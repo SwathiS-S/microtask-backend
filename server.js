@@ -1,0 +1,134 @@
+const express = require('express');
+try { require('dotenv').config(); } catch (_) {}
+const cors = require('cors');
+const http = require('http');
+const fs = require('fs');
+const app = express();
+const path = require('path');
+
+// Security headers (Removed HSTS for HTTP)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ROOT TEST ROUTE
+app.get('/', (req, res) => {
+  res.send('Backend is working successfully');
+});
+
+// SIMPLE OTP ALIAS ROUTES (email-only)
+const { sendEmail } = require('./services/email');
+app.post('/auth/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body || {};
+    const User = require('./models/User');
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (!user.emailOtp || !user.emailOtpExpires) return res.status(400).json({ success: false, message: 'OTP not generated' });
+    if (Date.now() > new Date(user.emailOtpExpires).getTime()) {
+      user.emailOtp = undefined;
+      user.emailOtpExpires = undefined;
+      await user.save();
+      return res.status(400).json({ success: false, message: 'OTP expired' });
+    }
+    if (String(otp) !== String(user.emailOtp)) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP' });
+    }
+    user.isEmailVerified = true;
+    user.emailOtp = undefined;
+    user.emailOtpExpires = undefined;
+    await user.save();
+    res.json({ success: true, message: 'Email verified' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message || 'Failed to verify OTP' });
+  }
+});
+
+// IMPORT ROUTES
+const userRoutes = require('./routes/userRoutes');
+app.use('/users', userRoutes);
+// Explicit auth endpoints to avoid path conflicts with /users/:id
+const User = require('./models/User');
+app.post('/auth/register', async (req, res) => {
+  try {
+    const body = req.body || {};
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const user = new User(Object.assign({}, body, {
+      isEmailVerified: false,
+      emailOtp: otp,
+      emailOtpExpires: new Date(Date.now() + 5 * 60 * 1000)
+    }));
+    await user.save();
+    let emailSent = false;
+    try {
+      const r = await sendEmail(user.email, 'TaskNest Email Verification OTP', `Your OTP is: ${otp}`);
+      emailSent = !!(r && r.ok);
+    } catch (_) {}
+    res.json({
+      success: true,
+      message: emailSent ? 'Registration successful. OTP sent to email.' : 'Registration successful. OTP sent (dev mode).',
+      userId: user._id,
+      email: user.email,
+      name: user.name,
+      devOtp: emailSent ? undefined : otp
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message || 'Registration failed',
+      error: err.message
+    });
+  }
+});
+app.post('/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    const user = await User.findOne({ email, password });
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+    if (user.status === 'BLOCKED') {
+      return res.status(403).json({ success: false, message: 'Account is blocked. Please contact support.' });
+    }
+    if (user.role !== 'admin' && !user.isEmailVerified) {
+      return res.status(403).json({ success: false, message: 'Please verify your email before login' });
+    }
+    res.json({
+      success: true,
+      message: 'Login successful',
+      userId: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      wallet: user.wallet
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message || 'Login failed', error: err.message });
+  }
+});
+const taskRoutes = require('./routes/taskRoutes');
+app.use('/tasks', taskRoutes);
+const adminRoutes = require('./routes/adminRoutes');
+app.use('/admin', adminRoutes);
+const paymentRoutes = require('./routes/paymentRoutes');
+app.use('/payments', paymentRoutes);
+// START SERVER
+const PORT = process.env.PORT || 5000;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const mongoose = require('mongoose');
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tasknest')
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error(err));
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on ${BASE_URL}`);
+});
