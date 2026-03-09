@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TaskNest Admin</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --brand: #1e3a5f;
+      --brand-600: #153055;
+      --border: #e5eaf1;
+      --accent: #3b82f6;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --shadow: 0 8px 24px rgba(16,24,40,.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+    .sidebar { background: var(--brand); color: #fff; display: flex; flex-direction: column; padding: 18px 14px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .3px; }
+    .brand-icon { width: 28px; height: 28px; border-radius: 8px; background: #fff2; display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+    .nav { margin-top: 18px; display: grid; gap: 6px; }
+    .nav button { background: transparent; border: 0; color: #cfe0ff; padding: 10px 12px; border-radius: 10px; text-align: left; cursor: pointer; font-weight: 600; }
+    .nav button:hover { background: #ffffff14; color: #fff; }
+    .nav button.active { background: #fff; color: var(--brand); }
+    .sidebar-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid #ffffff22; font-size: 13px; color: #cfe0ff; }
+    .main { padding: 22px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .title { font-size: 20px; font-weight: 800; letter-spacing: .2px; }
+    .actions { display: flex; gap: 8px; }
+    .btn { background: var(--brand); color: #fff; border: 0; border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer; }
+    .btn.alt { background: var(--muted); color: #fff; }
+    .btn.success { background: var(--success); }
+    .btn.danger { background: var(--danger); }
+    .btn.small { padding: 8px 12px; font-size: 13px; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+    .panel-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-body { padding: 16px 18px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .metric { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); }
+    .metric .label { color: var(--muted); font-size: 12px; }
+    .metric .value { font-size: 22px; font-weight: 800; margin-top: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead th { padding: 10px 10px; text-align: left; font-weight: 700; color: var(--text); border-bottom: 1px solid var(--border); background: #fbfcff; }
+    tbody td { padding: 10px 10px; border-bottom: 1px solid var(--border); }
+    tbody tr:hover { background: #f9fbff; }
+    .badge { display: inline-block; font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #eff6ff; color: #1e3a8a; font-weight: 700; }
+    .status { display: inline-block; font-size: 12px; padding: 6px 10px; border-radius: 999px; font-weight: 700; }
+    .status.ACTIVE { background: #dcfce7; color: #166534; }
+    .status.BLOCKED { background: #fee2e2; color: #991b1b; }
+    .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } .metrics { grid-template-columns: repeat(2,1fr); } .grid2 { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .metrics { grid-template-columns: 1fr; } }
+    .login-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; }
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"] { height: 40px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; outline: none; font-size: 14px; }
+    input::placeholder { color: var(--muted); }
+    .section { display: none; }
+    .section.active { display: block; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">TN</div>
+        <div>TaskNest Admin</div>
+      </div>
+      <div class="nav">
+        <button id="nav-overview" class="active" onclick="switchSection('overview')">Overview</button>
+        <button id="nav-users" onclick="switchSection('users')">Users</button>
+        <button id="nav-tasks" onclick="switchSection('tasks')">Tasks</button>
+        <button id="nav-transactions" onclick="switchSection('transactions')">Transactions</button>
+        <button id="nav-revenue" onclick="switchSection('revenue')">Revenue</button>
+        <button id="nav-withdrawals" onclick="switchSection('withdrawals')">Withdrawals</button>
+      </div>
+      <div class="sidebar-footer">
+        <div id="adminStatus">Not signed in</div>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <div class="title">Dashboard</div>
+        <div class="actions">
+          <button class="btn alt" onclick="logoutAdmin()">Sign out</button>
+        </div>
+      </div>
+
+      <!-- Sign-in panel removed in favor of a dedicated admin-login.html -->
+
+      <section id="section-overview" class="section active">
+        <div class="metrics">
+          <div class="metric">
+            <div class="label">Total Users</div>
+            <div id="metricUsers" class="value">–</div>
+          </div>
+          <div class="metric">
+            <div class="label">Total Tasks</div>
+            <div id="metricTasks" class="value">–</div>
+          </div>
+          <div class="metric">
+            <div class="label">Pending Withdrawals</div>
+            <div id="metricWithdrawals" class="value">–</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-users" class="section">
+        <div class="panel" style="margin-top:16px;">
+          <div class="panel-header">
+            <div>Users</div>
+            <div class="actions">
+              <button class="btn small" onclick="loadUsers()">Reload</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="grid2">
+              <div class="panel">
+                <div class="panel-body">
+                  <table>
+                    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Wallet</th><th>Actions</th></tr></thead>
+                    <tbody id="usersTable"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-tasks" class="section">
+        <div class="panel" style="margin-top:16px;">
+          <div class="panel-header">
+            <div>Tasks</div>
+            <div class="actions"><button class="btn small" onclick="loadTasks()">Reload</button></div>
+          </div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Title</th><th>Amount</th><th>Status</th><th>Posted By</th><th>Assigned To</th><th>Actions</th></tr></thead>
+              <tbody id="tasksTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-transactions" class="section">
+        <div class="panel" style="margin-top:16px;">
+          <div class="panel-header">
+            <div>Transactions</div>
+            <div class="actions"><button class="btn small" onclick="loadTransactions()">Reload</button></div>
+          </div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody id="txTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-revenue" class="section">
+        <div class="panel" style="margin-top:16px;">
+          <div class="panel-header">
+            <div>Revenue Analytics</div>
+            <div class="actions"><button class="btn small" onclick="loadRevenue()">Reload</button></div>
+          </div>
+          <div class="panel-body">
+            <div style="display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px;">
+              <div class="metric">
+                <div class="label">Inflow</div>
+                <div id="inflowTotal" class="value">–</div>
+              </div>
+              <div class="metric">
+                <div class="label">Outflow</div>
+                <div id="outflowTotal" class="value">–</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-withdrawals" class="section">
+        <div class="panel" style="margin-top:16px;">
+          <div class="panel-header">
+            <div>Withdrawal Approvals</div>
+            <div class="actions"><button class="btn small" onclick="loadWithdrawals()">Reload</button></div>
+          </div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Requested At</th><th>Actions</th></tr></thead>
+              <tbody id="wdTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const API_URL = 'https://localhost:5000';
+    let adminUser = null;
+    function setAdmin(u) {
+      adminUser = u;
+      const s = document.getElementById('adminStatus');
+      if (u && u.userId && u.role === 'admin') {
+        s.textContent = u.email + ' (admin)';
+        refreshMetrics();
+        loadUsers(); loadTasks(); loadTransactions(); loadRevenue(); loadWithdrawals();
+      } else {
+        s.textContent = 'Not signed in';
+        location.href = 'admin-login.html';
+      }
+    }
+    function getAdminIdHeader() {
+      return adminUser && adminUser.userId ? { 'x-admin-user-id': String(adminUser.userId) } : {};
+    }
+    function logoutAdmin() {
+      localStorage.removeItem('adminUser');
+      location.href = 'admin-login.html';
+    }
+    function loadPersisted() {
+      const raw = localStorage.getItem('adminUser');
+      if (raw) {
+        try { setAdmin(JSON.parse(raw)); } catch (_) { location.href = 'admin-login.html'; }
+      } else {
+        location.href = 'admin-login.html';
+      }
+    }
+    function switchSection(name) {
+      const ids = ['overview','users','tasks','transactions','revenue','withdrawals'];
+      ids.forEach(id => {
+        document.getElementById('section-' + id).classList.toggle('active', id === name);
+        document.getElementById('nav-' + id).classList.toggle('active', id === name);
+      });
+    }
+    async function refreshMetrics() {
+      try {
+        const [users, tasks, wd] = await Promise.all([
+          fetch(`${API_URL}/admin/users`, { headers: getAdminIdHeader() }).then(r => r.json()),
+          fetch(`${API_URL}/admin/tasks`, { headers: getAdminIdHeader() }).then(r => r.json()),
+          fetch(`${API_URL}/admin/withdrawals?status=PENDING`, { headers: getAdminIdHeader() }).then(r => r.json())
+        ]);
+        document.getElementById('metricUsers').textContent = (users.count ?? (users.users?.length ?? '–'));
+        document.getElementById('metricTasks').textContent = (tasks.count ?? (tasks.tasks?.length ?? '–'));
+        document.getElementById('metricWithdrawals').textContent = (wd.count ?? 0);
+      } catch (_) {}
+    }
+    async function loadUsers() {
+      const tbody = document.getElementById('usersTable');
+      tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+      try {
+        const data = await fetch(`${API_URL}/admin/users`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const items = data.users || [];
+        tbody.innerHTML = items.map(u => `
+          <tr>
+            <td>${u.name || '-'}</td>
+            <td>${u.email || '-'}</td>
+            <td>${u.role || '-'}</td>
+            <td><span class="status ${u.status}">${u.status}</span></td>
+            <td>₹ ${Number(u.wallet || 0).toFixed(2)}</td>
+            <td>
+              ${u.status === 'ACTIVE' ? `<button class="btn small danger" onclick="blockUser('${u._id}')">Block</button>` : `<button class="btn small success" onclick="activateUser('${u._id}')">Activate</button>`}
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6">${e.message}</td></tr>`;
+      }
+    }
+    async function blockUser(id) {
+      if (!confirm('Block this user?')) return;
+      try {
+        const r = await fetch(`${API_URL}/admin/users/${id}/block`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() } });
+        const d = await r.json();
+        alert(d.message || (r.ok ? 'User blocked' : 'Failed'));
+        loadUsers();
+      } catch (e) { alert(e.message); }
+    }
+    async function activateUser(id) {
+      if (!confirm('Activate this user?')) return;
+      try {
+        const r = await fetch(`${API_URL}/admin/users/${id}/activate`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() } });
+        const d = await r.json();
+        alert(d.message || (r.ok ? 'User activated' : 'Failed'));
+        loadUsers();
+      } catch (e) { alert(e.message); }
+    }
+    async function loadTasks() {
+      const tbody = document.getElementById('tasksTable');
+      tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+      try {
+        const data = await fetch(`${API_URL}/admin/tasks`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const items = data.tasks || [];
+        tbody.innerHTML = items.map(t => `
+          <tr>
+            <td>${t.title || '-'}</td>
+            <td>₹ ${Number(t.amount || 0).toFixed(2)}</td>
+            <td><span class="badge">${t.status}</span></td>
+            <td>${t.postedBy ? (t.postedBy.email || t.postedBy.name || t.postedBy._id) : '-'}</td>
+            <td>${t.acceptedBy ? (t.acceptedBy.email || t.acceptedBy.name || t.acceptedBy._id) : '-'}</td>
+            <td><button class="btn small danger" onclick="removeTask('${t._id}')">Remove</button></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6">${e.message}</td></tr>`;
+      }
+    }
+    async function removeTask(id) {
+      if (!confirm('Remove this task?')) return;
+      try {
+        const r = await fetch(`${API_URL}/admin/tasks/${id}`, { method: 'DELETE', headers: getAdminIdHeader() });
+        const d = await r.json();
+        alert(d.message || (r.ok ? 'Task removed' : 'Failed'));
+        loadTasks();
+      } catch (e) { alert(e.message); }
+    }
+    async function loadTransactions() {
+      const tbody = document.getElementById('txTable');
+      tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+      try {
+        const data = await fetch(`${API_URL}/admin/transactions`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const items = data.transactions || [];
+        tbody.innerHTML = items.map(x => `
+          <tr>
+            <td>${x.user_id || '-'}</td>
+            <td>${x.type}</td>
+            <td>₹ ${Number(x.amount || 0).toFixed(2)}</td>
+            <td>${x.status}</td>
+            <td>${new Date(x.created_at).toLocaleString()}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`;
+      }
+    }
+    async function loadRevenue() {
+      try {
+        const data = await fetch(`${API_URL}/admin/analytics/revenue`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const inflow = data.revenue?.inflow?.total ?? 0;
+        const outflow = data.revenue?.outflow?.total ?? 0;
+        document.getElementById('inflowTotal').textContent = `₹ ${Number(inflow).toFixed(2)}`;
+        document.getElementById('outflowTotal').textContent = `₹ ${Number(outflow).toFixed(2)}`;
+      } catch (_) {}
+    }
+    async function loadWithdrawals() {
+      const tbody = document.getElementById('wdTable');
+      tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+      try {
+        const data = await fetch(`${API_URL}/admin/withdrawals?status=PENDING`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const items = data.withdrawals || [];
+        tbody.innerHTML = items.map(w => `
+          <tr>
+            <td>${w.user_id ? (w.user_id.email || w.user_id.name || w.user_id._id) : '-'}</td>
+            <td>₹ ${Number(w.amount || 0).toFixed(2)}</td>
+            <td><span class="badge">${w.status}</span></td>
+            <td>${new Date(w.created_at).toLocaleString()}</td>
+            <td>
+              <button class="btn small success" onclick="approveWithdrawal('${w._id}')">Approve</button>
+              <button class="btn small danger" onclick="rejectWithdrawal('${w._id}')">Reject</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`;
+      }
+    }
+    async function approveWithdrawal(id) {
+      try {
+        const r = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, { method: 'POST', headers: getAdminIdHeader() });
+        const d = await r.json();
+        alert(d.message || (r.ok ? 'Withdrawal approved' : 'Failed'));
+        loadWithdrawals(); refreshMetrics();
+      } catch (e) { alert(e.message); }
+    }
+    async function rejectWithdrawal(id) {
+      try {
+        const r = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, { method: 'POST', headers: getAdminIdHeader() });
+        const d = await r.json();
+        alert(d.message || (r.ok ? 'Withdrawal rejected' : 'Failed'));
+        loadWithdrawals();
+      } catch (e) { alert(e.message); }
+    }
+    loadPersisted();
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+import 'screens/onboarding/role_selection_screen.dart';
+import 'screens/onboarding/landing_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/home/business_lead_screen.dart';
+import 'screens/tasks/create_task_screen.dart';
+import 'screens/tasks/task_list_screen.dart';
+import 'screens/wallet/add_money_screen.dart';
+import 'screens/wallet/wallet_screen.dart';
+import 'screens/wallet/transaction_screen.dart';
+import 'screens/profile/profile_screen.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'TaskNest',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        primaryColor: const Color(0xFF1E3A5F),
+        scaffoldBackgroundColor: const Color(0xFFF5F6FA),
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const RoleSelectionScreen(),
+        '/landing': (context) => const LandingScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/business': (context) => const BusinessLeadScreen(),
+        '/create-task': (context) => const CreateTaskScreen(),
+        '/tasks': (context) => const TaskListScreen(),
+        '/transactions': (context) => const TransactionsScreen(),
+        '/add-money': (context) => const AddMoneyScreen(),
+        '/wallet': (context) => const WalletScreen(),
+        '/profile': (context) => const ProfileScreen(),
+      },
+    );
+  }
+}
