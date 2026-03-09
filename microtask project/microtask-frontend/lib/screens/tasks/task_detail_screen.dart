@@ -63,28 +63,38 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       return;
     }
 
-    setState(() => isSubmitting = true);
-    try {
-      final res = await ApiService.post('/tasks/apply', {
-        'taskId': task.id,
-        'userId': UserService.userId,
-      });
+    // Step 4: Users apply with SAMPLE WORK
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'png'],
+    );
 
-      if (res['message'] == 'Applied successfully' || res['message'] == 'Application already exists') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Applied successfully! Waiting for provider to accept.')),
+    if (result != null) {
+      setState(() => isSubmitting = true);
+      try {
+        final res = await ApiService.postFile(
+          '/tasks/${task.id}/apply-with-sample',
+          result.files.single.path!,
+          {'userId': UserService.userId!},
         );
-      } else {
+
+        if (res['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Applied successfully with sample work! ✅')),
+          );
+          _refreshTask();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(res['message'] ?? 'Failed to apply')),
+          );
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res['message'] ?? 'Failed to apply')),
+          SnackBar(content: Text('Error: $e')),
         );
+      } finally {
+        setState(() => isSubmitting = false);
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    } finally {
-      setState(() => isSubmitting = false);
     }
   }
 
@@ -409,6 +419,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         ...apps.map((app) {
           final user = app['userId'];
           final state = app['state'];
+          final sampleFile = app['sampleFile'];
           if (user == null) return const SizedBox();
 
           return Container(
@@ -419,34 +430,55 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)],
             ),
-            child: Row(
+            child: Column(
               children: [
-                CircleAvatar(child: Text(user['name']?[0] ?? 'U')),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(user['name'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Text('Skills: ${user['skills'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
-                  ),
+                Row(
+                  children: [
+                    CircleAvatar(child: Text(user['name']?[0] ?? 'U')),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(user['name'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text('Skills: ${user['skills'] ?? 'N/A'}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    if (state == 'APPLIED')
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () => _handleApplication(user['_id'], 'REJECTED'),
+                            icon: const Icon(Icons.close, color: Colors.red),
+                          ),
+                          IconButton(
+                            onPressed: () => _handleApplication(user['_id'], 'APPROVED'),
+                            icon: const Icon(Icons.check, color: Colors.green),
+                          ),
+                        ],
+                      )
+                    else
+                      Text(state, style: TextStyle(color: state == 'ACCEPTED' ? Colors.green : Colors.red, fontWeight: FontWeight.bold)),
+                  ],
                 ),
-                if (state == 'APPLIED')
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => _handleApplication(user['_id'], 'REJECTED'),
-                        icon: const Icon(Icons.close, color: Colors.red),
-                      ),
-                      IconButton(
-                        onPressed: () => _handleApplication(user['_id'], 'APPROVED'),
-                        icon: const Icon(Icons.check, color: Colors.green),
-                      ),
-                    ],
-                  )
-                else
-                  Text(state, style: TextStyle(color: state == 'ACCEPTED' ? Colors.green : Colors.red, fontWeight: FontWeight.bold)),
+                if (sampleFile != null) ...[
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.attachment),
+                    title: const Text('Sample Work Attached'),
+                    subtitle: const Text('Step 5: Review before accepting'),
+                    trailing: TextButton(
+                      onPressed: () {
+                        // In a real app, use url_launcher or similar
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Opening sample work...')),
+                        );
+                      },
+                      child: const Text('View'),
+                    ),
+                  ),
+                ],
               ],
             ),
           );
@@ -692,10 +724,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Release Payment'),
-        content: const Text('Are you sure you want to approve this work and release ₹500 to the user?'),
+        content: Text('Are you sure you want to approve this work and release ₹${task.amount} to the worker? \n\nStep 10: This will transfer funds from Escrow to their Wallet.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Release')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Approve & Release')),
         ],
       ),
     );
@@ -703,11 +735,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
     setState(() => isSubmitting = true);
     try {
-      final res = await ApiService.post('/escrow/release/${task.id}', {
-        'userId': task.acceptedBy,
+      final res = await ApiService.post('/tasks/approve-final', {
+        'taskId': task.id,
+        'providerId': UserService.userId,
       });
       if (res['success']) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment released successfully! ✅')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Work Approved! Payment released to worker wallet ✅')));
         _refreshTask();
       }
     } catch (e) {
