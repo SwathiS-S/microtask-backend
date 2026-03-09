@@ -2026,6 +2026,52 @@
         let currentConversation = null; // { taskId, otherUserId, otherUserName }
         const savedKey = 'tn_saved_tasks';
 
+        // Initialize User
+        function initAuth() {
+            const stored = localStorage.getItem('currentUser');
+            if (stored) {
+                try {
+                    currentUser = JSON.parse(stored);
+                    
+                    // Show dashboard, hide landing/auth
+                    const landing = document.getElementById('landingSection');
+                    const auth = document.getElementById('authSection');
+                    const dashboard = document.getElementById('dashboardSection');
+                    
+                    if (landing) landing.classList.add('hidden');
+                    if (auth) auth.classList.add('hidden');
+                    if (dashboard) dashboard.classList.remove('hidden');
+
+                    updateDashboardUI();
+                    
+                    // Role-based UI
+                    const heading = document.getElementById('tasksHeading');
+                    const createBtn = document.getElementById('createTaskBtn');
+                    if (heading) heading.textContent = currentUser.role === 'taskProvider' ? 'Your Tasks' : 'Available Tasks';
+                    if (createBtn) createBtn.style.display = currentUser.role === 'taskProvider' ? 'inline-block' : 'none';
+                    
+                    const ratingsSection = document.getElementById('profileRatingsSection');
+                    if (ratingsSection) ratingsSection.style.display = currentUser.role === 'taskUser' ? 'block' : 'none';
+                    if (currentUser.role === 'taskUser') renderProfileRatings();
+                    initSettingsFromUser();
+                    if (currentUser.role === 'taskProvider') updateReputationStatsForProvider(String(currentUser.userId));
+                    
+                    showTriTabsForRole();
+                    initTriFilters();
+                    refreshUserWallet();
+                    
+                    navigateDashboard('tasks', document.querySelector('.sidebar .nav-item'));
+                    loadTasks();
+                } catch (e) {
+                    console.error('Error parsing stored user:', e);
+                    localStorage.removeItem('currentUser');
+                }
+            }
+        }
+
+        // Call initAuth on load
+        window.addEventListener('DOMContentLoaded', initAuth);
+
         // --- NEW DASHBOARD LOGIC ---
         function hideAllDashboardViews() {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -2240,10 +2286,16 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const messageDiv = document.getElementById('loginMessage');
+            const loginBtn = document.querySelector('#loginForm button');
 
             if (!email || !password) {
                 showMessage(messageDiv, 'Please fill all fields', 'error');
                 return;
+            }
+
+            if (loginBtn) {
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Logging in...';
             }
 
             try {
@@ -2268,6 +2320,10 @@
                         wallet: data.wallet != null ? data.wallet : 0,
                         bankDetails: data.bankDetails || null
                     };
+
+                    // Persist session
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('dashboardSection').classList.remove('hidden');
                     
@@ -2302,15 +2358,27 @@
                 }
             } catch (error) {
                 showMessage(messageDiv, 'Login failed: ' + error.message, 'error');
+            } finally {
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Login';
+                }
             }
         }
 
         function logout() {
+            localStorage.removeItem('currentUser');
             currentUser = null;
-            document.getElementById('authSection').classList.remove('hidden');
-            document.getElementById('dashboardSection').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
-            document.getElementById('registerForm').classList.add('hidden');
+            
+            const landing = document.getElementById('landingSection');
+            const dashboard = document.getElementById('dashboardSection');
+            const auth = document.getElementById('authSection');
+            
+            if (landing) landing.classList.remove('hidden');
+            if (dashboard) dashboard.classList.add('hidden');
+            if (auth) auth.classList.add('hidden');
+            
+            // Reset fields
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginPassword').value = '';
         }
