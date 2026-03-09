@@ -30,6 +30,7 @@ const finalStorage = multer.diskStorage({
 });
 const uploadFinal = multer({ storage: finalStorage });
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // CREATE TASK
 router.post('/create', async (req, res) => {
@@ -48,18 +49,28 @@ router.post('/create', async (req, res) => {
       duration: req.body.duration
     };
     console.log('PAYLOAD TO SAVE:', payload);
-    const task = new Task(payload);
+    const task = new Task({ ...payload, status: 'draft' });
     await task.save();
-    res.json({ message: 'Task created successfully', task });
+    res.json({ success: true, message: 'Task created as draft', task });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// GET DRAFT TASKS FOR PROVIDER
+router.get('/drafts/:providerId', async (req, res) => {
+  try {
+    const drafts = await Task.find({ postedBy: req.params.providerId, status: 'draft' });
+    res.json({ success: true, drafts });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
 // GET ALL TASKS
 router.get('/all', async (req, res) => {
   try {
-    const tasks = await Task.find()
+    const tasks = await Task.find({ status: { $ne: 'draft' } })
       .populate('postedBy', 'name email')
       .populate('acceptedBy', 'name email')
       .populate('applications.userId', 'name email');
@@ -80,6 +91,17 @@ router.post('/apply', async (req, res) => {
     if (exists) return res.json({ message: 'Application already exists' });
     task.applications.push({ userId, state: 'APPLIED' });
     await task.save();
+
+    // Notify Provider
+    await Notification.create({
+      recipient: task.postedBy,
+      sender: userId,
+      title: 'New Applicant',
+      message: `A user has applied for your task: ${task.title}`,
+      type: 'APPLICATION_RECEIVED',
+      taskId: task._id
+    });
+
     res.json({ message: 'Applied successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -99,7 +121,7 @@ router.post('/applications/accept', async (req, res) => {
     if (!app) return res.status(404).json({ message: 'Application not found' });
     app.state = 'ACCEPTED';
     task.acceptedBy = userId;
-    task.status = 'accepted';
+    task.status = 'assigned';
     // deadlines
     task.approvedDate = new Date();
     const dur = Number(req.body.taskDurationDays || 3);
@@ -148,9 +170,29 @@ router.post('/applications/status', async (req, res) => {
     task.applications = task.applications || [];
     const app = task.applications.find(a => String(a.userId) === String(userId));
     if (!app) return res.status(404).json({ message: 'Application not found' });
-    if (status === 'APPROVED') app.state = 'ACCEPTED';
-    else if (status === 'REJECTED') app.state = 'REJECTED';
-    else app.state = 'APPLIED'; // KEEP WAITING
+    if (status === 'APPROVED') {
+      app.state = 'ACCEPTED';
+      // Notify User
+      await Notification.create({
+        recipient: userId,
+        sender: approvedBy,
+        title: 'Application Approved! 🎉',
+        message: `Your application for "${task.title}" has been approved. You can now start the task.`,
+        type: 'APPLICATION_APPROVED',
+        taskId: task._id
+      });
+    } else if (status === 'REJECTED') {
+      app.state = 'REJECTED';
+      // Notify User
+      await Notification.create({
+        recipient: userId,
+        sender: approvedBy,
+        title: 'Application Rejected',
+        message: `Your application for "${task.title}" was not selected this time.`,
+        type: 'APPLICATION_REJECTED',
+        taskId: task._id
+      });
+    } else app.state = 'APPLIED'; // KEEP WAITING
     await task.save();
     res.json({ success: true, message: 'Application status updated', state: app.state });
   } catch (err) {
@@ -185,6 +227,17 @@ router.post('/:id/submit-final', uploadFinal.single('final'), async (req, res) =
     task.finalStatus = 'SUBMITTED';
     task.status = 'submitted';
     await task.save();
+
+    // Notify Provider
+    await Notification.create({
+      recipient: task.postedBy,
+      sender: userId,
+      title: 'Final Work Submitted',
+      message: `Final work for "${task.title}" has been submitted for your review.`,
+      type: 'WORK_SUBMITTED',
+      taskId: task._id
+    });
+
     res.json({ success: true, message: 'Final work submitted for review', finalFile: task.finalFile });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -220,7 +273,7 @@ router.get('/:id/applications', async (req, res) => {
   }
 });
 
-// USER SUBMITS WORK (set underReview)
+// USER SUBMITS WORK (set submitted)
 router.post('/submit', async (req, res) => {
   const { taskId, submittedBy } = req.body;
   try {
@@ -228,28 +281,44 @@ router.post('/submit', async (req, res) => {
     if (!task) return res.status(404).json({ message: 'Task not found' });
     if (!task.acceptedBy) return res.status(400).json({ message: 'Task not accepted yet' });
     if (String(task.acceptedBy) !== String(submittedBy)) return res.status(403).json({ message: 'Only assigned user can submit' });
-    if (!['accepted','inProgress'].includes(task.status)) return res.status(400).json({ message: 'Task not in progress' });
+    if (!['assigned','in_progress'].includes(task.status)) return res.status(400).json({ message: 'Task not in progress' });
     task.status = 'submitted';
     await task.save();
-    res.json({ message: 'Work submitted for review' });
+    res.json({ success: true, message: 'Work submitted for review' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// USER STARTS TASK (moves to IN_PROGRESS)
-router.post('/start', async (req, res) => {
-  const { taskId, userId } = req.body;
+// USER STARTS TASK (moves to in_progress)
+router.post('/:id/start', async (req, res) => {
   try {
-    const task = await Task.findById(taskId);
-    if (!task) return res.status(404).json({ message: 'Task not found' });
-    if (String(task.acceptedBy) !== String(userId)) return res.status(403).json({ message: 'Only assigned user can start' });
-    if (task.status !== 'accepted') return res.status(400).json({ message: 'Task not in accepted state' });
-    task.status = 'inProgress';
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    const { userId } = req.body;
+    if (String(task.acceptedBy) !== String(userId)) return res.status(403).json({ success: false, message: 'Only assigned user can start' });
+    if (task.status !== 'assigned') return res.status(400).json({ success: false, message: 'Task not in assigned state' });
+    task.status = 'in_progress';
     await task.save();
-    res.json({ message: 'Task started' });
+    res.json({ success: true, message: 'Task started' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// PROVIDER REVIEWS WORK (moves to reviewed)
+router.post('/:id/review', async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    const { providerId } = req.body;
+    if (String(task.postedBy) !== String(providerId)) return res.status(403).json({ success: false, message: 'Only provider can review' });
+    if (task.status !== 'submitted') return res.status(400).json({ success: false, message: 'Task not submitted' });
+    task.status = 'reviewed';
+    await task.save();
+    res.json({ success: true, message: 'Task marked as reviewed' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
@@ -265,6 +334,17 @@ router.post('/:id/status-update', async (req, res) => {
     task.updates = task.updates || [];
     task.updates.unshift({ userId, text });
     await task.save();
+
+    // Notify Provider
+    await Notification.create({
+      recipient: task.postedBy,
+      sender: userId,
+      title: 'Task Update Received',
+      message: `The worker has submitted a daily update for: ${task.title}`,
+      type: 'UPDATE_SUBMITTED',
+      taskId: task._id
+    });
+
     res.json({ success: true, message: 'Update saved' });
   } catch (err) {
     res.status(500).json({ error: err.message });

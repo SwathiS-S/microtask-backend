@@ -4,6 +4,8 @@ const router = express.Router();
 const User = require('../models/User');
 const Task = require('../models/Task');
 const Transaction = require('../models/Transaction');
+const Escrow = require('../models/Escrow');
+const Wallet = require('../models/Wallet');
 const { getClient, verifySignature } = require('../services/razorpay');
 
 router.post('/razorpay/create-order', async (req, res) => {
@@ -22,6 +24,61 @@ router.post('/razorpay/create-order', async (req, res) => {
     res.json({ success: true, order });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message || 'Failed to create order' });
+  }
+});
+
+// Step 3: Verify payment and fund task
+router.post('/razorpay/verify-escrow-payment', async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, taskId, providerId, amount } = req.body || {};
+    
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !taskId || !providerId) {
+      return res.status(400).json({ success: false, message: 'Missing fields' });
+    }
+
+    const isValid = verifySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+    if (!isValid) {
+      return res.status(400).json({ success: false, message: 'Signature verification failed' });
+    }
+
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+    // Update Task Status
+    task.status = 'open'; // funded -> open as per Step 3
+    await task.save();
+
+    // Create Escrow record
+    const escrow = new Escrow({
+      taskId,
+      providerId,
+      amount: amount || task.amount,
+      status: 'held',
+      heldAt: new Date()
+    });
+    await escrow.save();
+
+    // Provider wallet transaction
+    let wallet = await Wallet.findOne({ userId: providerId });
+    if (!wallet) {
+      wallet = new Wallet({ userId: providerId, role: 'provider', balance: 0 });
+    }
+    
+    // Log the funding in transactions
+    wallet.transactions.push({
+      type: 'escrow_hold',
+      amount: amount || task.amount,
+      taskId: task._id,
+      taskTitle: task.title,
+      description: `Task Funded - ₹${amount || task.amount} debited`,
+      status: 'completed',
+      date: new Date()
+    });
+    await wallet.save();
+
+    res.json({ success: true, message: 'Task funded and published successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message || 'Verification failed' });
   }
 });
 
@@ -63,29 +120,35 @@ router.post('/razorpay/verify-task-payment', async (req, res) => {
     // Find Admin
     const admin = await User.findOne({ role: 'admin' });
     if (admin) {
-      admin.wallet = (admin.wallet || 0) + adminCommission;
-      await admin.save();
-      
-      await Transaction.create({
-        user_id: admin._id,
-        task_id: task._id,
+      let adminWallet = await Wallet.findOne({ userId: admin._id });
+      if (!adminWallet) adminWallet = new Wallet({ userId: admin._id, role: 'user', balance: 0 });
+      adminWallet.balance = (adminWallet.balance || 0) + adminCommission;
+      adminWallet.transactions.push({
+        type: 'credit',
         amount: adminCommission,
-        type: 'COMMISSION',
-        status: 'SUCCESS'
+        taskId: task._id,
+        taskTitle: task.title,
+        description: `Admin Commission for Task: ${task.title}`,
+        status: 'completed',
+        date: new Date()
       });
+      await adminWallet.save();
     }
 
     // Update User Wallet
-    worker.wallet = (worker.wallet || 0) + userEarnings;
-    await worker.save();
-
-    await Transaction.create({
-      user_id: worker._id,
-      task_id: task._id,
+    let workerWallet = await Wallet.findOne({ userId: worker._id });
+    if (!workerWallet) workerWallet = new Wallet({ userId: worker._id, role: 'user', balance: 0 });
+    workerWallet.balance = (workerWallet.balance || 0) + userEarnings;
+    workerWallet.transactions.push({
+      type: 'credit',
       amount: userEarnings,
-      type: 'CREDIT',
-      status: 'SUCCESS'
+      taskId: task._id,
+      taskTitle: task.title,
+      description: `Payment received for Task: ${task.title}`,
+      status: 'completed', 
+      date: new Date()
     });
+    await workerWallet.save();
 
     // Update Task Status
     task.status = 'paid';
@@ -108,29 +171,30 @@ router.post('/razorpay/verify', async (req, res) => {
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !userId || amount == null) {
       return res.status(400).json({ success: false, message: 'Missing fields' });
     }
-    const key_secret = process.env.RAZORPAY_KEY_SECRET;
-    if (!key_secret) return res.status(500).json({ success: false, message: 'Razorpay not configured' });
-    const expected = crypto.createHmac('sha256', key_secret).update(razorpay_order_id + '|' + razorpay_payment_id).digest('hex');
-    if (expected !== razorpay_signature) {
+    const isValid = verifySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+    if (!isValid) {
       return res.status(400).json({ success: false, message: 'Signature verification failed' });
     }
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     const addAmount = Number(amount);
     if (!addAmount || addAmount <= 0) return res.status(400).json({ success: false, message: 'Invalid amount' });
-    user.wallet = (Number(user.wallet) || 0) + addAmount;
-    await user.save();
-    try {
-      await Transaction.create({
-        user_id: user._id,
-        amount: addAmount,
-        type: 'CREDIT',
-        status: 'SUCCESS'
-      });
-    } catch (_) {}
-    res.json({ success: true, message: 'Payment verified and wallet credited', wallet: Number(user.wallet) });
+    
+    let wallet = await Wallet.findOne({ userId });
+    if (!wallet) wallet = new Wallet({ userId, role: user.role === 'taskProvider' ? 'provider' : 'user', balance: 0 });
+    wallet.balance = (Number(wallet.balance) || 0) + addAmount;
+    wallet.transactions.push({
+      type: 'credit',
+      amount: addAmount,
+      description: 'Added Funds via Razorpay',
+      status: 'completed',
+      date: new Date()
+    });
+    await wallet.save();
+
+    res.json({ success: true, message: 'Funds added to wallet', balance: wallet.balance });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message || 'Failed to verify payment' });
+    res.status(500).json({ success: false, message: err.message || 'Verification failed' });
   }
 });
 

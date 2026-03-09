@@ -56,7 +56,14 @@ app.post('/auth/verify-otp', async (req, res) => {
 
 // IMPORT ROUTES
 const userRoutes = require('./routes/userRoutes');
+const bankRoutes = require('./routes/bankRoutes');
+const walletRoutes = require('./routes/walletRoutes');
+const escrowRoutes = require('./routes/escrowRoutes');
+
 app.use('/users', userRoutes);
+app.use('/bank', bankRoutes);
+app.use('/wallet', walletRoutes);
+app.use('/escrow', escrowRoutes);
 // Explicit auth endpoints to avoid path conflicts with /users/:id
 const User = require('./models/User');
 app.post('/auth/register', async (req, res) => {
@@ -122,6 +129,58 @@ const adminRoutes = require('./routes/adminRoutes');
 app.use('/admin', adminRoutes);
 const paymentRoutes = require('./routes/paymentRoutes');
 app.use('/payments', paymentRoutes);
+const notificationRoutes = require('./routes/notificationRoutes');
+app.use('/notifications', notificationRoutes);
+// AUTO DEADLINE CHECK (Run Daily)
+const Escrow = require('./models/Escrow');
+const Wallet = require('./models/Wallet');
+const Task = require('./models/Task');
+
+async function checkDeadlines() {
+  try {
+    const now = new Date();
+    // Find tasks that are expired and funded but no user assigned
+    const expiredTasks = await Task.find({
+      status: 'funded',
+      deadline: { $lt: now },
+      acceptedBy: { $exists: false }
+    });
+
+    for (const task of expiredTasks) {
+      const escrow = await Escrow.findOne({ taskId: task._id, status: 'held' });
+      if (escrow) {
+        // Refund escrow to provider
+        escrow.status = 'refunded';
+        escrow.refundedAt = now;
+        await escrow.save();
+
+        const wallet = await Wallet.findOne({ userId: escrow.providerId });
+        if (wallet) {
+          wallet.escrowBalance -= escrow.amount;
+          wallet.balance += escrow.amount;
+          wallet.transactions.push({
+            type: 'refund',
+            amount: escrow.amount,
+            taskId: task._id,
+            description: 'Auto-refund due to deadline expiry',
+            status: 'completed'
+          });
+          await wallet.save();
+        }
+
+        task.status = 'expired';
+        await task.save();
+        console.log(`Task ${task._id} auto-refunded and marked as expired.`);
+      }
+    }
+  } catch (err) {
+    console.error('Error in checkDeadlines:', err.message);
+  }
+}
+
+// Run every 24 hours
+setInterval(checkDeadlines, 24 * 60 * 60 * 1000);
+
 // START SERVER
 const PORT = process.env.PORT || 5000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;

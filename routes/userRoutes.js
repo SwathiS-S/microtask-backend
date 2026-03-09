@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
+const Wallet = require('../models/Wallet');
 const WithdrawalRequest = require('../models/WithdrawalRequest');
 const { createPayoutForUser } = require('../services/razorpay');
 
@@ -22,7 +23,10 @@ router.post('/withdraw-money', async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    if (user.wallet < amount) {
+    let wallet = await Wallet.findOne({ userId });
+    if (!wallet) wallet = new Wallet({ userId, role: user.role === 'taskProvider' ? 'provider' : 'user', balance: 0 });
+
+    if (wallet.balance < amount) {
       return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
     }
 
@@ -39,38 +43,40 @@ router.post('/withdraw-money', async (req, res) => {
     
     if (payoutRes.ok) {
       // Success: Deduct from wallet and update request
-      user.wallet -= amount;
-      await user.save();
+      wallet.balance -= amount;
+      wallet.transactions.push({
+        type: 'withdrawal',
+        amount: amount,
+        description: 'Withdrawal successful',
+        status: 'completed',
+        date: new Date()
+      });
+      await wallet.save();
 
       withdrawal.status = 'APPROVED';
       withdrawal.approved_at = new Date();
       await withdrawal.save();
 
-      // Record transaction
-      await Transaction.create({
-        user_id: user._id,
-        amount: amount,
-        type: 'DEBIT',
-        status: 'SUCCESS'
-      });
-
-      res.json({ success: true, message: 'Withdrawal successful', wallet: user.wallet });
+      res.json({ success: true, message: 'Withdrawal successful', wallet: wallet.balance });
     } else {
       // If RazorpayX is not configured or fails, we still keep it as pending/failed
       // If it's just not configured (dev mode), we might want to simulate success
       if (payoutRes.reason === 'razorpayx_not_configured') {
-        user.wallet -= amount;
-        await user.save();
+        wallet.balance -= amount;
+        wallet.transactions.push({
+          type: 'withdrawal',
+          amount: amount,
+          description: 'Withdrawal successful (Dev Mode)',
+          status: 'completed',
+          date: new Date()
+        });
+        await wallet.save();
+
         withdrawal.status = 'APPROVED';
         withdrawal.approved_at = new Date();
         await withdrawal.save();
-        await Transaction.create({
-          user_id: user._id,
-          amount: amount,
-          type: 'DEBIT',
-          status: 'SUCCESS'
-        });
-        return res.json({ success: true, message: 'Withdrawal successful (Dev Mode)', wallet: user.wallet });
+
+        return res.json({ success: true, message: 'Withdrawal successful (Dev Mode)', wallet: wallet.balance });
       }
 
       withdrawal.status = 'REJECTED';

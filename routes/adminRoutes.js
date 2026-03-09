@@ -5,6 +5,11 @@ const Task = require('../models/Task');
 const Transaction = require('../models/Transaction');
 const WithdrawalRequest = require('../models/WithdrawalRequest');
 
+const Withdrawal = require('../models/Withdrawal');
+const Escrow = require('../models/Escrow');
+const Wallet = require('../models/Wallet');
+const Notification = require('../models/Notification');
+
 async function assertAdmin(req, res, next) {
   try {
     const adminId = req.header('x-admin-user-id') || req.query.adminId || (req.body && req.body.adminId);
@@ -212,6 +217,141 @@ router.get('/dashboard-summary', async (req, res) => {
     });
   } catch (e) {
     res.status(500).json({ success: false, message: 'Failed to fetch dashboard summary', error: e.message });
+  }
+});
+
+// GET /admin/withdrawals - View all withdrawal requests
+router.get('/withdrawals', async (req, res) => {
+  try {
+    const items = await Withdrawal.find().sort({ requestedAt: -1 }).populate('userId', 'name email').populate('bankAccountId');
+    res.json({ success: true, count: items.length, withdrawals: items });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// PUT /admin/withdrawals/:id - Approve or reject withdrawal
+router.put('/withdrawals/:id', async (req, res) => {
+  try {
+    const { status, remarks } = req.body;
+    const item = await Withdrawal.findById(req.params.id);
+    if (!item) return res.status(404).json({ success: false, message: 'Withdrawal not found' });
+    
+    item.status = status;
+    item.remarks = remarks;
+    if (status === 'completed') item.completedAt = Date.now();
+    await item.save();
+
+    // Update wallet transaction status
+    const wallet = await Wallet.findOne({ userId: item.userId });
+    if (wallet) {
+      const tx = wallet.transactions.find(t => t.type === 'withdrawal' && t.status === 'pending' && t.amount === item.amount);
+      if (tx) tx.status = status === 'completed' ? 'completed' : 'failed';
+      
+      // If rejected, refund the balance
+      if (status === 'failed') {
+        wallet.balance += item.amount;
+        wallet.transactions.push({
+          type: 'credit',
+          amount: item.amount,
+          description: 'Withdrawal refund due to rejection',
+          status: 'completed'
+        });
+      }
+      await wallet.save();
+    }
+
+    res.json({ success: true, message: `Withdrawal ${status}`, withdrawal: item });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// GET /admin/escrow - View all escrow transactions
+router.get('/escrow', async (req, res) => {
+  try {
+    const items = await Escrow.find().sort({ heldAt: -1 }).populate('taskId').populate('providerId', 'name email').populate('userId', 'name email');
+    res.json({ success: true, count: items.length, escrows: items });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// PUT /admin/dispute/:taskId - Resolve dispute
+router.put('/dispute/:taskId', async (req, res) => {
+  try {
+    const { action, userId, amount } = req.body; // action: 'release' or 'refund' or 'split'
+    const escrow = await Escrow.findOne({ taskId: req.params.taskId, status: 'disputed' });
+    if (!escrow) return res.status(404).json({ success: false, message: 'Disputed escrow not found' });
+
+    if (action === 'release') {
+      // Release to user
+      escrow.status = 'released';
+      escrow.userId = userId || escrow.userId;
+      escrow.releasedAt = Date.now();
+      await escrow.save();
+      
+      const providerWallet = await Wallet.findOne({ userId: escrow.providerId });
+      if (providerWallet) {
+        providerWallet.escrowBalance -= escrow.amount;
+        await providerWallet.save();
+      }
+      
+      const workerWallet = await Wallet.findOne({ userId: escrow.userId });
+      if (workerWallet) {
+        workerWallet.balance += escrow.amount;
+        workerWallet.transactions.push({
+          type: 'credit',
+          amount: escrow.amount,
+          taskId: req.params.taskId,
+          description: 'Payment released by admin after dispute',
+          status: 'completed'
+        });
+        await workerWallet.save();
+      }
+    } else if (action === 'refund') {
+      // Refund to provider
+      escrow.status = 'refunded';
+      escrow.refundedAt = Date.now();
+      await escrow.save();
+      
+      const providerWallet = await Wallet.findOne({ userId: escrow.providerId });
+      if (providerWallet) {
+        providerWallet.escrowBalance -= escrow.amount;
+        providerWallet.balance += escrow.amount;
+        providerWallet.transactions.push({
+          type: 'refund',
+          amount: escrow.amount,
+          taskId: req.params.taskId,
+          description: 'Refunded by admin after dispute',
+          status: 'completed'
+        });
+        await providerWallet.save();
+      }
+    }
+
+    // Update task status to resolved
+    const task = await Task.findByIdAndUpdate(req.params.taskId, { status: 'resolved' });
+
+    // Notify involved parties
+    if (task) {
+      const recipientId = action === 'release' ? task.acceptedBy : task.postedBy;
+      const message = action === 'release' 
+        ? `The dispute for "${task.title}" has been resolved in your favor. Funds released.` 
+        : `The dispute for "${task.title}" has been resolved. Funds refunded to your wallet.`;
+      
+      await Notification.create({
+        recipient: recipientId,
+        title: 'Dispute Resolved ✅',
+        message: message,
+        type: 'DISPUTE_RESOLVED',
+        taskId: task._id
+      });
+    }
+
+    res.json({ success: true, message: 'Dispute resolved' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 

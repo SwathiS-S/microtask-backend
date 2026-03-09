@@ -40,19 +40,20 @@ const taskSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: [
-      'created',
+      'draft',
+      'funded',
       'open',
-      'accepted',
-      'inProgress',
+      'assigned',
+      'in_progress',
       'submitted',
-      'approved',
+      'reviewed',
       'completed',
-      'paid',
-      'rejected',
-      'cancelled',
-      'underReview'
+      'disputed',
+      'resolved',
+      'expired',
+      'cancelled'
     ],
-    default: 'open'
+    default: 'draft'
   },
   applications: [{
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
