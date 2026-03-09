@@ -67,18 +67,18 @@ app.post('/auth/register', async (req, res) => {
       emailOtpExpires: new Date(Date.now() + 5 * 60 * 1000)
     }));
     await user.save();
-    let emailSent = false;
+    let isMock = false;
     try {
       const r = await sendEmail(user.email, 'TaskNest Email Verification OTP', `Your OTP is: ${otp}`);
-      emailSent = !!(r && r.ok);
+      isMock = !!(r && r.isMock);
     } catch (_) {}
     res.json({
       success: true,
-      message: emailSent ? 'Registration successful. OTP sent to email.' : 'Registration successful. OTP sent (dev mode).',
+      message: isMock ? 'Registration successful. (Mock Mode: Use Dev OTP)' : 'Registration successful. OTP sent to email.',
       userId: user._id,
       email: user.email,
       name: user.name,
-      devOtp: emailSent ? undefined : otp
+      devOtp: isMock ? otp : undefined
     });
   } catch (err) {
     res.status(400).json({
@@ -125,9 +125,28 @@ const PORT = process.env.PORT || 5000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const mongoose = require('mongoose');
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tasknest')
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error(err));
+// Mongoose connection options
+const dbOptions = {
+  bufferCommands: false, // Fail fast if not connected
+  autoIndex: true,
+};
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.warn('\n⚠️  WARNING: MONGODB_URI is not defined in environment variables!');
+  console.warn('Backend will attempt to connect to local MongoDB at mongodb://127.0.0.1:27017/tasknest');
+  console.warn('If you are running on Render, this WILL fail. Please add MONGODB_URI to your Render Environment Variables.\n');
+}
+
+mongoose.connect(MONGODB_URI || 'mongodb://127.0.0.1:27017/tasknest', dbOptions)
+  .then(() => console.log('✅ MongoDB connected successfully'))
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err.message);
+    if (err.message.includes('buffering timed out')) {
+      console.error('Hint: Mongoose could not connect to the database. Check your MONGODB_URI.');
+    }
+  });
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on ${BASE_URL}`);

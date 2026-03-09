@@ -118,18 +118,18 @@ router.post('/register', async (req, res) => {
       emailOtpExpires: new Date(Date.now() + 5 * 60 * 1000)
     }));
     await user.save();
-    let emailSent = false;
+    let isMock = false;
     try {
       const r = await sendEmail(user.email, 'TaskNest Email Verification OTP', `Your OTP is: ${otp}`);
-      emailSent = !!(r && r.ok);
+      isMock = !!(r && r.isMock);
     } catch (_) {}
     res.json({
       success: true,
-      message: emailSent ? 'Registration successful. OTP sent to email.' : 'Registration successful. OTP sent (dev mode).',
+      message: isMock ? 'Registration successful. (Mock Mode: Use Dev OTP)' : 'Registration successful. OTP sent to email.',
       userId: user._id,
       email: user.email,
       name: user.name,
-      devOtp: emailSent ? undefined : otp
+      devOtp: isMock ? otp : undefined
     });
   } catch (err) {
     res.status(400).json({ 

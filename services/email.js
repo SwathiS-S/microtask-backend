@@ -5,7 +5,7 @@ const sendEmail = async (to, subject, body) => {
   // If you need to include a verification link:
   // const verificationLink = `${BASE_URL}/auth/verify?email=${to}`;
   
-  return { ok: true, devMode: true };
+  return { ok: true, isMock: true };
 };
 
 module.exports = { sendEmail };
