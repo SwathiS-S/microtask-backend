@@ -52,7 +52,9 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
     const escrow = new Escrow({
       taskId,
       providerId,
-      amount: amount || task.amount,
+      amount: task.amount,
+      platformFee: (amount - task.amount) > 0 ? (amount - task.amount) : 0,
+      totalPaid: amount || task.amount,
       status: 'held',
       heldAt: new Date()
     });

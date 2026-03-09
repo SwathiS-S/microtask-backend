@@ -129,10 +129,15 @@ router.post('/applications/accept', async (req, res) => {
     if (!task) return res.status(404).json({ message: 'Task not found' });
     if (String(task.postedBy) !== String(approvedBy))
       return res.status(403).json({ message: 'Only the task provider can accept applications' });
-    task.applications = task.applications || [];
-    const app = task.applications.find(a => String(a.userId) === String(userId));
-    if (!app) return res.status(404).json({ message: 'Application not found' });
-    app.state = 'ACCEPTED';
+    
+    // Step 6: Sample work disappears forever
+    task.applications = (task.applications || []).map(a => {
+      if (String(a.userId) === String(userId)) {
+        return { ...a.toObject(), state: 'ACCEPTED', sampleFile: undefined };
+      }
+      return { ...a.toObject(), sampleFile: undefined }; // Remove samples for others too
+    });
+
     task.acceptedBy = userId;
     task.status = 'assigned';
     // deadlines
@@ -140,8 +145,19 @@ router.post('/applications/accept', async (req, res) => {
     const dur = Number(req.body.taskDurationDays || 3);
     task.taskDurationDays = dur;
     task.submissionDeadline = new Date(task.approvedDate.getTime() + dur * 24 * 60 * 60 * 1000);
+    
+    // Notify User
+    await Notification.create({
+      recipient: userId,
+      sender: approvedBy,
+      title: 'Application Approved! 🎉',
+      message: `Your application for "${task.title}" has been approved. You can now start the task.`,
+      type: 'APPLICATION_APPROVED',
+      taskId: task._id
+    });
+
     await task.save();
-    res.json({ message: 'Application accepted' });
+    res.json({ success: true, message: 'Application accepted and sample work removed' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -272,6 +288,68 @@ router.post('/reject-final', async (req, res) => {
     res.json({ success: true, message: 'Final work rejected' });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// PROVIDER APPROVES FINAL WORK (Step 9 & 10)
+router.post('/approve-final', async (req, res) => {
+  const { taskId, providerId } = req.body;
+  try {
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    if (String(task.postedBy) !== String(providerId)) return res.status(403).json({ success: false, message: 'Only provider can approve' });
+    if (task.status !== 'submitted') return res.status(400).json({ success: false, message: 'Task not submitted' });
+
+    const Escrow = require('../models/Escrow');
+    const Wallet = require('../models/Wallet');
+    const Transaction = require('../models/Transaction');
+
+    // 1. Find Escrow Record
+    const escrow = await Escrow.findOne({ taskId: task._id, status: 'held' });
+    if (!escrow) return res.status(404).json({ success: false, message: 'No funds held in escrow' });
+
+    // 2. Transfer to Worker Wallet
+    const worker = await User.findById(task.acceptedBy);
+    if (!worker) return res.status(404).json({ success: false, message: 'Worker not found' });
+
+    let workerWallet = await Wallet.findOne({ userId: worker._id });
+    if (!workerWallet) workerWallet = new Wallet({ userId: worker._id, role: 'user', balance: 0 });
+    
+    workerWallet.balance = (workerWallet.balance || 0) + escrow.amount;
+    workerWallet.transactions.push({
+      type: 'credit',
+      amount: escrow.amount,
+      taskId: task._id,
+      taskTitle: task.title,
+      description: `Payment released for Task: ${task.title}`,
+      status: 'completed',
+      date: new Date()
+    });
+    await workerWallet.save();
+
+    // 3. Update Escrow Status
+    escrow.status = 'released';
+    escrow.releasedAt = new Date();
+    await escrow.save();
+
+    // 4. Update Task Status (Step 11)
+    task.status = 'completed';
+    task.finalStatus = 'APPROVED';
+    await task.save();
+
+    // 5. Notify Worker
+    await Notification.create({
+      recipient: worker._id,
+      sender: providerId,
+      title: 'Payment Released! 💰',
+      message: `Your work for "${task.title}" has been approved and ₹${escrow.amount} has been added to your wallet.`,
+      type: 'PAYMENT_RELEASED',
+      taskId: task._id
+    });
+
+    res.json({ success: true, message: 'Work approved and payment released to worker wallet' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 

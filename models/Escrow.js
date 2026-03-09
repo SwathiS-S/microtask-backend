@@ -5,6 +5,8 @@ const escrowSchema = new mongoose.Schema({
   providerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   amount: { type: Number, required: true },
+  platformFee: { type: Number, default: 0 },
+  totalPaid: { type: Number, required: true },
   status: { type: String, enum: ['held', 'released', 'refunded', 'disputed'], default: 'held' },
   heldAt: { type: Date, default: Date.now },
   releasedAt: { type: Date },
