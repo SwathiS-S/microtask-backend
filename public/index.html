@@ -4467,6 +4467,12 @@
                     return `<div class="task-item">
                         <div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-open">${t.status || 'open'}</span></div>
                         <div class="task-description">${t.description || ''}</div>
+                        ${t.status === 'draft' ? `
+                        <div style="background:#fff7ed; border:1px solid #ffedd5; border-radius:12px; padding:12px; margin-top:12px; display:flex; align-items:center; gap:10px;">
+                            <div style="color:#f97316;"><svg class="icon" style="width:20px; height:20px;"><use href="#icon-wallet"/></svg></div>
+                            <div style="flex:1; font-size:13px; color:#9a3412;">This task is a draft. Fund it to make it public.</div>
+                            <button class="btn-small" style="background:#f97316; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);" onclick='showEscrowPaymentModal(${JSON.stringify(t)})'>Fund Now</button>
+                        </div>` : ''}
                         <div style="display:flex; gap:10px; margin-top:16px;">
                             <button class="btn-small btn-secondary" data-action="apps" data-id="${tid}">View Applications</button>
                                     ${canReview ? `<a class="btn-small btn-secondary" href="${finalLink}" target="_blank">View Final File</a>
