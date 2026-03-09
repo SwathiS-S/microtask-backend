@@ -174,4 +174,45 @@ router.post('/withdrawals/:id/reject', async (req, res) => {
   }
 });
 
+router.get('/dashboard-summary', async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    const tasks = await Task.find()
+      .populate('postedBy', 'name email')
+      .populate('acceptedBy', 'name email');
+    const withdrawals = await WithdrawalRequest.find().sort({ created_at: -1 }).populate('user_id', 'name email');
+    const transactions = await Transaction.find().sort({ created_at: -1 });
+
+    const pipeline = [
+      {
+        $group: {
+          _id: '$type',
+          total_amount: { $sum: '$amount' },
+          count: { $sum: 1 }
+        }
+      }
+    ];
+    const grouped = await Transaction.aggregate(pipeline);
+    const totals = grouped.reduce((acc, g) => {
+      acc[g._id] = { total: g.total_amount, count: g.count };
+      return acc;
+    }, {});
+
+    res.json({
+      success: true,
+      users: { count: users.length, items: users },
+      tasks: { count: tasks.length, items: tasks },
+      withdrawals: { count: withdrawals.length, items: withdrawals },
+      transactions: { count: transactions.length, items: transactions },
+      revenue: {
+        inflow: totals['CREDIT'] || { total: 0, count: 0 },
+        outflow: totals['DEBIT'] || { total: 0, count: 0 },
+        commission: totals['COMMISSION'] || { total: 0, count: 0 }
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'Failed to fetch dashboard summary', error: e.message });
+  }
+});
+
 module.exports = router;
