@@ -1870,6 +1870,10 @@
                         </div>
                     </div>
                     <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px;">
+                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Paid Tasks</h4>
+                        <div id="provPaidTasksList" class="task-list"></div>
+                    </div>
+                    <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px;">
                         <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Employee Payments</h4>
                         <div id="provPaymentsList" class="task-list"></div>
                     </div>
@@ -3492,7 +3496,7 @@
                                 const verifyData = await verifyRes.json();
                                 alert(verifyData.message || 'Payment verified and worker paid!');
                                 await refreshUserWallet();
-                                loadTasks();
+                                loadProviderTasks(); // Use loadProviderTasks to refresh the provider's view
                                 if (workerId) {
                                     showRatingModal(workerId, taskId);
                                 }
@@ -4246,11 +4250,33 @@
             }
         }
         async function buildProvTxTable() {
-            return buildTxTable().then(()=>{
-                const src = document.getElementById('txTableBody');
-                const dst = document.getElementById('provTxTableBody');
-                if (src && dst) dst.innerHTML = src.innerHTML;
-            });
+            if (!currentUser) return;
+            try {
+                const res = await fetch(`${API_URL}/users/${currentUser.userId}/transactions`);
+                const data = await res.json();
+                const body = document.getElementById('provTxTableBody');
+                if (!data.success || !Array.isArray(data.transactions) || data.transactions.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="padding:8px; color:#666;">No transactions</td></tr>';
+                    return;
+                }
+                body.innerHTML = data.transactions.map(tx => {
+                    const when = tx.created_at ? new Date(tx.created_at).toLocaleString() : '';
+                    const type = tx.type;
+                    const amt = `₹${Number(tx.amount || 0)}`;
+                    const status = tx.status || '—';
+                    const taskName = tx.task_id && tx.task_id.title ? tx.task_id.title : 'N/A';
+                    return `<tr>
+                        <td style="padding:8px 6px;">${when}</td>
+                        <td style="padding:8px 6px;">${taskName}</td>
+                        <td style="padding:8px 6px;">${type}</td>
+                        <td style="padding:8px 6px;">${amt}</td>
+                        <td style="padding:8px 6px;">${status}</td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                const body = document.getElementById('provTxTableBody');
+                body.innerHTML = '<tr><td colspan="5" style="padding:8px; color:#dc3545;">Failed to load</td></tr>';
+            }
         }
         // USER METRICS + GRAPHS
         async function renderUserMetrics() {
@@ -4456,27 +4482,51 @@
                 });
                 
                 const el = document.getElementById('provTasksList');
-                if (!mine.length) { el.innerHTML = '<p style="color:#666;">No tasks match the filter.</p>'; return; }
-                el.innerHTML = mine.map(t => {
-                    const tid = String(t._id);
-                    const accId = String(t.acceptedBy && t.acceptedBy._id || t.acceptedBy || '');
-                    const hasAcc = !!accId;
-                            const hasFinal = t.finalFile && t.finalFile.path;
-                            const finalLink = hasFinal ? (API_URL + t.finalFile.path) : null;
-                            const canReview = String(t.status).toLowerCase() === 'submitted' && hasFinal;
-                    return `<div class="task-item">
-                        <div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-open">${t.status || 'open'}</span></div>
-                        <div class="task-description">${t.description || ''}</div>
-                        <div style="display:flex; gap:10px; margin-top:16px;">
-                            <button class="btn-small btn-secondary" data-action="apps" data-id="${tid}">View Applications</button>
-                                    ${canReview ? `<a class="btn-small btn-secondary" href="${finalLink}" target="_blank">View Final File</a>
-                                    <button class="btn-small" data-action="approve" data-id="${tid}" data-worker-id="${accId}" style="background:#10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Approve Work</button>
-                                    <button class="btn-small" data-action="reject-final" data-id="${tid}" style="background:#ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">Reject Work</button>` : (hasAcc ? `<button class="btn-small" data-action="approve" data-id="${tid}" data-worker-id="${accId}" style="background:#10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Approve Payment</button>
-                                    <button class="btn-small" style="background:#ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);" data-action="decline" data-id="${tid}">Reject</button>` : '')}
-                        </div>
-                        <div class="apps-container" id="apps-${tid}" style="margin-top:8px;"></div>
-                    </div>`;
-                }).join('');
+                const paidEl = document.getElementById('provPaidTasksList');
+
+                const openTasks = mine.filter(t => String(t.status).toLowerCase() !== 'paid');
+                const paidTasks = mine.filter(t => String(t.status).toLowerCase() === 'paid');
+
+                if (!openTasks.length) { el.innerHTML = '<p style="color:#666;">No open tasks match the filter.</p>'; }
+                else {
+                    el.innerHTML = openTasks.map(t => {
+                        const tid = String(t._id);
+                        const accId = String(t.acceptedBy && t.acceptedBy._id || t.acceptedBy || '');
+                        const hasAcc = !!accId;
+                        const hasFinal = t.finalFile && t.finalFile.path;
+                        const finalLink = hasFinal ? (API_URL + t.finalFile.path) : null;
+                        const canReview = String(t.status).toLowerCase() === 'submitted' && hasFinal;
+                        const isWorkViewed = window.viewedWork && window.viewedWork[tid];
+
+                        return `<div class="task-item">
+                            <div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-open">${t.status || 'open'}</span></div>
+                            <div class="task-description">${t.description || ''}</div>
+                            <div style="display:flex; gap:10px; margin-top:16px;">
+                                <button class="btn-small btn-secondary" data-action="apps" data-id="${tid}">View Applications</button>
+                                ${canReview && !isWorkViewed ? `<a class="btn-small btn-secondary" href="${finalLink}" target="_blank" onclick="markWorkAsViewed('${tid}')">View Final Work</a>` : ''}
+                                ${canReview && isWorkViewed ? `
+                                    <button class="btn-small" data-action="approve" data-id="${tid}" data-worker-id="${accId}" style="background:#10b981;">Approve Work</button>
+                                    <button class="btn-small" data-action="reject-final" data-id="${tid}" style="background:#ef4444;">Reject Work</button>
+                                ` : ''}
+                                ${!canReview && hasAcc ? `
+                                    <button class="btn-small" data-action="approve" data-id="${tid}" data-worker-id="${accId}" style="background:#10b981;">Approve Payment</button>
+                                    <button class="btn-small" data-action="decline" data-id="${tid}" style="background:#ef4444;">Reject</button>
+                                ` : ''}
+                            </div>
+                            <div class="apps-container" id="apps-${tid}" style="margin-top:8px;"></div>
+                        </div>`;
+                    }).join('');
+                }
+
+                if (!paidTasks.length) { paidEl.innerHTML = '<p style="color:#666;">No paid tasks match the filter.</p>'; }
+                else {
+                    paidEl.innerHTML = paidTasks.map(t => {
+                        return `<div class="task-item">
+                            <div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-completed">Paid</span></div>
+                            <div class="task-description">${t.description || ''}</div>
+                        </div>`;
+                    }).join('');
+                }
                 el.querySelectorAll('button[data-action]').forEach(b => {
                     b.onclick = function() {
                         const id = this.getAttribute('data-id');
@@ -4800,6 +4850,14 @@
 
         // Initialize skillset field after login
         function initTriFilters() {}
+
+        function markWorkAsViewed(taskId) {
+            if (!window.viewedWork) {
+                window.viewedWork = {};
+            }
+            window.viewedWork[taskId] = true;
+            loadProviderTasks();
+        }
     </script>
 </body>
 </html>
