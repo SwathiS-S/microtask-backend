@@ -67,6 +67,19 @@ router.get('/drafts/:providerId', async (req, res) => {
   }
 });
 
+// GET TASKS FOR A SPECIFIC PROVIDER
+router.get('/provider/:providerId', async (req, res) => {
+  try {
+    const tasks = await Task.find({ postedBy: req.params.providerId })
+      .populate('postedBy', 'name email')
+      .populate('acceptedBy', 'name email')
+      .populate('applications.userId', 'name email');
+    res.json({ success: true, tasks });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // GET ALL TASKS
 router.get('/all', async (req, res) => {
   try {
