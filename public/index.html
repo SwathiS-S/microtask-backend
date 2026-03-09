@@ -4435,9 +4435,9 @@
         // PROVIDER SIDE
         async function loadProviderTasks() {
             try {
-                const res = await fetch(`${API_URL}/tasks/all`);
-                const tasks = await res.json();
-                let mine = Array.isArray(tasks) ? tasks.filter(t => String(t.postedBy && t.postedBy._id || t.postedBy || '') === String(currentUser.userId)) : [];
+                const res = await fetch(`${API_URL}/tasks/provider/${currentUser.userId}`);
+                const data = await res.json();
+                let mine = data.success ? data.tasks : [];
                 
                 // Add date filtering
                 const fromEl = document.getElementById('manageTasksFrom');
@@ -4559,6 +4559,17 @@
             }
         }
         async function providerCreateTask() {
+            // 1. Check for bank details first
+            const isWalletCreated = currentUser && currentUser.bankDetails && 
+                                   ((currentUser.bankDetails.bankAccountNumber && currentUser.bankDetails.bankAccountNumber !== '') || 
+                                    (currentUser.bankDetails.upiId && currentUser.bankDetails.upiId !== ''));
+            
+            if (!isWalletCreated) {
+                alert('Please connect your bank account first to create tasks.');
+                showCreateWalletModal();
+                return;
+            }
+
             const title = document.getElementById('provTitle').value;
             const category = document.getElementById('provCategory').value;
             const skill = document.getElementById('provSkill').value;
@@ -4598,14 +4609,126 @@
                     })
                 });
                 const data = await response.json();
-                if (response.ok) {
-                    alert('Task created successfully!');
+                if (response.ok && data.success) {
                     onTaskCreatedSuccess();
+                    // 2. Redirect to Escrow Payment
+                    showEscrowPaymentModal(data.task);
                 } else {
                     alert('Error: ' + (data.message || data.error || 'Failed to create task'));
                 }
             } catch (error) {
                 alert('Error creating task: ' + error.message);
+            }
+        }
+
+        function showEscrowPaymentModal(task) {
+            const amount = Number(task.amount);
+            const fee = amount * 0.02;
+            const total = amount + fee;
+
+            const html = `
+                <div id="escrowModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:10000;">
+                    <div class="card-soft" style="width:450px; padding:40px; background:#fff; border-radius:24px; text-align:center;">
+                        <div style="width:64px; height:64px; background:#eff6ff; border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; color:#3b82f6;">
+                            <svg class="icon" style="width:32px; height:32px;"><use href="#icon-wallet"/></svg>
+                        </div>
+                        <h3 style="margin:0 0 8px 0; font-size:24px;">Fund Your Task</h3>
+                        <p style="color:#666; margin-bottom:32px;">Fund your task to make it live and visible to workers.</p>
+                        
+                        <div style="background:#f9fafb; border-radius:16px; padding:20px; margin-bottom:32px; text-align:left;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                                <span style="color:#666;">Task Budget</span>
+                                <span style="font-weight:700;">₹${amount.toFixed(2)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                                <span style="color:#666;">Platform Fee (2%)</span>
+                                <span style="font-weight:700;">₹${fee.toFixed(2)}</span>
+                            </div>
+                            <div style="height:1px; background:#e5e7eb; margin:12px 0;"></div>
+                            <div style="display:flex; justify-content:space-between; font-size:18px;">
+                                <span style="font-weight:800;">Total to Pay</span>
+                                <span style="font-weight:800; color:#3b82f6;">₹${total.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <button class="add-task-btn" style="width:100%; padding:16px;" onclick="payEscrow('${task._id}', ${total})">Pay & Publish Task</button>
+                        <button class="btn-small btn-secondary" style="width:100%; margin-top:12px; background:transparent; box-shadow:none;" onclick="closeEscrowModal()">Maybe Later (Save as Draft)</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        function closeEscrowModal() {
+            const m = document.getElementById('escrowModal');
+            if (m) m.remove();
+            loadProviderTasks();
+        }
+
+        async function payEscrow(taskId, totalAmount) {
+            try {
+                // 1. Create Order on Backend
+                const orderRes = await fetch(`${API_URL}/payments/razorpay/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        amount: totalAmount, 
+                        userId: currentUser.userId,
+                        currency: 'INR'
+                    })
+                });
+                const orderData = await orderRes.json();
+
+                if (!orderRes.ok || !orderData.success) {
+                    alert(orderData.message || 'Failed to create payment order');
+                    return;
+                }
+
+                // 2. Open Razorpay
+                const options = {
+                    "key": "rzp_test_SNzqJbQGrxxv81", // TEST KEY
+                    "amount": orderData.order.amount,
+                    "currency": "INR",
+                    "name": "TaskNest",
+                    "description": "Task Escrow Payment",
+                    "order_id": orderData.order.id,
+                    "handler": async function (response) {
+                        // 3. Verify Payment
+                        try {
+                            const verifyRes = await fetch(`${API_URL}/payments/razorpay/verify-escrow-payment`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    taskId: taskId,
+                                    providerId: currentUser.userId,
+                                    amount: totalAmount
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+                            if (verifyData.success) {
+                                alert('Task funded and published successfully! ✅');
+                                closeEscrowModal();
+                                loadProviderTasks();
+                            } else {
+                                alert('Payment verification failed: ' + verifyData.message);
+                            }
+                        } catch (err) {
+                            alert('Verification error: ' + err.message);
+                        }
+                    },
+                    "prefill": {
+                        "name": currentUser.name || "",
+                        "email": currentUser.email || ""
+                    },
+                    "theme": { "color": "#3b82f6" }
+                };
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (error) {
+                alert('Payment error: ' + error.message);
             }
         }
         async function renderProviderMetrics() {
