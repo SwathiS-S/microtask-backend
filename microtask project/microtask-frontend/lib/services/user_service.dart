@@ -1,4 +1,4 @@
-enum UserRole { taskUser, taskProvider }
+enum UserRole { taskUser, taskProvider, admin }
 
 class UserService {
   static String? _userId;
@@ -24,6 +24,7 @@ class UserService {
   static String get memberSince => _memberSince;
   static UserRole get userRole => _userRole;
   static bool get isTaskProvider => _userRole == UserRole.taskProvider;
+  static bool get isAdmin => _userRole == UserRole.admin;
 
   // Setters
   static void setUser({

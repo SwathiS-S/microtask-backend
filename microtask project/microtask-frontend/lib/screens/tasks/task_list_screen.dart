@@ -35,9 +35,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
     });
     try {
       final data = await ApiService.get('/tasks/all');
-      final tasks = (data as List).map<Map<String, dynamic>>((t) {
+      final tasks = (data as List).where((t) => t['status'] != 'draft').map<Map<String, dynamic>>((t) {
         final postedBy = t['postedBy'];
         return {
+          'id': t['_id'] ?? t['id'],
           'title': t['title'] ?? '',
           'description': t['description'] ?? '',
           'amount': t['amount'] ?? 0,
@@ -47,6 +48,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           'workType': t['workType'] ?? '',
           'status': t['status'] ?? 'open',
           'acceptedBy': t['acceptedBy'] is Map ? (t['acceptedBy']['_id'] ?? t['acceptedBy']) : (t['acceptedBy'] ?? ''),
+          'raw': t,
         };
       }).toList();
       final skills = <String>{};
@@ -302,7 +304,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => TaskDetailScreen(),
+                                builder: (_) => TaskDetailScreen(task: Task.fromJson(task['raw'])),
                               ),
                             );
                           },
@@ -343,6 +345,10 @@ class _TaskCard extends StatelessWidget {
     String badgeText = '';
     if (isMine && status.toLowerCase() == 'accepted') badgeText = 'Applied';
     if (isMine && status.toLowerCase() == 'completed') badgeText = 'Completed';
+    
+    // Status that imply funding
+    final isFunded = status != 'draft';
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
@@ -369,14 +375,39 @@ class _TaskCard extends StatelessWidget {
                         color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text(
                       'Posted by $postedBy',
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         color: Colors.black54,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    if (isFunded)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.green.withOpacity(0.3)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.verified_user, size: 12, color: Colors.green),
+                            SizedBox(width: 4),
+                            Text(
+                              'Payment Secured in Escrow ✅',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     if (badgeText.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Container(

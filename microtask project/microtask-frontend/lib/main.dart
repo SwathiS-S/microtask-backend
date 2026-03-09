@@ -9,6 +9,9 @@ import 'screens/tasks/task_list_screen.dart';
 import 'screens/wallet/add_money_screen.dart';
 import 'screens/wallet/wallet_screen.dart';
 import 'screens/wallet/transaction_screen.dart';
+import 'screens/wallet/bank_setup_screen.dart';
+import 'screens/wallet/withdrawal_screen.dart';
+import 'screens/admin/withdrawal_management_screen.dart';
 import 'screens/profile/profile_screen.dart';
 
 void main() {
@@ -41,6 +44,8 @@ class MyApp extends StatelessWidget {
         '/add-money': (context) => const AddMoneyScreen(),
         '/wallet': (context) => const WalletScreen(),
         '/profile': (context) => const ProfileScreen(),
+        '/bank-setup': (context) => const BankSetupScreen(role: 'user'),
+        '/admin/withdrawals': (context) => const AdminWithdrawalManagementScreen(),
       },
     );
   }
