@@ -307,16 +307,61 @@ router.post('/complete', async (req, res) => {
     const poster = await User.findById(task.postedBy);
     const worker = await User.findById(completedBy);
 
+    // Calculate Commission (20%)
+    const adminCommission = Math.round(task.amount * 0.20);
+    const userEarnings = task.amount - adminCommission;
+
     if (poster.wallet < task.amount)
       return res.status(400).json({ message: 'Insufficient balance' });
 
+    // Deduct from poster
     poster.wallet -= task.amount;
-    worker.wallet += task.amount;
+    // Credit to worker
+    worker.wallet += userEarnings;
 
     await poster.save();
     await worker.save();
 
-    res.json({ message: 'Task completed and payment transferred successfully' });
+    // Credit to Admin
+    const admin = await User.findOne({ role: 'admin' });
+    if (admin) {
+      admin.wallet = (admin.wallet || 0) + adminCommission;
+      await admin.save();
+      
+      // Admin Commission Transaction
+      const Transaction = require('../models/Transaction');
+      await Transaction.create({
+        user_id: admin._id,
+        task_id: task._id,
+        amount: adminCommission,
+        type: 'COMMISSION',
+        status: 'SUCCESS'
+      });
+    }
+
+    // Transactions for poster and worker
+    const Transaction = require('../models/Transaction');
+    await Transaction.create({
+      user_id: poster._id,
+      task_id: task._id,
+      amount: task.amount,
+      type: 'DEBIT',
+      status: 'SUCCESS'
+    });
+
+    await Transaction.create({
+      user_id: worker._id,
+      task_id: task._id,
+      amount: userEarnings,
+      type: 'CREDIT',
+      status: 'SUCCESS'
+    });
+
+    res.json({ 
+      message: 'Task completed and payment transferred successfully',
+      earnings: userEarnings,
+      commission: adminCommission
+    });
 
   } catch (err) {
     res.status(500).json({ error: err.message });

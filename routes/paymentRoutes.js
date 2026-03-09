@@ -48,6 +48,18 @@ router.post('/razorpay/verify-task-payment', async (req, res) => {
     const adminCommission = Math.round(task.amount * 0.20);
     const userEarnings = task.amount - adminCommission;
 
+    // Find Provider
+    const provider = await User.findById(task.postedBy);
+    if (provider) {
+      await Transaction.create({
+        user_id: provider._id,
+        task_id: task._id,
+        amount: task.amount,
+        type: 'DEBIT',
+        status: 'SUCCESS'
+      });
+    }
+
     // Find Admin
     const admin = await User.findOne({ role: 'admin' });
     if (admin) {

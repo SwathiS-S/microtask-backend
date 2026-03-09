@@ -74,7 +74,7 @@ router.delete('/tasks/:id', async (req, res) => {
 
 router.get('/transactions', async (req, res) => {
   try {
-    const items = await Transaction.find().sort({ created_at: -1 });
+    const items = await Transaction.find().sort({ created_at: -1 }).populate('user_id', 'name email');
     res.json({ success: true, count: items.length, transactions: items });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
