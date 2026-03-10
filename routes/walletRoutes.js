@@ -51,48 +51,40 @@ router.get('/transactions/:userId', async (req, res) => {
 router.post('/withdraw', async (req, res) => {
   try {
     const { userId, amount, bankDetails } = req.body;
-
     const mongoose = require('mongoose');
-    // Step 2: Check wallet balance
-    const wallet = await Wallet.findOne({ userId: mongoose.Types.ObjectId(userId) });
+
+    // Find wallet - try both ways
+    let wallet = await Wallet.findOne({ userId: userId });
+
     if (!wallet) {
-      return res.status(404).json({
-        success: false,
-        message: 'Wallet not found'
+      wallet = await Wallet.findOne({ 
+        userId: mongoose.Types.ObjectId(userId) 
       });
     }
 
-    // Step 1: Check dynamic minimum amount and sufficient balance
-    const walletBalance = wallet.balance;
-    const minimumWithdrawal = walletBalance < 100 ? 1 : 10;
-    const requestedAmount = parseFloat(amount);
+    console.log('Wallet found:', wallet);
+    console.log('Balance:', wallet?.balance);
+    console.log('Requested:', amount);
 
-    if (requestedAmount < minimumWithdrawal) {
+    if (!wallet || Number(wallet.balance) < Number(amount)) {
       return res.status(400).json({
         success: false,
-        message: `Minimum withdrawal amount is ₹${minimumWithdrawal}`
+        message: `Insufficient balance. Available: ₹${wallet?.balance || 0}`
       });
     }
 
-    if (requestedAmount > walletBalance) {
-      return res.status(400).json({
-        success: false,
-        message: `Insufficient balance. Your balance: ₹${walletBalance} Requested: ₹${requestedAmount}`
-      });
-    }
-
-    // Step 3: Deduct from wallet and update pending withdrawal balance
+    // Deduct from wallet
     await Wallet.findOneAndUpdate(
-      { userId },
+      { userId: userId },
       {
-        $inc: {
-          balance: -amount,
-          pendingWithdrawal: +amount
+        $inc: { 
+          balance: -Number(amount), 
+          pendingWithdrawal: +Number(amount) 
         },
         $push: {
           transactions: {
             type: 'withdrawal',
-            amount: amount,
+            amount: Number(amount),
             description: 'Withdrawal requested',
             status: 'pending',
             date: new Date()
@@ -101,33 +93,24 @@ router.post('/withdraw', async (req, res) => {
       }
     );
 
-    // Step 4: Create withdrawal request
+    // Create withdrawal record
     const user = await User.findById(userId);
-    const withdrawal = await Withdrawal.create({
-      userId,
+    await Withdrawal.create({
+      userId: userId,
       userName: user ? user.name : 'N/A',
-      amount,
-      bankDetails,
+      amount: Number(amount),
+      bankDetails: bankDetails,
       status: 'pending',
       requestedAt: new Date()
     });
 
-    // Step 5: Create notification for user
-    await Notification.create({
-      recipient: userId,
-      title: '⏳ Withdrawal Requested',
-      message: `Your withdrawal request of ₹${amount} has been submitted. Expected processing time is 1-2 business days.`,
-      type: 'WITHDRAWAL_REQUESTED'
-    });
-
     res.json({
       success: true,
-      message: 'Withdrawal requested successfully',
-      withdrawalId: withdrawal._id,
-      expectedTime: '1-2 business days'
+      message: 'Withdrawal requested successfully!'
     });
 
   } catch (error) {
+    console.log('Withdrawal error:', error);
     res.status(500).json({
       success: false,
       message: error.message

@@ -79,6 +79,7 @@
         <button id="nav-transactions" onclick="switchSection('transactions')">Transactions</button>
         <button id="nav-revenue" onclick="switchSection('revenue')">Revenue</button>
         <button id="nav-withdrawals" onclick="switchSection('withdrawals')">Withdrawals</button>
+        <button id="nav-escrow" onclick="switchSection('escrow')">Escrow Releases</button>
       </div>
       <div class="sidebar-footer">
         <div id="adminStatus">Not signed in</div>
@@ -203,6 +204,22 @@
           </div>
         </div>
       </section>
+
+      <!-- Fix 5: Admin dashboard show pending escrows -->
+      <section id="section-escrow" class="section">
+        <div class="panel" style="margin-top:16px;">
+          <div class="panel-header">
+            <div>Pending Escrow Releases</div>
+            <div class="actions"><button class="btn small" onclick="loadPendingEscrows()">Reload</button></div>
+          </div>
+          <div class="panel-body">
+            <div id="pendingEscrows" style="display:grid; gap:12px;">
+              <!-- Escrow cards will be injected here -->
+              <p>Loading pending releases...</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -237,22 +254,33 @@
       }
     }
     function switchSection(name) {
-      const ids = ['overview','users','tasks','transactions','revenue','withdrawals'];
+      const ids = ['overview','users','tasks','transactions','revenue','withdrawals','escrow'];
       ids.forEach(id => {
-        document.getElementById('section-' + id).classList.toggle('active', id === name);
-        document.getElementById('nav-' + id).classList.toggle('active', id === name);
+        const el = document.getElementById('section-' + id);
+        const nav = document.getElementById('nav-' + id);
+        if (el) el.classList.toggle('active', id === name);
+        if (nav) nav.classList.toggle('active', id === name);
       });
+      if (name === 'escrow') loadPendingEscrows();
     }
     async function refreshMetrics() {
       try {
-        const [users, tasks, wd] = await Promise.all([
+        const [users, tasks, wd, esc] = await Promise.all([
           fetch(`${API_URL}/admin/users`, { headers: getAdminIdHeader() }).then(r => r.json()),
           fetch(`${API_URL}/admin/tasks`, { headers: getAdminIdHeader() }).then(r => r.json()),
-          fetch(`${API_URL}/admin/withdrawals?status=PENDING`, { headers: getAdminIdHeader() }).then(r => r.json())
+          fetch(`${API_URL}/admin/withdrawals?status=PENDING`, { headers: getAdminIdHeader() }).then(r => r.json()),
+          fetch(`${API_URL}/escrow/admin/escrow/pending`, { headers: getAdminIdHeader() }).then(r => r.json())
         ]);
         document.getElementById('metricUsers').textContent = (users.count ?? (users.users?.length ?? '–'));
         document.getElementById('metricTasks').textContent = (tasks.count ?? (tasks.tasks?.length ?? '–'));
         document.getElementById('metricWithdrawals').textContent = (wd.count ?? 0);
+        
+        // Update nav badge if it exists
+        const escBtn = document.getElementById('nav-escrow');
+        if (escBtn && esc.success) {
+          const count = (esc.tasks?.length || 0) + (esc.escrows?.length || 0);
+          escBtn.innerHTML = `Escrow Releases ${count > 0 ? `<span class="badge" style="background:var(--danger); color:white; padding:2px 6px; font-size:10px;">${count}</span>` : ''}`;
+        }
       } catch (_) {}
     }
     async function loadUsers() {
@@ -392,6 +420,55 @@
         loadWithdrawals();
       } catch (e) { alert(e.message); }
     }
+
+    // Fix 5: Admin dashboard show pending escrows
+    async function loadPendingEscrows() {
+      const container = document.getElementById('pendingEscrows');
+      container.innerHTML = '<p>Loading pending releases...</p>';
+      try {
+        const response = await fetch(`${API_URL}/escrow/admin/escrow/pending`, { headers: getAdminIdHeader() });
+        const data = await response.json();
+        console.log('Pending escrows:', data);
+
+        if (!data.tasks || data.tasks.length === 0) {
+          container.innerHTML = '<div class="panel-body" style="text-align:center; color:var(--muted); padding:40px;">No pending releases</div>';
+          return;
+        }
+
+        container.innerHTML = data.tasks.map(task => `
+          <div class="panel-body" style="border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 700; font-size: 16px;">${task.title}</div>
+              <div style="color: var(--muted); font-size: 13px;">Amount: <span style="color: var(--success); font-weight: 700;">₹${task.escrowAmount || task.amount}</span> | Status: <span class="badge">${task.status}</span></div>
+            </div>
+            <button class="btn success" onclick="releaseEscrow('${task._id}')">
+              Release to Worker ✅
+            </button>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = `<p style="color:var(--danger); padding:20px;">Error: ${e.message}</p>`;
+      }
+    }
+
+    async function releaseEscrow(taskId) {
+      if (!confirm('Release payment to worker?')) return;
+      try {
+        const response = await fetch(`${API_URL}/escrow/admin/escrow/release/${taskId}`, { 
+          method: 'POST',
+          headers: getAdminIdHeader()
+        });
+        const data = await response.json();
+        if (data.success) {
+          alert('Payment released successfully! ✅');
+          loadPendingEscrows();
+          refreshMetrics();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (e) { alert('Error: ' + e.message); }
+    }
+
     loadPersisted();
   </script>
 </body>

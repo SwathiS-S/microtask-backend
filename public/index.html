@@ -2515,6 +2515,12 @@
                 return;
             }
 
+            console.log('Processing withdrawal with data:', { 
+                userId: currentUser.userId, 
+                amount: Number(amount),
+                bankDetails
+            });
+
             fetch(`${API_URL}/wallet/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -5082,64 +5088,66 @@
             const m = document.getElementById('withdrawModal');
             if (m) m.remove();
         }
-
         async function processWithdrawal() {
-            const amountEl = document.getElementById('withdrawAmount');
-            if (!amountEl) return;
+    const amountEl = document.getElementById('withdrawAmount');
+    if (!amountEl) return;
 
-            const amount = amountEl.value;
-            const min = currentUser.wallet < 100 ? 1 : 10;
+    const amount = amountEl.value;
+    const min = currentUser.wallet < 100 ? 1 : 10;
 
-            if (!amount || isNaN(amount) || Number(amount) <= 0) {
-                alert('Please enter a valid amount.');
-                return;
-            }
-            
-            if (Number(amount) < min) {
-                alert(`Minimum withdrawal is ₹${min}`);
-                return;
-            }
-            if (Number(amount) > currentUser.wallet) {
-                alert('Insufficient balance');
-                return;
-            }
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+        alert('Please enter a valid amount.');
+        return;
+    }
+    
+    if (Number(amount) < min) {
+        alert(`Minimum withdrawal is ₹${min}`);
+        return;
+    }
+    if (Number(amount) > currentUser.wallet) {
+        alert('Insufficient balance');
+        return;
+    }
 
-            // Fetch bank details first
-            let bankDetails = {};
-            try {
-                const res = await fetch(`${API_URL}/wallet/details/${currentUser.userId}`);
-                const data = await res.json();
-                if (data.success && data.account) {
-                    bankDetails = data.account;
-                } else {
-                    alert('Bank account details not found. Please set up your bank account first.');
-                    return;
-                }
-            } catch (e) {
-                alert('Error fetching bank details: ' + e.message);
-                return;
-            }
-
-            fetch(`${API_URL}/wallet/withdraw`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    userId: currentUser.userId, 
-                    amount: Number(amount),
-                    bankDetails: {
-                        accountHolderName: bankDetails.accountHolderName,
-                        accountNumber: bankDetails.bankAccountNumber,
-                        ifscCode: bankDetails.ifscCode,
-                        bankName: bankDetails.bankName || 'N/A',
-                        branchName: bankDetails.branchName || 'N/A'
-                    }
-                })
-            }).then(r=>r.json()).then(d=>{
-                alert(d.message || (d.success ? 'Withdrawal successful' : 'Failed'));
-                closeWithdrawModal();
-                refreshUserWallet();
-            }).catch(e=>alert(e.message));
+    // Fetch bank details first
+    let bankDetails = {};
+    try {
+        const res = await fetch(`${API_URL}/wallet/details/${currentUser.userId}`);
+        const data = await res.json();
+        if (data.success && data.account) {
+            bankDetails = data.account;
+        } else {
+            alert('Bank account details not found. Please set up your bank account first.');
+            return;
         }
+    } catch (e) {
+        alert('Error fetching bank details: ' + e.message);
+        return;
+    }
+
+    fetch(`${API_URL}/wallet/withdraw`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            userId: currentUser.userId, 
+            amount: Number(amount),
+            bankDetails: {
+                accountHolderName: bankDetails.accountHolderName,
+                accountNumber: bankDetails.bankAccountNumber,
+                ifscCode: bankDetails.ifscCode,
+                bankName: bankDetails.bankName || 'N/A',
+                branchName: bankDetails.branchName || 'N/A'
+            }
+        })
+    }).then(r=>r.json()).then(d=>{
+        alert(d.message || (d.success ? 'Withdrawal successful' : 'Failed'));
+        closeWithdrawModal();
+        refreshUserWallet();
+    }).catch(e=>alert(e.message));
+}
+
+        
+        
 
         // Initialize skillset field after login
         function initTriFilters() {}

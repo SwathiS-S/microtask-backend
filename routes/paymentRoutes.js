@@ -44,21 +44,31 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
 
-    // Update Task Status
-    task.status = 'open'; // funded -> open as per Step 3
-    await task.save();
+    // Fix 1: After escrow payment verified save to DB correctly
+    // Save or Update Escrow record using findOneAndUpdate with upsert
+    const escrow = await Escrow.findOneAndUpdate(
+      { taskId: taskId },
+      {
+        taskId: taskId,
+        taskTitle: task.title,
+        providerId: providerId,
+        amount: Number(amount),
+        razorpayPaymentId: razorpay_payment_id,
+        razorpayOrderId: razorpay_order_id,
+        status: 'held',
+        heldAt: new Date()
+      },
+      { upsert: true, new: true }
+    );
 
-    // Create Escrow record
-    const escrow = new Escrow({
-      taskId,
-      providerId,
-      amount: task.amount,
-      platformFee: (amount - task.amount) > 0 ? (amount - task.amount) : 0,
-      totalPaid: amount || task.amount,
-      status: 'held',
-      heldAt: new Date()
+    // Update task status to open
+    await Task.findByIdAndUpdate(taskId, {
+      status: 'open',
+      escrowPaid: true,
+      escrowAmount: Number(amount)
     });
-    await escrow.save();
+
+    console.log('Escrow saved successfully');
 
     // Provider wallet transaction
     let wallet = await Wallet.findOne({ userId: providerId });
@@ -69,16 +79,16 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
     // Log the funding in transactions
     wallet.transactions.push({
       type: 'escrow_hold',
-      amount: amount || task.amount,
+      amount: Number(amount),
       taskId: task._id,
       taskTitle: task.title,
-      description: `Task Funded - ₹${amount || task.amount} debited`,
+      description: `Task Funded - ₹${amount} debited`,
       status: 'completed',
       date: new Date()
     });
     await wallet.save();
 
-    res.json({ success: true, message: 'Task funded and published successfully' });
+    res.json({ success: true, message: 'Task funded and published successfully', escrow });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message || 'Verification failed' });
   }
