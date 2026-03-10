@@ -36,7 +36,7 @@ const taskSchema = new mongoose.Schema({
     uploadedAt: { type: Date }
   },
   reviewRemark: { type: String },
-  finalStatus: { type: String, enum: ['NONE','SUBMITTED','MISSED','APPROVED','REJECTED'], default: 'NONE' },
+  finalStatus: { type: String, enum: ['NONE','SUBMITTED','MISSED','APPROVED','REJECTED', 'PENDING_RELEASE'], default: 'NONE' },
   status: {
     type: String,
     enum: [
@@ -47,6 +47,7 @@ const taskSchema = new mongoose.Schema({
       'in_progress',
       'submitted',
       'reviewed',
+      'pending_release',
       'completed',
       'disputed',
       'resolved',

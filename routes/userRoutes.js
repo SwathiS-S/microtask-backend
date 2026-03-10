@@ -26,7 +26,17 @@ router.post('/withdraw-money', async (req, res) => {
     let wallet = await Wallet.findOne({ userId });
     if (!wallet) wallet = new Wallet({ userId, role: user.role === 'taskProvider' ? 'provider' : 'user', balance: 0 });
 
-    if (wallet.balance < amount) {
+    const walletBalance = wallet.balance;
+    const minimumWithdrawal = walletBalance < 100 ? 1 : 10;
+
+    if (amount < minimumWithdrawal) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Minimum withdrawal is ₹${minimumWithdrawal}` 
+      });
+    }
+
+    if (walletBalance < amount) {
       return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
     }
 

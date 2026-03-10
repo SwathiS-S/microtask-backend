@@ -332,12 +332,28 @@ router.post('/approve-final', async (req, res) => {
     escrow.releasedAt = new Date();
     await escrow.save();
 
-    // 4. Update Task Status (Step 11)
+    // 4. Update Provider's Escrow Balance
+    const providerWallet = await Wallet.findOne({ userId: task.postedBy });
+    if (providerWallet) {
+      providerWallet.escrowBalance = Math.max(0, (providerWallet.escrowBalance || 0) - escrow.amount);
+      providerWallet.transactions.push({
+        type: 'escrow_release',
+        amount: escrow.amount,
+        taskId: task._id,
+        taskTitle: task.title,
+        description: `Payment released to worker for Task: ${task.title}`,
+        status: 'completed',
+        date: new Date()
+      });
+      await providerWallet.save();
+    }
+
+    // 5. Update Task Status (Step 11)
     task.status = 'completed';
     task.finalStatus = 'APPROVED';
     await task.save();
 
-    // 5. Notify Worker
+    // 6. Notify Worker
     await Notification.create({
       recipient: worker._id,
       sender: providerId,
@@ -539,6 +555,41 @@ router.post('/complete', async (req, res) => {
   }
 });
 
+router.post('/approve-work/:taskId', async (req, res) => {
+  const { taskId } = req.params;
+  const { approvedBy } = req.body;
+
+  try {
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+
+    if (String(task.postedBy) !== String(approvedBy)) {
+      return res.status(403).json({ message: 'Only the task provider can approve this work' });
+    }
+
+    task.status = 'pending_release';
+    task.providerApprovedAt = new Date();
+    await task.save();
+
+    // Notify Admin
+    const admin = await User.findOne({ role: 'admin' });
+    if (admin) {
+      await Notification.create({
+        recipient: admin._id,
+        sender: approvedBy,
+        title: 'Escrow Release Request',
+        message: `Provider approved work for "${task.title}". Please release the escrow of ₹${task.amount}.`,
+        type: 'ESCROW_RELEASE_REQUEST',
+        taskId: task._id
+      });
+    }
+
+    res.json({ success: true, message: 'Work approved! Admin will release payment shortly.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // APPROVE TASK (provider approves → marks as approved → returns Razorpay order)
 router.post('/approve', async (req, res) => {
   const { taskId, approvedBy } = req.body;
@@ -563,7 +614,8 @@ router.post('/approve', async (req, res) => {
       return res.status(400).json({ message: 'Task not accepted by anyone yet' });
 
     // Mark as approved (waiting for payment)
-    task.status = 'approved';
+    task.status = 'reviewed';
+    task.finalStatus = 'APPROVED';
     await task.save();
 
     // Create Razorpay Order

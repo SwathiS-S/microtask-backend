@@ -86,6 +86,161 @@ router.get('/transactions', async (req, res) => {
   }
 });
 
+// --- WITHDRAWAL MANAGEMENT ---
+
+// Admin gets all pending withdrawals
+router.get('/withdrawals/pending', async (req, res) => {
+  try {
+    const pending = await Withdrawal.find({ status: 'pending' }).sort({ requestedAt: 1 });
+    res.json({ success: true, withdrawals: pending });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Admin gets all withdrawals (completed, rejected, etc.)
+router.get('/withdrawals/all', async (req, res) => {
+  try {
+    const all = await Withdrawal.find().sort({ requestedAt: -1 });
+    res.json({ success: true, withdrawals: all });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Admin marks a withdrawal as processing
+router.put('/withdrawals/process/:id', async (req, res) => {
+  try {
+    const { adminId, remarks } = req.body;
+    const withdrawal = await Withdrawal.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: 'processing',
+        processedBy: adminId,
+        processedAt: new Date(),
+        remarks
+      },
+      { new: true }
+    );
+
+    // Notify User
+    await Notification.create({
+      recipient: withdrawal.userId,
+      title: '🔄 Withdrawal Processing',
+      message: `Your withdrawal of ₹${withdrawal.amount} is being processed by our team.`,
+      type: 'WITHDRAWAL_PROCESSING'
+    });
+
+    res.json({ success: true, message: 'Withdrawal marked as processing', withdrawal });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Admin marks a withdrawal as completed
+router.put('/withdrawals/complete/:id', async (req, res) => {
+  try {
+    const { adminId, transactionReference, remarks } = req.body;
+
+    const withdrawal = await Withdrawal.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: 'completed',
+        transactionReference,
+        remarks,
+        completedAt: new Date(),
+        processedBy: adminId
+      },
+      { new: true }
+    );
+
+    // Update wallet: decrease pendingWithdrawal
+    await Wallet.findOneAndUpdate(
+      { userId: withdrawal.userId },
+      {
+        $inc: { pendingWithdrawal: -withdrawal.amount },
+        $push: {
+          transactions: {
+            type: 'withdrawal_completed',
+            amount: withdrawal.amount,
+            description: `Withdrawal to ${withdrawal.bankDetails.bankName} completed`,
+            transactionReference,
+            status: 'completed',
+            date: new Date()
+          }
+        }
+      }
+    );
+
+    // Notify User
+    await Notification.create({
+      recipient: withdrawal.userId,
+      title: '✅ Withdrawal Completed',
+      message: `₹${withdrawal.amount} has been successfully transferred to your bank account ending in ${withdrawal.bankDetails.accountNumber.slice(-4)}. Ref: ${transactionReference}`,
+      type: 'WITHDRAWAL_COMPLETED'
+    });
+
+    res.json({ success: true, message: 'Withdrawal marked as completed' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Admin rejects a withdrawal
+router.put('/withdrawals/reject/:id', async (req, res) => {
+  try {
+    const { adminId, reason } = req.body;
+
+    const withdrawal = await Withdrawal.findById(req.params.id);
+
+    // Refund amount back to user's main balance
+    await Wallet.findOneAndUpdate(
+      { userId: withdrawal.userId },
+      {
+        $inc: {
+          balance: +withdrawal.amount, // Add back to main balance
+          pendingWithdrawal: -withdrawal.amount // Deduct from pending balance
+        },
+        $push: {
+          transactions: {
+            type: 'withdrawal_rejected',
+            amount: withdrawal.amount,
+            description: `Withdrawal rejected. Reason: ${reason}`,
+            status: 'failed',
+            date: new Date()
+          }
+        }
+      }
+    );
+
+    // Update withdrawal status
+    await Withdrawal.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: 'rejected',
+        rejectionReason: reason,
+        rejectedAt: new Date(),
+        processedBy: adminId
+      }
+    );
+
+    // Notify User
+    await Notification.create({
+      recipient: withdrawal.userId,
+      title: '❌ Withdrawal Rejected',
+      message: `Your withdrawal of ₹${withdrawal.amount} was rejected. The amount has been refunded to your wallet. Reason: ${reason}`,
+      type: 'WITHDRAWAL_REJECTED'
+    });
+
+    res.json({ success: true, message: 'Withdrawal rejected and amount refunded' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
+// --- DASHBOARD & ANALYTICS ---
+
 router.get('/analytics/revenue', async (req, res) => {
   try {
     const pipeline = [

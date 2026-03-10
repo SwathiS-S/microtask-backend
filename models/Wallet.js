@@ -5,6 +5,7 @@ const walletSchema = new mongoose.Schema({
   role: { type: String, enum: ['provider', 'user'], required: true },
   balance: { type: Number, default: 0 },
   escrowBalance: { type: Number, default: 0 },
+  pendingWithdrawal: { type: Number, default: 0 },
   transactions: [
     {
       type: { 

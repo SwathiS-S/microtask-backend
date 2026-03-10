@@ -48,87 +48,50 @@ router.post('/deposit/:taskId', async (req, res) => {
 
 // POST /escrow/release/:taskId - Release to user
 router.post('/release/:taskId', async (req, res) => {
+  const { taskId } = req.params;
+  const { userId } = req.body; // This should be the worker's ID
+
   try {
-    const { userId } = req.body; // Worker's user ID
-    
-    const escrow = await Escrow.findOne({ taskId: req.params.taskId, status: 'held' });
-    if (!escrow) {
-      return res.status(404).json({ success: false, message: 'Held escrow record not found' });
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+
+    if (task.status !== 'pending_release') {
+      return res.status(400).json({ message: 'Task is not pending release' });
     }
 
-    // Update escrow record
-    escrow.status = 'released';
-    escrow.userId = userId;
-    escrow.releasedAt = Date.now();
-    await escrow.save();
-
-    // Release from provider escrow balance
-    const providerWallet = await Wallet.findOne({ userId: escrow.providerId });
-    const task = await Task.findById(req.params.taskId);
-    if (providerWallet) {
-      providerWallet.escrowBalance -= escrow.amount;
-      providerWallet.transactions.push({
-        type: 'escrow_release',
-        amount: escrow.amount,
-        taskId: req.params.taskId,
-        taskTitle: task ? task.title : 'Task',
-        description: `Payment Released - ₹${escrow.amount}`,
-        status: 'completed'
-      });
-      await providerWallet.save();
-    }
-
-    // Credit to worker's wallet balance
     const workerWallet = await Wallet.findOne({ userId });
-    const txDescription = `+ ₹${escrow.amount} received for ${task ? task.title : 'Task'}`;
-    if (!workerWallet) {
-      // Create wallet if it doesn't exist
-      const newWallet = new Wallet({
-        userId,
-        role: 'user',
-        balance: escrow.amount,
-        transactions: [{
-          type: 'credit',
-          amount: escrow.amount,
-          taskId: req.params.taskId,
-          taskTitle: task ? task.title : 'Task',
-          description: txDescription,
-          status: 'completed'
-        }]
-      });
-      await newWallet.save();
-    } else {
-      workerWallet.balance += escrow.amount;
-      workerWallet.transactions.push({
-        type: 'credit',
-        amount: escrow.amount,
-        taskId: req.params.taskId,
-        taskTitle: task ? task.title : 'Task',
-        description: txDescription,
-        status: 'completed'
-      });
-      await workerWallet.save();
-    }
+    if (!workerWallet) return res.status(404).json({ message: 'Worker wallet not found' });
 
-    // Update task status to "completed"
-    if (task) {
-      task.status = 'completed';
-      await task.save();
+    workerWallet.balance += task.amount;
+    await workerWallet.save();
 
-      // Notify User
-      await Notification.create({
-        recipient: userId,
-        sender: escrow.providerId,
-        title: 'Payment Received! 💰',
-        message: `Your work for "${task.title}" has been approved and ₹${escrow.amount} has been added to your wallet.`,
-        type: 'PAYMENT_RELEASED',
-        taskId: task._id
-      });
-    }
+    task.status = 'completed';
+    task.finalStatus = 'COMPLETED';
+    task.completedAt = new Date();
+    await task.save();
 
-    res.json({ success: true, message: 'Funds released from escrow to worker' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    // Notify Provider and User
+    await Notification.create({
+      recipient: task.postedBy,
+      sender: userId,
+      title: 'Payment Released',
+      message: `Payment of ₹${task.amount} for "${task.title}" has been released to the worker.`,
+      type: 'PAYMENT_RELEASED',
+      taskId: task._id
+    });
+
+    await Notification.create({
+      recipient: userId,
+      sender: task.postedBy,
+      title: 'Payment Received',
+      message: `₹${task.amount} has been added to your wallet for "${task.title}".`,
+      type: 'PAYMENT_RECEIVED',
+      taskId: task._id
+    });
+
+    res.json({ success: true, message: 'Escrow released successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

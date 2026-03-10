@@ -21,9 +21,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ROOT TEST ROUTE
+// ROOT ROUTE - Serve landing page
 app.get('/', (req, res) => {
-  res.send('Backend is working successfully');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // SIMPLE OTP ALIAS ROUTES (email-only)
