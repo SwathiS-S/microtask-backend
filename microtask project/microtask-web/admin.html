@@ -190,15 +190,29 @@
       </section>
 
       <section id="section-withdrawals" class="section">
+        <div class="metrics">
+          <div class="metric">
+            <div class="label">Pending Requests</div>
+            <div id="metricPending" class="value">–</div>
+          </div>
+          <div class="metric">
+            <div class="label">Today's Completed</div>
+            <div id="metricTodayCompleted" class="value">–</div>
+          </div>
+          <div class="metric">
+            <div class="label">Total Paid Out</div>
+            <div id="metricTotalPaid" class="value">–</div>
+          </div>
+        </div>
         <div class="panel" style="margin-top:16px;">
           <div class="panel-header">
-            <div>Withdrawal Approvals</div>
+            <div>Pending Withdrawals</div>
             <div class="actions"><button class="btn small" onclick="loadWithdrawals()">Reload</button></div>
           </div>
           <div class="panel-body">
             <table>
-              <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Requested At</th><th>Actions</th></tr></thead>
-              <tbody id="wdTable"></tbody>
+              <thead><tr><th>User</th><th>Amount</th><th>Bank Details</th><th>Action</th></tr></thead>
+              <tbody id="pendingWdTable"></tbody>
             </table>
           </div>
         </div>
@@ -355,43 +369,95 @@
       } catch (_) {}
     }
     async function loadWithdrawals() {
-      const tbody = document.getElementById('wdTable');
-      tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+      const tbody = document.getElementById('pendingWdTable');
+      tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
       try {
-        const data = await fetch(`${API_URL}/admin/withdrawals?status=PENDING`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const data = await fetch(`${API_URL}/admin/withdrawals/pending`, { headers: getAdminIdHeader() }).then(r => r.json());
         const items = data.withdrawals || [];
         tbody.innerHTML = items.map(w => `
           <tr>
-            <td>${w.user_id ? (w.user_id.email || w.user_id.name || w.user_id._id) : '-'}</td>
+            <td>${w.userName || '-'}</td>
             <td>₹ ${Number(w.amount || 0).toFixed(2)}</td>
-            <td><span class="badge">${w.status}</span></td>
-            <td>${new Date(w.created_at).toLocaleString()}</td>
-            <td>
-              <button class="btn small success" onclick="approveWithdrawal('${w._id}')">Approve</button>
-              <button class="btn small danger" onclick="rejectWithdrawal('${w._id}')">Reject</button>
-            </td>
+            <td>${w.bankDetails.bankName} - ${w.bankDetails.accountNumber}</td>
+            <td><button class="btn small" onclick='showProcessModal(${JSON.stringify(w)})'>Process</button></td>
           </tr>
         `).join('');
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4">${e.message}</td></tr>`;
       }
     }
-    async function approveWithdrawal(id) {
-      try {
-        const r = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, { method: 'POST', headers: getAdminIdHeader() });
-        const d = await r.json();
-        alert(d.message || (r.ok ? 'Withdrawal approved' : 'Failed'));
-        loadWithdrawals(); refreshMetrics();
-      } catch (e) { alert(e.message); }
+
+    function showProcessModal(withdrawal) {
+      const modal = document.createElement('div');
+      modal.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">
+          <div class="panel" style="width: 400px;">
+            <div class="panel-header">Process Withdrawal</div>
+            <div class="panel-body">
+              <div>User: ${withdrawal.userName}</div>
+              <div>Amount: ₹${withdrawal.amount}</div>
+              <hr>
+              <div>Account Holder: ${withdrawal.bankDetails.accountHolderName}</div>
+              <div>Account Number: ${withdrawal.bankDetails.accountNumber}</div>
+              <div>IFSC Code: ${withdrawal.bankDetails.ifscCode}</div>
+              <div>Bank: ${withdrawal.bankDetails.bankName}</div>
+              <hr>
+              <input type="text" id="transactionRef" placeholder="Transaction Reference (UTR)" style="width: 100%; margin-bottom: 8px;">
+              <input type="text" id="remarks" placeholder="Remarks" style="width: 100%;">
+            </div>
+            <div class="panel-footer" style="padding: 14px 18px; display: flex; justify-content: flex-end; gap: 8px;">
+              <button class="btn alt" onclick="this.parentElement.parentElement.parentElement.remove()">Cancel</button>
+              <button class="btn danger" onclick="rejectWithdrawal('${withdrawal._id}', this.parentElement.parentElement.parentElement)">Reject</button>
+              <button class="btn success" onclick="completeWithdrawal('${withdrawal._id}', this.parentElement.parentElement.parentElement)">Mark as Completed</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
     }
-    async function rejectWithdrawal(id) {
+
+    async function completeWithdrawal(id, modal) {
+      const transactionReference = modal.querySelector('#transactionRef').value;
+      const remarks = modal.querySelector('#remarks').value;
+      if (!transactionReference) {
+        alert('Transaction Reference is required');
+        return;
+      }
       try {
-        const r = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, { method: 'POST', headers: getAdminIdHeader() });
+        const r = await fetch(`${API_URL}/admin/withdrawals/complete/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify({ adminId: adminUser.userId, transactionReference, remarks })
+        });
+        const d = await r.json();
+        alert(d.message || (r.ok ? 'Withdrawal completed' : 'Failed'));
+        modal.remove();
+        loadWithdrawals();
+        refreshMetrics();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function rejectWithdrawal(id, modal) {
+      const reason = prompt('Enter reason for rejection:');
+      if (!reason) return;
+      try {
+        const r = await fetch(`${API_URL}/admin/withdrawals/reject/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify({ adminId: adminUser.userId, reason })
+        });
         const d = await r.json();
         alert(d.message || (r.ok ? 'Withdrawal rejected' : 'Failed'));
+        modal.remove();
         loadWithdrawals();
-      } catch (e) { alert(e.message); }
+        refreshMetrics();
+      } catch (e) {
+        alert(e.message);
+      }
     }
+
     loadPersisted();
   </script>
 </body>

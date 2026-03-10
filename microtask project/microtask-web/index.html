@@ -2037,14 +2037,40 @@
             if (stored) {
                 try {
                     currentUser = JSON.parse(stored);
+                    
+                    // Show dashboard, hide landing/auth
+                    const landing = document.getElementById('landingSection');
+                    const auth = document.getElementById('authSection');
+                    const dashboard = document.getElementById('dashboardSection');
+                    
+                    if (landing) landing.classList.add('hidden');
+                    if (auth) auth.classList.add('hidden');
+                    if (dashboard) dashboard.classList.remove('hidden');
+
                     updateDashboardUI();
-                    navigateDashboard('tasks');
+                    
+                    // Role-based UI
+                    const heading = document.getElementById('tasksHeading');
+                    const createBtn = document.getElementById('createTaskBtn');
+                    if (heading) heading.textContent = currentUser.role === 'taskProvider' ? 'Your Tasks' : 'Available Tasks';
+                    if (createBtn) createBtn.style.display = currentUser.role === 'taskProvider' ? 'inline-block' : 'none';
+                    
+                    const ratingsSection = document.getElementById('profileRatingsSection');
+                    if (ratingsSection) ratingsSection.style.display = currentUser.role === 'taskUser' ? 'block' : 'none';
+                    if (currentUser.role === 'taskUser') renderProfileRatings();
+                    initSettingsFromUser();
+                    if (currentUser.role === 'taskProvider') updateReputationStatsForProvider(String(currentUser.userId));
+                    
+                    showTriTabsForRole();
+                    initTriFilters();
+                    refreshUserWallet();
+                    
+                    navigateDashboard('tasks', document.querySelector('.sidebar .nav-item'));
+                    loadTasks();
                 } catch (e) {
                     console.error('Error parsing stored user:', e);
-                    window.location.href = '/login.html';
+                    localStorage.removeItem('currentUser');
                 }
-            } else {
-                window.location.href = '/login.html';
             }
         }
 
@@ -2332,7 +2358,19 @@
 
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = '/login.html';
+            currentUser = null;
+            
+            const landing = document.getElementById('landingSection');
+            const dashboard = document.getElementById('dashboardSection');
+            const auth = document.getElementById('authSection');
+            
+            if (landing) landing.classList.remove('hidden');
+            if (dashboard) dashboard.classList.add('hidden');
+            if (auth) auth.classList.add('hidden');
+            
+            // Reset fields
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
         }
 
         function openDrawer() {
@@ -2447,17 +2485,55 @@
         function saveTaskOverrides(map) {
             try { localStorage.setItem(overridesKey, JSON.stringify(map)); } catch (_) {}
         }
-        function showSubmissionModal(taskId, providerId) {
-            submissionTaskId = String(taskId);
-            submissionProviderId = String(providerId || '');
-            const m = document.getElementById('submissionModal');
-            const t = document.getElementById('submissionText');
-            const f = document.getElementById('submissionFiles');
-            const p = document.getElementById('submissionPreview');
-            if (m) m.classList.remove('hidden');
-            if (t) t.value = '';
-            if (f) f.value = '';
-            if (p) p.innerHTML = '';
+        function withdrawToBank() {
+            const amount = prompt("Enter amount to withdraw:");
+            if (!amount) return;
+
+            const parsedAmount = parseFloat(amount);
+            if (isNaN(parsedAmount) || parsedAmount <= 0) {
+                alert("Invalid amount");
+                return;
+            }
+
+            if (parsedAmount > currentUser.wallet) {
+                alert("Insufficient wallet balance");
+                return;
+            }
+
+            // Use the new withdrawal flow
+            const bankDetails = currentUser.bankDetails;
+            if (!bankDetails) {
+                alert("Please set up your bank details first.");
+                return;
+            }
+
+            fetch(`${API_URL}/wallet/withdraw`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: currentUser.userId,
+                    amount: parsedAmount,
+                    bankDetails: {
+                        accountHolderName: bankDetails.accountHolderName,
+                        accountNumber: bankDetails.accountNumber,
+                        ifscCode: bankDetails.ifscCode,
+                        bankName: bankDetails.bankName,
+                        branchName: bankDetails.branchName,
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Withdrawal requested successfully!");
+                    refreshUserWallet();
+                } else {
+                    alert(data.message || "Withdrawal failed");
+                }
+            })
+            .catch(error => {
+                alert("An error occurred: " + error.message);
+            });
         }
         function closeSubmissionModal() {
             const m = document.getElementById('submissionModal');
