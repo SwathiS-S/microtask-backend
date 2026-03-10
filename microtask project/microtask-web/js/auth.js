@@ -4,17 +4,15 @@ function chooseRole(role) {
     const auth = document.getElementById('authSection');
     if (landing) landing.classList.add('hidden');
     if (auth) auth.classList.remove('hidden');
-    const logoText = document.querySelector('#loginForm .logo h2');
-    if (logoText) {
-        logoText.innerHTML = selectedRole === 'taskProvider'
-            ? 'Login as <span style="color: var(--primary);">Task Provider</span>'
-            : 'Login as <span style="color: var(--primary);">Task Worker</span>';
+    
+    // Update labels based on role if elements exist
+    const loginTitle = document.querySelector('#loginForm h1');
+    if (loginTitle) {
+        loginTitle.innerHTML = `Task <span style="color: #3b82f6;">Nest</span>`;
     }
-    const regLogoText = document.querySelector('#registerForm .logo h2');
-    if (regLogoText) {
-        regLogoText.innerHTML = selectedRole === 'taskProvider'
-            ? 'Join as <span style="color: var(--primary);">Task Provider</span>'
-            : 'Join as <span style="color: var(--primary);">Task Worker</span>';
+    const regTitle = document.querySelector('#registerForm h1');
+    if (regTitle) {
+        regTitle.innerHTML = `Task <span style="color: #3b82f6;">Nest</span>`;
     }
 }
 
