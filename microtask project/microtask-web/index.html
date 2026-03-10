@@ -6,44 +6,54 @@
     <title>TaskNest - Micro-Task Platform</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
+        body { background: #0a0a0c; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         .hidden { display: none !important; }
+        #landingSection {
+            background: #0a0a0c;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .role-selection {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
-            padding: 80px 20px;
-            max-width: 1000px;
-            margin: 0 auto;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
         }
         .role-card {
-            background: #fff;
-            padding: 40px;
+            background: #141418;
+            padding: 50px 40px;
             border-radius: 24px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 2px solid transparent;
+            border: 1px solid #2c2c34;
+            color: #fff;
         }
         .role-card:hover {
             transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            background: #1c1c21;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
         .role-card i {
-            font-size: 48px;
-            color: var(--primary);
-            margin-bottom: 20px;
+            font-size: 56px;
+            color: #3b82f6;
+            margin-bottom: 24px;
             display: block;
         }
         .role-card h3 {
             font-size: 24px;
-            margin-bottom: 15px;
-            color: var(--text-main);
+            margin-bottom: 16px;
+            font-weight: 700;
         }
         .role-card p {
-            color: var(--text-muted);
+            color: #8e8e93;
             line-height: 1.6;
+            font-size: 15px;
         }
         
         /* Auth Split UI - Restored from image */
