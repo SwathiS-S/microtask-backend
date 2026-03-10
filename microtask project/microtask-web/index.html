@@ -11,7 +11,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
-            padding: 40px 20px;
+            padding: 80px 20px;
             max-width: 1000px;
             margin: 0 auto;
         }
@@ -145,21 +145,9 @@
     </style>
 </head>
 <body>
-    <header style="background: var(--sidebar-bg); color: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div class="logo" style="font-size: 24px; font-weight: 800;">TaskNest</div>
-        <nav>
-            <a href="policies.html" style="color: #fff; margin-right: 20px; text-decoration: none; font-weight: 600;">Pricing & Policies</a>
-        </nav>
-    </header>
-
     <main id="mainContent">
         <!-- 1. Landing Section -->
         <section id="landingSection">
-            <div style="text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: #fff;">
-                <h1 style="font-size: 48px; margin-bottom: 20px;">Your Gateway to Micro-Task Success</h1>
-                <p style="font-size: 20px; max-width: 800px; margin: 0 auto;">Choose your path to get started.</p>
-            </div>
-
             <div class="role-selection">
                 <div class="role-card" onclick="chooseRole('taskUser')">
                     <div style="font-size: 40px; margin-bottom: 15px;">🔍</div>
@@ -172,39 +160,6 @@
                     <p>Post tasks and find skilled workers to get your work done quickly.</p>
                 </div>
             </div>
-            
-            <!-- Services & Pricing Section --> 
-            <section id="services" class="landing-section"> 
-              <h2 style="text-align: center; margin-top: 60px;">Our Services & Pricing</h2> 
-              <div class="service-grid">
-                <div class="service-card"> 
-                  <h3>Task Provider</h3> 
-                  <ul> 
-                    <li>Post tasks starting from ₹100</li> 
-                    <li>Platform fee: 2% per transaction</li> 
-                    <li>Secure escrow payment protection</li> 
-                    <li>Access to verified task workers</li> 
-                  </ul> 
-                </div> 
-                <div class="service-card"> 
-                  <h3>Task Worker</h3> 
-                  <ul> 
-                    <li>Free to register and apply</li> 
-                    <li>No commission on earnings</li> 
-                    <li>Instant wallet credit after approval</li> 
-                    <li>Withdraw earnings to bank anytime</li> 
-                  </ul> 
-                </div> 
-                <div class="service-card"> 
-                  <h3>Payment Methods</h3> 
-                  <ul> 
-                    <li>UPI (GPay, PhonePe, Paytm)</li> 
-                    <li>Debit & Credit Cards</li> 
-                    <li>Net Banking</li> 
-                  </ul> 
-                </div> 
-              </div>
-            </section>
         </section>
 
         <!-- 2. Auth Section - Restored Split UI -->
@@ -288,28 +243,19 @@
             </div>
         </section>
 
-        <!-- 3. Dashboard Section -->
+        <!-- 3. Dashboard Section (will be handled by tasks.js/wallet.js etc) -->
         <section id="dashboardSection" class="hidden">
+            <!-- Dashboard content will be dynamically loaded here or toggled -->
             <div id="dashboardContainer"></div>
         </section>
     </main>
-
-    <footer> 
-      <div class="footer-contact">
-        <p>Contact: support@tasknest.com</p> 
-        <p>Phone: +91 XXXXXXXXXX</p> 
-      </div>
-      <div class="razorpay-badge"> 
-        <p>Payments Secured by</p> 
-        <img src="https://badgesgalore.com/wp-content/uploads/2021/06/razorpay.png" alt="Razorpay" height="40" /> 
-      </div> 
-    </footer> 
 
     <script>
         const API_URL = 'https://microtask-backend-bc7z.onrender.com/api'; // Primary API for web
         let selectedRole = 'taskUser';
         let currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
+        // Basic routing logic
         window.onload = () => {
             if (currentUser) {
                 showDashboard();
@@ -325,6 +271,7 @@
             document.getElementById('landingSection').classList.add('hidden');
             document.getElementById('authSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
+            // Load dashboard content
             if (typeof loadTasks === 'function') loadTasks();
         }
     </script>
