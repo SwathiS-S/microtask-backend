@@ -4,6 +4,9 @@ import '../../services/user_service.dart';
 import '../../services/api_service.dart';
 import '../wallet/bank_setup_screen.dart';
 
+import '../models/task_model.dart';
+import '../screens/create_task_screen.dart';
+import '../screens/task_detail_screen.dart';
 import '../notifications/notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -744,11 +747,13 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () async {
-          await Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(task))),
           );
-          _loadProviderDashboard();
+          if (result == true) {
+            _loadProviderDashboard();
+          }
         },
         icon: Icon(icon, size: 16),
         label: Text(label),
@@ -785,8 +790,9 @@ class _HomeScreenState extends State<HomeScreen> {
           width: double.infinity,
           height: 30,
           child: OutlinedButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(task))));
+            onPressed: () async {
+              final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(task))));
+              if (result == true) _loadProviderDashboard();
             },
             child: const Text('View Case', style: TextStyle(fontSize: 12)),
           ),
@@ -835,7 +841,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(task)))),
+        onPressed: () async {
+          final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(task))));
+          if (result == true) _loadEarnerDashboard();
+        },
         style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
         child: const Text('Apply Now'),
       ),
@@ -863,7 +872,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(task)))),
+        onPressed: () async {
+          final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(task))));
+          if (result == true) _loadEarnerDashboard();
+        },
         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E3A5F), foregroundColor: Colors.white),
         child: Text(label),
       ),
@@ -931,6 +943,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
   Widget _buildTransactionItem(Map<String, dynamic> transaction) {
     return Container(

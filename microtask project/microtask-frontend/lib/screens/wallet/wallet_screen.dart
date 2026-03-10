@@ -4,6 +4,7 @@ import '../../services/api_service.dart';
 import 'add_money_screen.dart';
 import 'bank_setup_screen.dart';
 import 'withdrawal_screen.dart';
+import 'withdrawal_history_screen.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -15,10 +16,7 @@ class WalletScreen extends StatefulWidget {
 class _WalletScreenState extends State<WalletScreen> {
   bool _isLoading = false;
   double _balance = 0;
-  double _escrowBalance = 0;
   double _pendingWithdrawal = 0;
-  double _totalEarned = 0;
-  double _totalSpent = 0;
   List<dynamic> _transactions = [];
   Map<String, dynamic>? _bankAccount;
 
@@ -36,7 +34,7 @@ class _WalletScreenState extends State<WalletScreen> {
       if (balRes != null && balRes is Map && balRes['success']) {
         setState(() {
           _balance = (balRes['balance'] ?? 0).toDouble();
-          _escrowBalance = (balRes['escrowBalance'] ?? 0).toDouble();
+          _pendingWithdrawal = (balRes['pendingWithdrawal'] ?? 0).toDouble();
         });
       }
 
@@ -45,13 +43,6 @@ class _WalletScreenState extends State<WalletScreen> {
       if (txRes != null && txRes is Map && txRes['success']) {
         setState(() {
           _transactions = txRes['transactions'];
-          // Calculate metrics
-          _totalEarned = _transactions
-              .where((t) => t['type'] == 'credit')
-              .fold(0.0, (sum, t) => sum + (t['amount'] ?? 0));
-          _totalSpent = _transactions
-              .where((t) => t['type'] == 'escrow_hold')
-              .fold(0.0, (sum, t) => sum + (t['amount'] ?? 0));
         });
       }
 
@@ -60,17 +51,6 @@ class _WalletScreenState extends State<WalletScreen> {
       if (bankRes != null && bankRes is Map && bankRes['success']) {
         setState(() {
           _bankAccount = bankRes['bankAccount'];
-        });
-      }
-
-      // Load Withdrawal History for pending amount
-      final withRes = await ApiService.get('/wallet/withdrawal-history/${UserService.userId}');
-      if (withRes != null && withRes is Map && withRes['success']) {
-        final history = withRes['history'] as List;
-        setState(() {
-          _pendingWithdrawal = history
-              .where((w) => w['status'] == 'pending' || w['status'] == 'processing')
-              .fold(0.0, (sum, w) => sum + (w['amount'] ?? 0));
         });
       }
     } catch (e) {
@@ -92,14 +72,13 @@ class _WalletScreenState extends State<WalletScreen> {
 
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => WithdrawalScreen(balance: _balance)),
+      MaterialPageRoute(builder: (context) => WithdrawalScreen(balance: _balance, bankAccount: _bankAccount!)),
     );
     if (result == true) _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isProvider = UserService.isTaskProvider;
     final bool hasBank = _bankAccount != null;
 
     return Scaffold(
@@ -108,6 +87,7 @@ class _WalletScreenState extends State<WalletScreen> {
         backgroundColor: const Color(0xFF1E3A5F),
         title: const Text('My Wallet', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
+          IconButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WithdrawalHistoryScreen())), icon: const Icon(Icons.history)),
           IconButton(onPressed: _loadData, icon: const Icon(Icons.refresh)),
         ],
       ),
@@ -121,10 +101,7 @@ class _WalletScreenState extends State<WalletScreen> {
               if (!hasBank)
                 _buildBankPrompt(),
               
-              if (isProvider) 
-                _buildProviderHeader()
-              else 
-                _buildUserHeader(),
+              _buildUserHeader(),
 
               const SizedBox(height: 24),
               const Text('Transaction History', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),

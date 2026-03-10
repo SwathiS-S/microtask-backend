@@ -4,7 +4,8 @@ import '../../services/api_service.dart';
 
 class WithdrawalScreen extends StatefulWidget {
   final double balance;
-  const WithdrawalScreen({super.key, required this.balance});
+  final Map<String, dynamic> bankAccount;
+  const WithdrawalScreen({super.key, required this.balance, required this.bankAccount});
 
   @override
   State<WithdrawalScreen> createState() => _WithdrawalScreenState();
@@ -13,61 +14,65 @@ class WithdrawalScreen extends StatefulWidget {
 class _WithdrawalScreenState extends State<WithdrawalScreen> {
   final _amountController = TextEditingController();
   bool _isLoading = false;
-  Map<String, dynamic>? _bankAccount;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadBankDetails();
-  }
-
-  Future<void> _loadBankDetails() async {
-    setState(() => _isLoading = true);
-    try {
-      final res = await ApiService.get('/bank/details/${UserService.userId}');
-      if (res != null && res is Map && res['success']) {
-        setState(() {
-          _bankAccount = res['bankAccount'];
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading bank details: $e');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
 
   Future<void> _requestWithdrawal() async {
     final amount = double.tryParse(_amountController.text);
+
+    // 1. Fetch FRESH balance from API before validation
+    final balRes = await ApiService.get('/wallet/balance/${UserService.userId}');
+    if (balRes == null || !(balRes is Map) || !balRes['success']) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not refresh balance. Please try again.')),
+      );
+      return;
+    }
+    final freshBalance = (balRes['balance'] ?? 0).toDouble();
+    print('Fresh balance from API: $freshBalance');
+
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid amount')));
       return;
     }
-    if (amount > widget.balance) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Insufficient balance')));
+
+    final double minimumWithdrawal = freshBalance < 100 ? 1 : 10;
+    if (amount < minimumWithdrawal) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Minimum withdrawal amount is ₹$minimumWithdrawal')));
       return;
     }
-    if (_bankAccount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please connect bank account first')));
+    if (amount > freshBalance) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Insufficient balance')));
       return;
     }
 
     setState(() => _isLoading = true);
+
+    print('=== WITHDRAWAL REQUEST ===');
+    print('User ID: ${UserService.userId}');
+    print('Amount: $amount');
+    print('Wallet Balance: ${widget.balance}');
+    print('==========================');
+
     try {
       final res = await ApiService.post('/wallet/withdraw', {
         'userId': UserService.userId,
         'amount': amount,
-        'bankAccountId': _bankAccount!['_id'],
+        'bankDetails': {
+          'accountHolderName': widget.bankAccount['accountHolderName'],
+          'accountNumber': widget.bankAccount['accountNumber'],
+          'ifscCode': widget.bankAccount['ifscCode'],
+          'bankName': widget.bankAccount['bankName'],
+          'branchName': widget.bankAccount['branchName'],
+        }
       });
 
-      if (res != null && res is Map && res['success']) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Withdrawal Requested ✅')),
-        );
+      if (res['success']) {
         Navigator.pop(context, true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ Withdrawal Requested!')),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res?['message'] ?? 'Withdrawal failed')),
+          SnackBar(content: Text(res['message'] ?? 'Withdrawal failed')),
         );
       }
     } catch (e) {
@@ -81,70 +86,76 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Withdraw Funds')),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Available Balance', style: TextStyle(color: Colors.grey)),
+            Text(
+              '₹${widget.balance.toStringAsFixed(2)}',
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Available Balance', style: TextStyle(color: Colors.grey)),
                 Text(
-                  '₹${widget.balance.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
+                  'Minimum Withdrawal: ₹${widget.balance < 100 ? 1 : 10}',
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
-                const SizedBox(height: 32),
-                TextField(
-                  controller: _amountController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Enter amount to withdraw',
-                    prefixText: '₹ ',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                if (_bankAccount != null)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Connected Bank Account', style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 8),
-                        Text('Name: ${_bankAccount!['accountHolderName']}'),
-                        Text('Bank: ${_bankAccount!['bankName'] ?? 'N/A'}'),
-                        Text('A/C: ****${_bankAccount!['accountNumber'].toString().substring(_bankAccount!['accountNumber'].toString().length - 4)}'),
-                      ],
-                    ),
-                  ),
-                const SizedBox(height: 32),
-                const Text(
-                  'Expected time: 2-3 business days',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _requestWithdrawal,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Confirm Withdrawal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
+                Text(
+                  'Maximum Withdrawal: ₹${widget.balance.toStringAsFixed(2)}',
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 32),
+            TextField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Enter amount to withdraw',
+                prefixText: '₹ ',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Bank Account', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text('Name: ${widget.bankAccount['accountHolderName']}'),
+                  Text('Bank: ${widget.bankAccount['bankName'] ?? 'N/A'}'),
+                  Text('A/C: ****${widget.bankAccount['accountNumber'].toString().substring(widget.bankAccount['accountNumber'].toString().length - 4)}'),
+                ],
+              ),
+            ),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _requestWithdrawal,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Request Withdrawal', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
