@@ -2485,7 +2485,7 @@
         function saveTaskOverrides(map) {
             try { localStorage.setItem(overridesKey, JSON.stringify(map)); } catch (_) {}
         }
-        function withdrawToBank() {
+        async function withdrawToBank() {
             const amount = prompt("Enter amount to withdraw:");
             if (!amount) return;
 
@@ -2495,8 +2495,16 @@
                 return;
             }
 
-            if (parsedAmount > currentUser.wallet) {
-                alert("Insufficient wallet balance");
+            // Fetch fresh balance from the API
+            const balRes = await fetch(`${API_URL}/wallet/balance/${currentUser.userId}`).then(r => r.json());
+            if (!balRes.success) {
+                alert("Could not fetch wallet balance. Please try again.");
+                return;
+            }
+
+            const freshBalance = balRes.balance;
+            if (parsedAmount > freshBalance) {
+                alert(`Insufficient wallet balance. Your current balance is ₹${freshBalance}.`);
                 return;
             }
 
@@ -5046,8 +5054,14 @@
         }
 
         function showWithdrawModal() {
-            const amount = prompt('Enter amount to withdraw (₹):');
+            const min = currentUser.wallet < 100 ? 1 : 10;
+            const amount = prompt(`Enter amount to withdraw (₹):\nMinimum: ₹${min}\nMaximum: ₹${currentUser.wallet}`);
             if (!amount || isNaN(amount) || Number(amount) <= 0) return;
+            
+            if (Number(amount) < min) {
+                alert(`Minimum withdrawal is ₹${min}`);
+                return;
+            }
             if (Number(amount) > currentUser.wallet) {
                 alert('Insufficient balance');
                 return;
