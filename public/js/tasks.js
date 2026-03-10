@@ -1,100 +1,141 @@
 async function loadTasks() {
-    if (!currentUser) return;
-    const isProvider = currentUser.role === 'taskProvider';
-    const userId = currentUser.userId;
+    const grid = document.getElementById('task-grid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="loading">Loading tasks...</div>';
 
     try {
         const response = await fetch(`${API_URL}/tasks`);
         const tasks = await response.json();
 
-        const taskGrid = document.getElementById('task-grid');
-        if (!taskGrid) return;
-        taskGrid.innerHTML = '';
+        if (!tasks || tasks.length === 0) {
+            grid.innerHTML = '<div class="no-tasks">No tasks available at the moment.</div>';
+            return;
+        }
 
-        tasks.forEach(task => {
-            const isMyTask = String(task.acceptedBy && (task.acceptedBy._id || task.acceptedBy)) === String(userId);
-            const canApply = !isProvider && !isMyTask && isVisibleTask(task);
-
+        grid.innerHTML = tasks.map(task => {
+            const isMyTask = task.acceptedBy === currentUser.userId;
             let statusHTML = '';
-            if (isMyTask) {
-                if (task.status === 'submitted') {
-                    statusHTML = `<div class="task-status status-under-review">Work submitted ✅</div>`;
-                } else if (task.status === 'reviewed') {
-                    statusHTML = `<div class="task-status status-under-review">Under review ⏳</div>`;
-                } else if (task.status === 'pending_release') {
-                    statusHTML = `<div class="task-status status-under-review">Payment being processed ⏳</div>`;
-                } else if (task.status === 'completed') {
-                    statusHTML = `<div class="task-status status-completed">₹${task.amount} received! <button class="btn-small" onclick="showWallet()">Withdraw</button></div>`;
-                } else {
-                    statusHTML = `<div class="task-status status-inprogress">In Progress</div>`;
-                }
+            
+            if (task.status === 'pending_release') {
+                statusHTML = '<span class="status-pill pending">⏳ Payment being processed by admin</span>';
+            } else if (task.status === 'completed') {
+                statusHTML = `<span class="status-pill completed">✅ ₹${task.amount} received!</span>`;
             } else {
-                statusHTML = `<div class="task-status status-open">Open</div>`;
+                statusHTML = `<span class="status-pill ${task.status}">${task.status}</span>`;
             }
 
-            const taskCard = `
+            return `
                 <div class="task-card-new">
                     <div class="task-card-header">
                         <h3>${task.title}</h3>
-                        <div class="task-card-price">₹${task.amount}</div>
+                        <span class="price-tag">₹${task.amount}</span>
                     </div>
-                    <p class="task-card-description">${task.description}</p>
-                    <div class="task-card-tags">
-                        ${task.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}
-                    </div>
+                    <p>${task.description}</p>
                     <div class="task-card-footer">
                         ${statusHTML}
-                        ${canApply ? `<button class="btn-small" onclick="applyForTask('${task._id}')">Apply Now</button>` : ''}
+                        ${!isMyTask && task.status === 'open' ? `<button onclick="applyForTask('${task._id}')" class="btn-primary">Apply Now</button>` : ''}
                     </div>
                 </div>
             `;
-            taskGrid.innerHTML += taskCard;
-        });
+        }).join('');
     } catch (error) {
-        console.error('Error loading tasks:', error);
+        grid.innerHTML = '<div class="error">Failed to load tasks.</div>';
     }
 }
 
 async function loadProviderTasks() {
-    if (!currentUser || currentUser.role !== 'taskProvider') return;
+    const grid = document.getElementById('provider-tasks-grid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="loading">Loading your tasks...</div>';
 
     try {
         const response = await fetch(`${API_URL}/tasks/provider/${currentUser.userId}`);
         const tasks = await response.json();
 
-        const providerTasksGrid = document.getElementById('provider-tasks-grid');
-        if (!providerTasksGrid) return;
-        providerTasksGrid.innerHTML = '';
+        if (!tasks || tasks.length === 0) {
+            grid.innerHTML = '<div class="no-tasks">You haven\'t posted any tasks yet.</div>';
+            return;
+        }
 
-        tasks.forEach(task => {
-            const tid = task._id;
+        grid.innerHTML = tasks.map(task => {
+            let statusHTML = '';
             let actionButtons = '';
-            if (task.status === 'submitted') {
-                actionButtons = `<a class="btn-small btn-secondary" href="${API_URL}${task.finalFile.path}" target="_blank">View Final Work</a>`;
-            } else if (task.status === 'reviewed') {
-                actionButtons = `<button class="btn-small" data-action="approve-work" data-id="${tid}">Approve Work</button>
-                               <button class="btn-small btn-danger" data-action="dispute" data-id="${tid}">Dispute</button>`;
-            } else if (task.status === 'pending_release') {
-                actionButtons = `<span>Waiting for admin release ⏳</span>`;
+
+            if (task.status === 'pending_release') {
+                statusHTML = '<span class="status-pill pending">⏳ Waiting for admin to release payment</span>';
             } else if (task.status === 'completed') {
-                actionButtons = `<span>Completed ✅</span>`;
+                statusHTML = '<span class="status-pill completed">✅ Task Completed</span>';
+            } else {
+                statusHTML = `<span class="status-pill ${task.status}">${task.status}</span>`;
             }
 
-            const taskCard = `
+            if (task.status === 'reviewed') {
+                actionButtons = `<button onclick="approveWork('${task._id}', this)" class="btn-primary">Approve Work</button>`;
+            }
+
+            return `
                 <div class="task-card-new">
                     <div class="task-card-header">
                         <h3>${task.title}</h3>
-                        <div class="task-card-price">₹${task.amount}</div>
+                        <span class="price-tag">₹${task.amount}</span>
                     </div>
-                    <p class="task-card-description">${task.description}</p>
+                    <p>${task.description}</p>
                     <div class="task-card-footer">
+                        ${statusHTML}
                         ${actionButtons}
                     </div>
                 </div>
             `;
-            providerTasksGrid.innerHTML += taskCard;
-        });
+        }).join('');
     } catch (error) {
-        console.error('Error loading provider tasks:', error);
+        grid.innerHTML = '<div class="error">Failed to load provider tasks.</div>';
+    }
+}
+
+function showSection(sectionId) {
+    // Hide all sections
+    document.getElementById('browse-section').classList.add('hidden');
+    document.getElementById('provider-section').classList.add('hidden');
+    document.getElementById('wallet-view').classList.add('hidden');
+    
+    // Show requested section
+    if (sectionId === 'browse') {
+        document.getElementById('browse-section').classList.remove('hidden');
+        loadTasks();
+    } else if (sectionId === 'my-tasks') {
+        // For workers, this might show their accepted tasks
+        // For now, let's just reuse provider section if they are provider
+        if (currentUser.role === 'taskProvider') {
+            document.getElementById('provider-section').classList.remove('hidden');
+            loadProviderTasks();
+        } else {
+            // Show worker's tasks
+            document.getElementById('browse-section').classList.remove('hidden');
+        }
+    } else if (sectionId === 'wallet') {
+        showWallet();
+    }
+    
+    // Update sidebar active state
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    // This part would need more specific logic to match sectionId to nav items
+}
+
+async function applyForTask(taskId) {
+    try {
+        const response = await fetch(`${API_URL}/tasks/apply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ taskId, userId: currentUser.userId })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Application submitted!');
+            loadTasks();
+        } else {
+            alert(data.message || 'Application failed');
+        }
+    } catch (error) {
+        alert('Error applying for task');
     }
 }
