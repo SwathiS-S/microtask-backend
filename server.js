@@ -181,7 +181,7 @@ async function checkDeadlines() {
 // Run every 24 hours
 setInterval(checkDeadlines, 24 * 60 * 60 * 1000);
 
-// START SERVER
+// Force redeploy
 const PORT = process.env.PORT || 5000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const mongoose = require('mongoose');
