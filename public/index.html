@@ -5,75 +5,213 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskNest - Micro-Task Platform</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .hidden { display: none !important; }
+        .role-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 40px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .role-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
+        }
+        .role-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+        }
+        .role-card i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: block;
+        }
+        .role-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+        .role-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        /* Auth Form Styles */
+        .auth-container {
+            max-width: 450px;
+            margin: 60px auto;
+            padding: 40px;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main); }
+        .form-group input { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            font-size: 16px; 
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .auth-toggle {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-muted);
+        }
+        .auth-toggle a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
     <header style="background: var(--sidebar-bg); color: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
         <div class="logo" style="font-size: 24px; font-weight: 800;">TaskNest</div>
         <nav>
             <a href="policies.html" style="color: #fff; margin-right: 20px; text-decoration: none; font-weight: 600;">Pricing & Policies</a>
-            <a href="login.html" style="background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700;">Login / Register</a>
         </nav>
     </header>
 
-    <main>
-        <!-- Landing Hero Section (simplified) -->
-        <section style="text-align: center; padding: 100px 20px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: #fff;">
-            <h1 style="font-size: 48px; margin-bottom: 20px;">Your Gateway to Micro-Task Success</h1>
-            <p style="font-size: 20px; max-width: 800px; margin: 0 auto 40px;">Connect with businesses or find work. Earn rewards for completing tasks securely.</p>
-            <a href="login.html" style="background: #fff; color: var(--primary); padding: 15px 40px; border-radius: 12px; font-size: 18px; font-weight: 700; text-decoration: none;">Get Started</a>
+    <main id="mainContent">
+        <!-- 1. Landing Section -->
+        <section id="landingSection">
+            <div style="text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: #fff;">
+                <h1 style="font-size: 48px; margin-bottom: 20px;">Your Gateway to Micro-Task Success</h1>
+                <p style="font-size: 20px; max-width: 800px; margin: 0 auto;">Choose your path to get started.</p>
+            </div>
+
+            <div class="role-selection">
+                <div class="role-card" onclick="chooseRole('taskUser')">
+                    <div style="font-size: 40px; margin-bottom: 15px;">🔍</div>
+                    <h3>Looking for a task?</h3>
+                    <p>Browse and complete tasks to earn rewards directly to your wallet.</p>
+                </div>
+                <div class="role-card" onclick="chooseRole('taskProvider')">
+                    <div style="font-size: 40px; margin-bottom: 15px;">💼</div>
+                    <h3>Hiring an employee?</h3>
+                    <p>Post tasks and find skilled workers to get your work done quickly.</p>
+                </div>
+            </div>
+            
+            <!-- Services & Pricing Section --> 
+            <section id="services" class="landing-section"> 
+              <h2 style="text-align: center; margin-top: 60px;">Our Services & Pricing</h2> 
+              <div class="service-grid">
+                <div class="service-card"> 
+                  <h3>Task Provider</h3> 
+                  <ul> 
+                    <li>Post tasks starting from ₹100</li> 
+                    <li>Platform fee: 2% per transaction</li> 
+                    <li>Secure escrow payment protection</li> 
+                    <li>Access to verified task workers</li> 
+                  </ul> 
+                </div> 
+                <div class="service-card"> 
+                  <h3>Task Worker</h3> 
+                  <ul> 
+                    <li>Free to register and apply</li> 
+                    <li>No commission on earnings</li> 
+                    <li>Instant wallet credit after approval</li> 
+                    <li>Withdraw earnings to bank anytime</li> 
+                  </ul> 
+                </div> 
+                <div class="service-card"> 
+                  <h3>Payment Methods</h3> 
+                  <ul> 
+                    <li>UPI (GPay, PhonePe, Paytm)</li> 
+                    <li>Debit & Credit Cards</li> 
+                    <li>Net Banking</li> 
+                  </ul> 
+                </div> 
+              </div>
+            </section>
         </section>
 
-        <!-- Services & Pricing Section --> 
-        <section id="services" class="landing-section"> 
-          <h2>Our Services & Pricing</h2> 
-        
-          <div class="service-grid">
-            <div class="service-card"> 
-              <h3>Task Provider</h3> 
-              <ul> 
-                <li>Post tasks starting from ₹100</li> 
-                <li>Platform fee: 2% per transaction</li> 
-                <li>Secure escrow payment protection</li> 
-                <li>Access to verified task workers</li> 
-                <li>Full refund if no worker found</li> 
-              </ul> 
-            </div> 
-          
-            <div class="service-card"> 
-              <h3>Task Worker</h3> 
-              <ul> 
-                <li>Free to register and apply</li> 
-                <li>No commission on earnings</li> 
-                <li>Instant wallet credit after approval</li> 
-                <li>Withdraw earnings to bank anytime</li> 
-                <li>Payment secured in escrow</li> 
-              </ul> 
-            </div> 
-          
-            <div class="service-card"> 
-              <h3>Payment Methods</h3> 
-              <ul> 
-                <li>UPI (GPay, PhonePe, Paytm)</li> 
-                <li>Debit & Credit Cards</li> 
-                <li>Net Banking</li> 
-                <li>All payments secured by Razorpay</li> 
-              </ul> 
-            </div> 
-          </div>
-        </section> 
-        
-        <!-- How Payments Work Section --> 
-        <section id="payments" class="landing-section payments-section" style="background: var(--content-bg);"> 
-          <h2>How Payments Work</h2> 
-          <ol> 
-            <li>Provider posts task with budget (min ₹100)</li> 
-            <li>Provider pays budget to secure escrow</li> 
-            <li>Worker completes the task</li> 
-            <li>Provider reviews and approves work</li> 
-            <li>Payment released from escrow to worker</li> 
-            <li>Worker withdraws to bank account</li> 
-          </ol> 
-        </section> 
+        <!-- 2. Auth Section -->
+        <section id="authSection" class="hidden">
+            <div class="auth-container">
+                <!-- Login Form -->
+                <div id="loginForm">
+                    <div class="logo" style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="font-size: 28px; color: var(--text-main);">Login to <span style="color: var(--primary);">TaskNest</span></h2>
+                        <p style="color: var(--text-muted); margin-top: 10px;">Find tasks and earn rewards</p>
+                    </div>
+                    <div id="loginMessage"></div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button class="btn-primary" onclick="handleLogin()">Login</button>
+                    <div class="auth-toggle">
+                        Don't have an account? <a href="javascript:void(0)" onclick="toggleForms()">Register</a>
+                    </div>
+                    <div class="auth-toggle" style="margin-top: 10px;">
+                        <a href="javascript:void(0)" onclick="backToLanding()">← Back to Role Selection</a>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <div id="registerForm" class="hidden">
+                    <div class="logo" style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="font-size: 28px; color: var(--text-main);">Join <span style="color: var(--primary);">TaskNest</span></h2>
+                        <p style="color: var(--text-muted); margin-top: 10px;">Create an account to find tasks</p>
+                    </div>
+                    <div id="registerMessage"></div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="regName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="regEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="regPassword" placeholder="Create a password" required>
+                    </div>
+                    <button class="btn-primary" onclick="handleRegister()">Create Account</button>
+                    <div class="auth-toggle">
+                        Already have an account? <a href="javascript:void(0)" onclick="toggleForms()">Login</a>
+                    </div>
+                    <div class="auth-toggle" style="margin-top: 10px;">
+                        <a href="javascript:void(0)" onclick="backToLanding()">← Back to Role Selection</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Dashboard Section (will be handled by tasks.js/wallet.js etc) -->
+        <section id="dashboardSection" class="hidden">
+            <!-- Dashboard content will be dynamically loaded here or toggled -->
+            <div id="dashboardContainer"></div>
+        </section>
     </main>
 
     <footer> 
@@ -81,25 +219,37 @@
         <p>Contact: support@tasknest.com</p> 
         <p>Phone: +91 XXXXXXXXXX</p> 
       </div>
-
-      <div class="footer-links" style="margin-bottom: 20px;">
-        <a href="policies.html" style="color: #cfe0ff; text-decoration: none; margin: 0 10px;">Privacy Policy</a> |
-        <a href="policies.html" style="color: #cfe0ff; text-decoration: none; margin: 0 10px;">Terms of Service</a> |
-        <a href="policies.html" style="color: #cfe0ff; text-decoration: none; margin: 0 10px;">Refund Policy</a>
-      </div>
-
-      <!-- Razorpay badge in footer --> 
       <div class="razorpay-badge"> 
         <p>Payments Secured by</p> 
-        <img 
-          src="https://badgesgalore.com/wp-content/uploads/2021/06/razorpay.png" 
-          alt="Razorpay" 
-          height="40" 
-        /> 
+        <img src="https://badgesgalore.com/wp-content/uploads/2021/06/razorpay.png" alt="Razorpay" height="40" /> 
       </div> 
-      <p style="margin-top: 20px; font-size: 14px; color: #8e8e93;">&copy; 2026 TaskNest. All rights reserved.</p>
     </footer> 
 
+    <script>
+        const API_URL = window.location.origin + '/api';
+        let selectedRole = 'taskUser';
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        // Basic routing logic
+        window.onload = () => {
+            if (currentUser) {
+                showDashboard();
+            }
+        };
+
+        function backToLanding() {
+            document.getElementById('landingSection').classList.remove('hidden');
+            document.getElementById('authSection').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('landingSection').classList.add('hidden');
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            // Load dashboard content
+            if (typeof loadTasks === 'function') loadTasks();
+        }
+    </script>
     <script src="js/auth.js"></script>
     <script src="js/tasks.js"></script>
     <script src="js/payment.js"></script>
