@@ -5083,7 +5083,7 @@
             if (m) m.remove();
         }
 
-        function processWithdrawal() {
+        async function processWithdrawal() {
             const amountEl = document.getElementById('withdrawAmount');
             if (!amountEl) return;
 
@@ -5104,10 +5104,36 @@
                 return;
             }
 
+            // Fetch bank details first
+            let bankDetails = {};
+            try {
+                const res = await fetch(`${API_URL}/wallet/details/${currentUser.userId}`);
+                const data = await res.json();
+                if (data.success && data.account) {
+                    bankDetails = data.account;
+                } else {
+                    alert('Bank account details not found. Please set up your bank account first.');
+                    return;
+                }
+            } catch (e) {
+                alert('Error fetching bank details: ' + e.message);
+                return;
+            }
+
             fetch(`${API_URL}/wallet/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: currentUser.userId, amount: Number(amount) })
+                body: JSON.stringify({ 
+                    userId: currentUser.userId, 
+                    amount: Number(amount),
+                    bankDetails: {
+                        accountHolderName: bankDetails.accountHolderName,
+                        accountNumber: bankDetails.bankAccountNumber,
+                        ifscCode: bankDetails.ifscCode,
+                        bankName: bankDetails.bankName || 'N/A',
+                        branchName: bankDetails.branchName || 'N/A'
+                    }
+                })
             }).then(r=>r.json()).then(d=>{
                 alert(d.message || (d.success ? 'Withdrawal successful' : 'Failed'));
                 closeWithdrawModal();
