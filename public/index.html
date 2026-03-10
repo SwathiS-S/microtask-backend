@@ -5055,8 +5055,45 @@
 
         function showWithdrawModal() {
             const min = currentUser.wallet < 100 ? 1 : 10;
-            const amount = prompt(`Enter amount to withdraw (₹):\nMinimum: ₹${min}\nMaximum: ₹${currentUser.wallet}`);
-            if (!amount || isNaN(amount) || Number(amount) <= 0) return;
+            const html = `
+                <div id="withdrawModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeWithdrawModal()">&times;</span>
+                        <h2>Withdraw Funds</h2>
+                        <p>Enter the amount you want to withdraw.</p>
+                        <div class="form-group">
+                            <label>Amount to withdraw (₹):</label>
+                            <input id="withdrawAmount" type="number" placeholder="Enter amount">
+                        </div>
+                        <div style="font-size:12px; color:#888; margin-top:-8px; margin-bottom:16px;">
+                            Minimum: ₹${min}, Maximum: ₹${currentUser.wallet}
+                        </div>
+                        <div style="display:flex; gap:12px; margin-top:24px;">
+                            <button class="btn-small" style="flex:1;" onclick="processWithdrawal()">Withdraw</button>
+                            <button class="btn-small btn-secondary" style="flex:1;" onclick="closeWithdrawModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        function closeWithdrawModal() {
+            const m = document.getElementById('withdrawModal');
+            if (m) m.remove();
+        }
+
+        function processWithdrawal() {
+            const amountEl = document.getElementById('withdrawAmount');
+            if (!amountEl) return;
+
+            const amount = amountEl.value;
+            const min = currentUser.wallet < 100 ? 1 : 10;
+
+            if (!amount || isNaN(amount) || Number(amount) <= 0) {
+                alert('Please enter a valid amount.');
+                return;
+            }
             
             if (Number(amount) < min) {
                 alert(`Minimum withdrawal is ₹${min}`);
@@ -5067,12 +5104,13 @@
                 return;
             }
 
-            fetch(`${API_URL}/users/withdraw-money`, {
+            fetch(`${API_URL}/wallet/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: currentUser.userId, amount: Number(amount) })
             }).then(r=>r.json()).then(d=>{
                 alert(d.message || (d.success ? 'Withdrawal successful' : 'Failed'));
+                closeWithdrawModal();
                 refreshUserWallet();
             }).catch(e=>alert(e.message));
         }
