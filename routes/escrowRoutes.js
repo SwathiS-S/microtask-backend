@@ -58,15 +58,42 @@ router.post('/admin/escrow/release/:taskId',
      console.log('acceptedBy:', task.acceptedBy); 
      console.log('amount:', task.amount); 
  
-     // Get worker ID 
-     const workerId = task.acceptedBy 
-       || task.assignedTo; 
+     console.log('Full task object:', JSON.stringify(task)); 
+ 
+     let workerId = task.acceptedBy 
+       || task.assignedTo 
+       || task.assignedUser 
+       || task.workerId 
+       || task.selectedWorker; 
+ 
+     console.log('workerId found:', workerId); 
  
      if (!workerId) { 
-       return res.status(400).json({ 
-         success: false, 
-         message: 'No worker found' 
-       }); 
+       // Search in applications array 
+       const acceptedApp = task.applications?.find( 
+         app => app.status === 'accepted' 
+           || app.status === 'ACCEPTED' 
+           || app.isAccepted === true 
+       ); 
+ 
+       console.log('Accepted application:', acceptedApp); 
+ 
+       if (!acceptedApp) { 
+         return res.status(400).json({ 
+           success: false, 
+           message: 'No worker found in task' 
+         }); 
+       } 
+ 
+       const workerIdFromApp = acceptedApp.userId 
+         || acceptedApp.user 
+         || acceptedApp.workerId; 
+ 
+       console.log('Worker from application:', workerIdFromApp); 
+ 
+       // Use worker from application 
+       // Continue with workerIdFromApp 
+       workerId = workerIdFromApp; 
      } 
  
      // Get escrow 
