@@ -422,52 +422,85 @@
     }
 
     // Fix 5: Admin dashboard show pending escrows
-    async function loadPendingEscrows() {
-      const container = document.getElementById('pendingEscrows');
-      container.innerHTML = '<p>Loading pending releases...</p>';
-      try {
-        const response = await fetch(`${API_URL}/escrow/admin/escrow/pending`, { headers: getAdminIdHeader() });
-        const data = await response.json();
-        console.log('Pending escrows:', data);
+    async function loadPendingEscrows() { 
+   try { 
+     console.log('Loading pending escrows...'); 
+ 
+     const response = await fetch( 
+       `${API_URL}/escrow/admin/escrow/pending` 
+     ); 
+     const data = await response.json(); 
+ 
+     console.log('Pending escrows data:', data); 
+ 
+     const container = document.getElementById( 
+       'pendingEscrowList' 
+     ) || document.getElementById( 
+       'escrowReleases' 
+     ) || document.getElementById( 
+       'pendingReleases' 
+     ) || document.getElementById( 
+       'pendingEscrows' 
+     ); 
+ 
+     if (!container) { 
+       console.log('Container not found!'); 
+       return; 
+     } 
+ 
+     if (!data.tasks || data.tasks.length === 0) { 
+       container.innerHTML = '<p>No pending releases</p>'; 
+       return; 
+     } 
+ 
+     container.innerHTML = data.tasks.map(task => ` 
+       <div style="border:1px solid #ccc; 
+         padding:10px; margin:10px 0;"> 
+         <p><b>Task:</b> ${task.title}</p> 
+         <p><b>Provider:</b> 
+           ${task.postedBy?.name || task.postedBy}</p> 
+         <p><b>Worker:</b> 
+           ${task.acceptedBy?.name || task.acceptedBy}</p> 
+         <p><b>Amount:</b> 
+           ₹${task.workerAmount || task.amount}</p> 
+         <p><b>Status:</b> ${task.status}</p> 
+         <button onclick="releaseEscrow('${task._id}')"> 
+           ✅ Release to Worker 
+         </button> 
+       </div> 
+     `).join(''); 
+ 
+   } catch (error) { 
+     console.log('Load escrows error:', error); 
+   } 
+ } 
+ 
+ async function releaseEscrow(taskId, btn) { 
+   if (!confirm('Release payment to worker?')) return; 
+ 
+   try { 
+     const response = await fetch( 
+       `${API_URL}/escrow/admin/escrow/release/${taskId}`, 
+       { method: 'POST' } 
+     ); 
+     const data = await response.json(); 
+ 
+     console.log('Release response:', data); 
+ 
+     if (data.success) { 
+       alert('✅ Payment released to worker!'); 
+       loadPendingEscrows(); 
+     } else { 
+       alert('❌ ' + data.message); 
+     } 
+   } catch (error) { 
+     alert('Error: ' + error.message); 
+   } 
+ } 
+ 
+ // Call on page load 
+ loadPendingEscrows(); 
 
-        if (!data.tasks || data.tasks.length === 0) {
-          container.innerHTML = '<div class="panel-body" style="text-align:center; color:var(--muted); padding:40px;">No pending releases</div>';
-          return;
-        }
-
-        container.innerHTML = data.tasks.map(task => `
-          <div class="panel-body" style="border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <div style="font-weight: 700; font-size: 16px;">${task.title}</div>
-              <div style="color: var(--muted); font-size: 13px;">Amount: <span style="color: var(--success); font-weight: 700;">₹${task.escrowAmount || task.amount}</span> | Status: <span class="badge">${task.status}</span></div>
-            </div>
-            <button class="btn success" onclick="releaseEscrow('${task._id}')">
-              Release to Worker ✅
-            </button>
-          </div>
-        `).join('');
-      } catch (e) {
-        container.innerHTML = `<p style="color:var(--danger); padding:20px;">Error: ${e.message}</p>`;
-      }
-    }
-
-    async function releaseEscrow(taskId) {
-      if (!confirm('Release payment to worker?')) return;
-      try {
-        const response = await fetch(`${API_URL}/escrow/admin/escrow/release/${taskId}`, { 
-          method: 'POST',
-          headers: getAdminIdHeader()
-        });
-        const data = await response.json();
-        if (data.success) {
-          alert('Payment released successfully! ✅');
-          loadPendingEscrows();
-          refreshMetrics();
-        } else {
-          alert('Error: ' + data.message);
-        }
-      } catch (e) { alert('Error: ' + e.message); }
-    }
 
     loadPersisted();
   </script>

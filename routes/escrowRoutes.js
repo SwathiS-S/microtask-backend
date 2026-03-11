@@ -6,33 +6,31 @@ const Task = require('../models/Task');
 const Notification = require('../models/Notification');
 
 // Fix 2: Admin dashboard fetch all pending escrows
-router.get('/admin/escrow/pending', async (req, res) => {
-  try {
-    const pendingEscrows = await Escrow.find({
-      status: 'held'
-    }).populate('taskId').populate('providerId');
+router.get('/admin/escrow/pending', async (req, res) => { 
+   try { 
+     console.log('=== PENDING ESCROWS ==='); 
+ 
+     const pendingTasks = await Task.find({ 
+       status: 'pending_release' 
+     }).populate('postedBy', 'name email') 
+       .populate('acceptedBy', 'name email'); 
+ 
+     console.log('Pending tasks:', pendingTasks.length); 
+ 
+     return res.json({ 
+       success: true, 
+       tasks: pendingTasks 
+     }); 
+ 
+   } catch (error) { 
+     console.log('Error:', error.message); 
+     return res.status(500).json({ 
+       success: false, 
+       message: error.message 
+     }); 
+   } 
+ }); 
 
-    // Also get from tasks directly as backup
-    const pendingTasks = await Task.find({
-      status: 'pending_release',
-      escrowPaid: true
-    });
-
-    console.log('Pending escrows:', pendingEscrows);
-    console.log('Pending tasks:', pendingTasks);
-
-    res.json({
-      success: true,
-      escrows: pendingEscrows,
-      tasks: pendingTasks
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
 
 router.post('/admin/escrow/release/:taskId', 
    async (req, res) => { 
