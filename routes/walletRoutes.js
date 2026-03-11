@@ -2,33 +2,53 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const Wallet = require('../models/Wallet'); 
+const Withdrawal = require('../models/Withdrawal'); 
 
-// Route 3 
- router.get('/balance/:userId', async (req, res) => { 
+router.get('/balance/:userId', async (req, res) => { 
    try { 
      const mongoose = require('mongoose'); 
      let wallet = await Wallet.findOne({ 
        userId: req.params.userId 
+     }) || await Wallet.findOne({ 
+       userId: new mongoose.Types.ObjectId( 
+         req.params.userId 
+       ) 
      }); 
+ 
      if (!wallet) { 
-       wallet = await Wallet.findOne({ 
-         userId: new mongoose.Types.ObjectId( 
-           req.params.userId 
-         ) 
+       const user = await User.findById( 
+         req.params.userId 
+       ); 
+       if (!user) { 
+         return res.status(404).json({ 
+           success: false, 
+           message: 'User not found' 
+         }); 
+       } 
+       wallet = await Wallet.create({ 
+         userId: user._id, 
+         role: user.role === 'taskProvider' 
+           ? 'provider' : 'user', 
+         balance: 0 
        }); 
      } 
+ 
      return res.json({ 
        success: true, 
-       balance: Number(wallet?.balance || 0), 
+       balance: Number(wallet.balance || 0), 
+       escrowBalance: Number(wallet.escrowBalance || 0), 
        pendingWithdrawal: Number( 
-         wallet?.pendingWithdrawal || 0 
+         wallet.pendingWithdrawal || 0 
        ), 
-       transactions: wallet?.transactions || [] 
+       transactions: wallet.transactions || [] 
      }); 
+ 
    } catch (error) { 
      return res.status(500).json({ 
        success: false, 
-       balance: 0 
+       balance: 0, 
+       message: error.message 
      }); 
    } 
  }); 

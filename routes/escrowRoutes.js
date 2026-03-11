@@ -206,11 +206,41 @@ router.post('/release/:taskId', async (req, res) => {
       return res.status(400).json({ message: 'Task is not pending release' });
     }
 
-    const workerWallet = await Wallet.findOne({ userId });
-    if (!workerWallet) return res.status(404).json({ message: 'Worker wallet not found' });
-
-    workerWallet.balance += task.amount;
-    await workerWallet.save();
+    const escrow = await Escrow.findOne({ 
+      taskId: task._id, 
+      status: 'held' 
+    }); 
+    const releaseAmount = escrow?. workerAmount 
+      || Math.round(Number(task.amount) * 0.8); 
+    
+    await Wallet.findOneAndUpdate( 
+      { userId }, 
+      { 
+        $inc: { balance: Number(releaseAmount) }, 
+        $push: { 
+          transactions: { 
+            type: 'credit', 
+            amount: Number(releaseAmount), 
+            taskId: task._id, 
+            description: 'Payment released from escrow', 
+            status: 'completed', 
+            date: new Date() 
+          } 
+        } 
+      }, 
+      { upsert: true, new: true } 
+    ); 
+    
+    if (escrow) { 
+      await Wallet.findOneAndUpdate( 
+        { userId: escrow.providerId }, 
+        { $inc: { escrowBalance: -Number(escrow.amount) } } 
+      ); 
+      await Escrow.findOneAndUpdate( 
+        { taskId: task._id }, 
+        { $set: { status: 'released', releasedAt: new Date() } } 
+      ); 
+    } 
 
     task.status = 'completed';
     task.finalStatus = 'COMPLETED';
@@ -222,7 +252,7 @@ router.post('/release/:taskId', async (req, res) => {
       recipient: task.postedBy,
       sender: userId,
       title: 'Payment Released',
-      message: `Payment of ₹${task.amount} for "${task.title}" has been released to the worker.`,
+      message: `Payment of ₹${releaseAmount} for "${task.title}" has been released to the worker.`,
       type: 'PAYMENT_RELEASED',
       taskId: task._id
     });
@@ -231,7 +261,7 @@ router.post('/release/:taskId', async (req, res) => {
       recipient: userId,
       sender: task.postedBy,
       title: 'Payment Received',
-      message: `₹${task.amount} has been added to your wallet for "${task.title}".`,
+      message: `₹${releaseAmount} has been added to your wallet for "${task.title}".`,
       type: 'PAYMENT_RECEIVED',
       taskId: task._id
     });
