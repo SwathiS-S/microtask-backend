@@ -471,17 +471,23 @@
      } 
  
      container.innerHTML = items.map(item => { 
-       console.log('Rendering item:', JSON.stringify(item)); 
+       console.log('Item full:', JSON.stringify(item)); 
+ 
+       // Get correct taskId 
+       const taskId = item.taskId?._id 
+         || item.taskId 
+         || item._id; 
+ 
        const title = item.title 
          || item.taskId?.title 
          || 'N/A'; 
-       const amount = item.amount 
+ 
+       const amount = item.workerAmount 
+         || item.amount 
          || item.totalAmount 
-         || item.workerAmount 
          || 'N/A'; 
-       const taskId = item._id 
-         || item.taskId?._id 
-         || item.taskId; 
+ 
+       console.log('Using taskId:', taskId); 
  
        return ` 
          <div style="background:#1e293b; 
@@ -489,14 +495,12 @@
            margin:8px 0;"> 
            <p><b>Task:</b> ${title}</p> 
            <p><b>Amount:</b> ₹${amount}</p> 
-           <p><b>Task ID:</b> ${taskId}</p> 
            <button 
              onclick="releaseEscrow('${taskId}')" 
-             style="background:green; 
-             color:white; padding:8px 16px; 
-             border:none; border-radius:4px; 
-             cursor:pointer;"> 
-             ✅ Release to Worker 
+             style="background:green; color:white; 
+             padding:8px 16px; border:none; 
+             border-radius:4px; cursor:pointer;"> 
+             ✅ Release ₹${amount} to Worker 
            </button> 
          </div> 
        `; 

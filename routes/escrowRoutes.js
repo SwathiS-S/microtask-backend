@@ -41,18 +41,26 @@ router.post('/admin/escrow/release/:taskId',
    async (req, res) => { 
    try { 
      const { taskId } = req.params; 
+     console.log('Received ID:', taskId); 
  
-     console.log('Releasing taskId:', taskId); 
+     // Try finding task directly first 
+     let task = await Task.findById(taskId); 
  
-     // Get task 
-     const task = await Task.findById(taskId); 
-     console.log('Task found:', task); 
+     // If not found try finding via escrow 
+     if (!task) { 
+       const escrow = await Escrow.findById(taskId); 
+       console.log('Found escrow:', escrow); 
+       if (escrow) { 
+         task = await Task.findById(escrow.taskId); 
+       } 
+     } 
  
-     // Check task exists 
+     console.log('Task found:', task?.title); 
+ 
      if (!task) { 
        return res.status(404).json({ 
          success: false, 
-         message: 'Task not found for ID: ' + taskId 
+         message: 'Task not found' 
        }); 
      } 
  
@@ -72,7 +80,7 @@ router.post('/admin/escrow/release/:taskId',
  
      // Get escrow 
      const escrow = await Escrow.findOne({ 
-       taskId: taskId 
+       taskId: task._id 
      }); 
      console.log('Escrow found:', escrow); 
  
@@ -92,7 +100,7 @@ router.post('/admin/escrow/release/:taskId',
            transactions: { 
              type: 'credit', 
              amount: Number(releaseAmount), 
-             taskId: taskId, 
+             taskId: task._id, 
              description: 'Payment released from escrow', 
              status: 'completed', 
              date: new Date() 
@@ -105,7 +113,7 @@ router.post('/admin/escrow/release/:taskId',
      console.log('Worker balance:', workerWallet.balance); 
  
      // Update task 
-     await Task.findByIdAndUpdate(taskId, { 
+     await Task.findByIdAndUpdate(task._id, { 
        $set: { 
          status: 'completed', 
          finalStatus: 'COMPLETED', 
@@ -117,7 +125,7 @@ router.post('/admin/escrow/release/:taskId',
      // Update escrow 
      if (escrow) { 
        await Escrow.findOneAndUpdate( 
-         { taskId: taskId }, 
+         { taskId: task._id }, 
          { 
            $set: { 
              status: 'released', 
