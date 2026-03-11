@@ -72,90 +72,81 @@ const { sendEmail } = require('../services/email');
 
 // /send-otp removed (email OTP is generated during registration)
 
-router.post('/withdraw-money', async (req, res) => {
-  try {
-    const { userId, amount } = req.body;
-    if (!userId || !amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: 'Valid userId and amount required' });
-    }
-
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    let wallet = await Wallet.findOne({ userId });
-    if (!wallet) wallet = new Wallet({ userId, role: user.role === 'taskProvider' ? 'provider' : 'user', balance: 0 });
-
-    const walletBalance = wallet.balance;
-    const minimumWithdrawal = walletBalance < 100 ? 1 : 10;
-
-    if (amount < minimumWithdrawal) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Minimum withdrawal is ₹${minimumWithdrawal}` 
-      });
-    }
-
-    if (walletBalance < amount) {
-      return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
-    }
-
-    // Create Withdrawal Request
-    const withdrawal = new WithdrawalRequest({
-      user_id: user._id,
-      amount: amount,
-      status: 'PENDING'
-    });
-    await withdrawal.save();
-
-    // Call RazorpayX Payout API
-    const payoutRes = await createPayoutForUser(user, amount);
-    
-    if (payoutRes.ok) {
-      // Success: Deduct from wallet and update request
-      wallet.balance -= amount;
-      wallet.transactions.push({
-        type: 'withdrawal',
-        amount: amount,
-        description: 'Withdrawal successful',
-        status: 'completed',
-        date: new Date()
-      });
-      await wallet.save();
-
-      withdrawal.status = 'APPROVED';
-      withdrawal.approved_at = new Date();
-      await withdrawal.save();
-
-      res.json({ success: true, message: 'Withdrawal successful', wallet: wallet.balance });
-    } else {
-      // If RazorpayX is not configured or fails, we still keep it as pending/failed
-      // If it's just not configured (dev mode), we might want to simulate success
-      if (payoutRes.reason === 'razorpayx_not_configured') {
-        wallet.balance -= amount;
-        wallet.transactions.push({
-          type: 'withdrawal',
-          amount: amount,
-          description: 'Withdrawal successful (Dev Mode)',
-          status: 'completed',
-          date: new Date()
-        });
-        await wallet.save();
-
-        withdrawal.status = 'APPROVED';
-        withdrawal.approved_at = new Date();
-        await withdrawal.save();
-
-        return res.json({ success: true, message: 'Withdrawal successful (Dev Mode)', wallet: wallet.balance });
-      }
-
-      withdrawal.status = 'PENDING';
-      await withdrawal.save();
-      res.status(400).json({ success: false, message: 'Payout failed', reason: payoutRes.reason, data: payoutRes.data });
-    }
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message || 'Failed to process withdrawal' });
-  }
-});
+router.post('/withdraw-money', async (req, res) => { 
+   try { 
+     const { userId, amount } = req.body; 
+     const mongoose = require('mongoose'); 
+ 
+     console.log('=== WITHDRAW ==='); 
+     console.log('userId:', userId); 
+     console.log('amount:', amount); 
+ 
+     let wallet = await Wallet.findOne({ userId }); 
+     if (!wallet) { 
+       wallet = await Wallet.findOne({ 
+         userId: new mongoose.Types.ObjectId(userId) 
+       }); 
+     } 
+ 
+     console.log('Balance:', wallet?.balance); 
+ 
+     if (!wallet) { 
+       return res.status(400).json({ 
+         success: false, 
+         message: 'Wallet not found' 
+       }); 
+     } 
+ 
+     if (parseFloat(wallet.balance) < parseFloat(amount)) { 
+       return res.status(400).json({ 
+         success: false, 
+         message: `Insufficient. Available: ₹${wallet.balance}` 
+       }); 
+     } 
+ 
+     // Deduct from wallet 
+     await Wallet.findOneAndUpdate( 
+       { userId: wallet.userId }, 
+       { 
+         $inc: { 
+           balance: -parseFloat(amount), 
+           pendingWithdrawal: +parseFloat(amount) 
+         }, 
+         $push: { 
+           transactions: { 
+             type: 'withdrawal', 
+             amount: parseFloat(amount), 
+             description: `Withdrawal ₹${amount} requested`, 
+             status: 'pending', 
+             date: new Date() 
+           } 
+         } 
+       } 
+     ); 
+ 
+     // Save withdrawal record 
+     await Withdrawal.create({ 
+       userId: wallet.userId, 
+       amount: parseFloat(amount), 
+       status: 'pending', 
+       requestedAt: new Date() 
+     }); 
+ 
+     console.log('=== WITHDRAW SUCCESS ==='); 
+ 
+     return res.json({ 
+       success: true, 
+       message: 'Withdrawal requested! Admin will transfer within 1-2 business days.' 
+     }); 
+ 
+   } catch (error) { 
+     console.log('ERROR:', error.message); 
+     return res.status(400).json({ 
+       success: false, 
+       message: error.message 
+     }); 
+   } 
+ }); 
 
 router.post('/verify-otp', async (req, res) => {
   try {

@@ -41,22 +41,12 @@ router.post('/admin/escrow/release/:taskId',
    async (req, res) => { 
    try { 
      const { taskId } = req.params; 
-     console.log('Received ID:', taskId); 
  
-     // Try finding task directly first 
-     let task = await Task.findById(taskId); 
+     console.log('=== RELEASE START ==='); 
+     console.log('taskId:', taskId); 
  
-     // If not found try finding via escrow 
-     if (!task) { 
-       const escrow = await Escrow.findById(taskId); 
-       console.log('Found escrow:', escrow); 
-       if (escrow) { 
-         task = await Task.findById(escrow.taskId); 
-       } 
-     } 
- 
-     console.log('Task found:', task?.title); 
- 
+     // Get task 
+     const task = await Task.findById(taskId); 
      if (!task) { 
        return res.status(404).json({ 
          success: false, 
@@ -64,44 +54,47 @@ router.post('/admin/escrow/release/:taskId',
        }); 
      } 
  
-     // Get worker ID safely 
-     const workerId = task.acceptedBy 
-       || task.assignedTo 
-       || null; 
+     console.log('Task:', task.title); 
+     console.log('acceptedBy:', task.acceptedBy); 
+     console.log('amount:', task.amount); 
  
-     console.log('Worker ID:', workerId); 
+     // Get worker ID 
+     const workerId = task.acceptedBy 
+       || task.assignedTo; 
  
      if (!workerId) { 
        return res.status(400).json({ 
          success: false, 
-         message: 'No worker assigned to this task' 
+         message: 'No worker found' 
        }); 
      } 
  
      // Get escrow 
      const escrow = await Escrow.findOne({ 
-       taskId: task._id 
+       taskId: taskId 
      }); 
-     console.log('Escrow found:', escrow); 
+     console.log('Escrow:', escrow?.amount); 
  
-     // Get release amount 
-     const releaseAmount = escrow?.workerAmount 
-       || task.workerAmount 
-       || Math.round(Number(task.amount) * 0.8); 
+     // Calculate worker amount 
+     const totalAmount = Number( 
+       escrow?.amount || task.amount 
+     ); 
+     const workerAmount = escrow?.workerAmount 
+       || Math.round(totalAmount * 0.8); 
  
-     console.log('Release amount:', releaseAmount); 
+     console.log('Worker amount:', workerAmount); 
  
-     // Credit worker wallet 
+     // Step 1: Credit worker wallet 
      const workerWallet = await Wallet.findOneAndUpdate( 
        { userId: workerId }, 
        { 
-         $inc: { balance: Number(releaseAmount) }, 
+         $inc: { balance: Number(workerAmount) }, 
          $push: { 
            transactions: { 
              type: 'credit', 
-             amount: Number(releaseAmount), 
-             taskId: task._id, 
-             description: 'Payment released from escrow', 
+             amount: Number(workerAmount), 
+             taskId: taskId, 
+             description: `Payment ₹${workerAmount} released from escrow`, 
              status: 'completed', 
              date: new Date() 
            } 
@@ -112,8 +105,27 @@ router.post('/admin/escrow/release/:taskId',
  
      console.log('Worker balance:', workerWallet.balance); 
  
-     // Update task 
-     await Task.findByIdAndUpdate(task._id, { 
+     // Step 2: Update admin outflow 
+     await Wallet.findOneAndUpdate( 
+       { role: 'admin' }, 
+       { 
+         $inc: { totalOutflow: Number(workerAmount) }, 
+         $push: { 
+           transactions: { 
+             type: 'escrow_release', 
+             amount: Number(workerAmount), 
+             taskId: taskId, 
+             description: `Released ₹${workerAmount} to worker`, 
+             status: 'completed', 
+             date: new Date() 
+           } 
+         } 
+       }, 
+       { upsert: true, new: true } 
+     ); 
+ 
+     // Step 3: Update task to completed 
+     await Task.findByIdAndUpdate(taskId, { 
        $set: { 
          status: 'completed', 
          finalStatus: 'COMPLETED', 
@@ -122,10 +134,12 @@ router.post('/admin/escrow/release/:taskId',
        } 
      }); 
  
-     // Update escrow 
+     console.log('Task → completed'); 
+ 
+     // Step 4: Update escrow to released 
      if (escrow) { 
        await Escrow.findOneAndUpdate( 
-         { taskId: task._id }, 
+         { taskId: taskId }, 
          { 
            $set: { 
              status: 'released', 
@@ -135,15 +149,17 @@ router.post('/admin/escrow/release/:taskId',
        ); 
      } 
  
+     console.log('=== RELEASE DONE ==='); 
+ 
      return res.json({ 
        success: true, 
-       message: 'Payment released to worker!', 
+       message: 'Payment released!', 
        workerBalance: workerWallet.balance, 
-       releaseAmount: releaseAmount 
+       workerAmount: workerAmount 
      }); 
  
    } catch (error) { 
-     console.log('Release error:', error.message); 
+     console.log('ERROR:', error.message); 
      return res.status(500).json({ 
        success: false, 
        message: error.message 

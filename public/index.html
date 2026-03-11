@@ -2711,6 +2711,28 @@
                         const list = getSubmissions();
                         return list.find(s => String(s.taskId) === String(tid) && s.status !== 'approved');
                     })();
+
+                    if (displayStatus === 'completed' || task.paymentStatus === 'paid') { 
+                        return ` 
+                            <div class="task-item" data-task-id="${tid}"> 
+                                <div class="task-header"> 
+                                    <div class="task-title">${task.title || 'Untitled Task'}</div> 
+                                    <span class="task-status status-completed">COMPLETED</span> 
+                                </div> 
+                                <div class="task-description"> 
+                                    <p>✅ Task Completed!</p> 
+                                    <p>₹${task.workerAmount || task.amount} added to your wallet</p> 
+                                    <button onclick="refreshWalletBalance()" class="btn-small" style="background:var(--primary);"> 
+                                        💰 Check Wallet 
+                                    </button> 
+                                </div> 
+                                <div class="task-footer"> 
+                                    <span class="task-reward">₹${task.amount != null ? task.amount : 0}</span> 
+                                </div> 
+                            </div> 
+                        `; 
+                    } 
+
                     return `
                     <div class="task-item" data-task-id="${tid}">
                         <div class="task-header">
