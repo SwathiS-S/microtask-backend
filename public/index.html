@@ -3921,7 +3921,7 @@
         function hideAllTriContents() {
             document.querySelectorAll('.tri-tab-content').forEach(el => el.classList.add('hidden'));
         }
-        function switchUserTriTab(name) {
+        async function switchUserTriTab(name) {
             hideAllDashboardViews();
             if (name === 'filter') {
                 document.getElementById('userFilterTab').classList.remove('hidden');
@@ -3932,6 +3932,7 @@
                 buildTxTable();
             } else if (name === 'dashboard') {
                 document.getElementById('userDashTab').classList.remove('hidden');
+                refreshWalletBalance(); // Added refreshWalletBalance() call
                 
                 const dm = document.getElementById('dashMonth');
                 if (dm && !dm.value) {
