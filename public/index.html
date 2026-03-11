@@ -4726,21 +4726,41 @@
                 return;
             }
 
-            const title = document.getElementById('provTitle').value;
-            const category = document.getElementById('provCategory').value;
-            const skill = document.getElementById('provSkill').value;
-            const desc = document.getElementById('provDesc').value;
-            const emp = document.getElementById('provEmployees').value;
-            const wt = document.getElementById('provWorkType').value;
-            const loc = document.getElementById('provLocation').value;
-            const dur = document.getElementById('provDuration').value;
-            const amt = document.getElementById('provAmount').value;
-            const start = document.getElementById('provStart').value;
+            const title = document.getElementById('taskTitle')?. value 
+              || document.getElementById('task-title')?. value 
+              || document.getElementById('title')?.value
+              || document.getElementById('provTitle')?.value; 
+            
+            const amount = document.getElementById('taskAmount')?. value 
+              || document.getElementById('task-amount')?. value 
+              || document.getElementById('amount')?. value 
+              || document.getElementById('reward')?.value
+              || document.getElementById('provAmount')?.value; 
+            
+            const category = document.getElementById('taskCategory')?. value 
+              || document.getElementById('task-category')?. value 
+              || document.getElementById('category')?.value
+              || document.getElementById('provCategory')?.value; 
 
-            if (!title || !amt || !category) {
-                alert('Please fill title, reward amount and category');
-                return;
-            }
+            const skill = document.getElementById('provSkill')?.value || '';
+            const desc = document.getElementById('provDesc')?.value || '';
+            const emp = document.getElementById('provEmployees')?.value || '1';
+            const wt = document.getElementById('provWorkType')?.value || '';
+            const loc = document.getElementById('provLocation')?.value || '';
+            const dur = document.getElementById('provDuration')?.value || '';
+            const start = document.getElementById('provStart')?.value || '';
+
+            console.log('title:', title); 
+            console.log('amount:', amount); 
+            console.log('category:', category); 
+            
+            if (!title || !amount || !category) { 
+              alert(` Please fill: 
+                title: ${title ? '✅' : '❌'} 
+                amount: ${amount ? '✅' : '❌'} 
+                category: ${category ? '✅' : '❌'}`); 
+              return; 
+            } 
             if (!currentUser || !currentUser.userId) {
                 alert('Session expired. Please log in again.');
                 return;
@@ -4754,7 +4774,7 @@
                         title: wt === 'WFH' ? (title + ' [WFH]') : (wt === 'ONSITE' ? (title + ' [ONSITE]') : title),
                         category: category,
                         description: (desc || '') + (dur ? `\nDuration: ${dur} days` : '') + (loc ? `\nLocation: ${loc}` : '') + (skill ? `\nSkill: ${skill}` : ''),
-                        amount: Number(amt),
+                        amount: Number(amount),
                         postedBy: currentUser.userId,
                         workMode: wt,
                         workType: wt,
