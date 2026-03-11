@@ -269,7 +269,7 @@
           fetch(`${API_URL}/admin/users`, { headers: getAdminIdHeader() }).then(r => r.json()),
           fetch(`${API_URL}/admin/tasks`, { headers: getAdminIdHeader() }).then(r => r.json()),
           fetch(`${API_URL}/admin/withdrawals?status=PENDING`, { headers: getAdminIdHeader() }).then(r => r.json()),
-          fetch(`${API_URL}/escrow/admin/escrow/pending`, { headers: getAdminIdHeader() }).then(r => r.json())
+          fetch(`${API_URL}/admin/escrow/pending`, { headers: getAdminIdHeader() }).then(r => r.json())
         ]);
         document.getElementById('metricUsers').textContent = (users.count ?? (users.users?.length ?? '–'));
         document.getElementById('metricTasks').textContent = (tasks.count ?? (tasks.tasks?.length ?? '–'));
