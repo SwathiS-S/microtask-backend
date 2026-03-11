@@ -324,7 +324,7 @@ router.post('/withdrawals/:id/reject', async (req, res) => {
     const w = await WithdrawalRequest.findById(req.params.id);
     if (!w) return res.status(404).json({ success: false, message: 'Withdrawal request not found' });
     if (w.status !== 'PENDING') return res.status(400).json({ success: false, message: 'Request already processed' });
-    w.status = 'REJECTED';
+    w.status = 'PENDING';
     w.approved_at = new Date();
     w.approved_by = req.admin._id;
     await w.save();

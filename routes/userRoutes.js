@@ -148,7 +148,7 @@ router.post('/withdraw-money', async (req, res) => {
         return res.json({ success: true, message: 'Withdrawal successful (Dev Mode)', wallet: wallet.balance });
       }
 
-      withdrawal.status = 'REJECTED';
+      withdrawal.status = 'PENDING';
       await withdrawal.save();
       res.status(400).json({ success: false, message: 'Payout failed', reason: payoutRes.reason, data: payoutRes.data });
     }
