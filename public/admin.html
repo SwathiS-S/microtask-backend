@@ -423,82 +423,71 @@
 
     // Fix 5: Admin dashboard show pending escrows
     async function loadPendingEscrows() { 
-   try { 
-     console.log('Loading pending escrows...'); 
+   const response = await fetch( 
+     `${API_URL}/admin/escrow/pending` 
+   ); 
+   const data = await response.json(); 
  
-     const response = await fetch( 
-       `${API_URL}/escrow/admin/escrow/pending` 
-     ); 
-     const data = await response.json(); 
+   console.log('Pending escrows:', data); 
  
-     console.log('Pending escrows data:', data); 
+   const container = document.getElementById( 
+     'pendingEscrows' 
+   ); 
  
-     const container = document.getElementById( 
-       'pendingEscrowList' 
-     ) || document.getElementById( 
-       'escrowReleases' 
-     ) || document.getElementById( 
-       'pendingReleases' 
-     ) || document.getElementById( 
-       'pendingEscrows' 
-     ); 
- 
-     if (!container) { 
-       console.log('Container not found!'); 
-       return; 
-     } 
- 
-     if (!data.tasks || data.tasks.length === 0) { 
-       container.innerHTML = '<p>No pending releases</p>'; 
-       return; 
-     } 
- 
-     container.innerHTML = data.tasks.map(task => ` 
-       <div style="border:1px solid #ccc; 
-         padding:10px; margin:10px 0;"> 
-         <p><b>Task:</b> ${task.title}</p> 
-         <p><b>Provider:</b> 
-           ${task.postedBy?.name || task.postedBy}</p> 
-         <p><b>Worker:</b> 
-           ${task.acceptedBy?.name || task.acceptedBy}</p> 
-         <p><b>Amount:</b> 
-           ₹${task.workerAmount || task.amount}</p> 
-         <p><b>Status:</b> ${task.status}</p> 
-         <button onclick="releaseEscrow('${task._id}')"> 
-           ✅ Release to Worker 
-         </button> 
-       </div> 
-     `).join(''); 
- 
-   } catch (error) { 
-     console.log('Load escrows error:', error); 
+   if (!data.escrows || data.escrows.length === 0) { 
+     container.innerHTML = '<p>No pending releases</p>'; 
+     return; 
    } 
+ 
+   container.innerHTML = data.escrows.map(escrow => ` 
+     <div class="escrow-card"> 
+       <p><b>Task:</b> 
+         ${escrow.taskId?.title || 'N/A'}</p> 
+       <p><b>Provider:</b> 
+         ${escrow.providerId?.name || 'N/A'}</p> 
+       <p><b>Total Amount:</b> 
+         ₹${escrow.totalAmount || escrow.amount}</p> 
+       <p><b>Worker Gets:</b> 
+         ₹${escrow.workerAmount || 
+           Math.round(escrow.amount * 0.8)}</p> 
+       <p><b>Commission:</b> 
+         ₹${escrow.adminCommission || 
+           Math.round(escrow.amount * 0.2)}</p> 
+       <button onclick="releaseEscrow( 
+         '${escrow.taskId?._id}')"> 
+         ✅ Release to Worker 
+       </button> 
+     </div> 
+   `).join(''); 
  } 
  
  async function releaseEscrow(taskId, btn) { 
    if (!confirm('Release payment to worker?')) return; 
  
-   try { 
-     const response = await fetch( 
-       `${API_URL}/escrow/admin/escrow/release/${taskId}`, 
-       { method: 'POST' } 
-     ); 
-     const data = await response.json(); 
+   if (btn) { 
+     btn.disabled = true; 
+     btn.textContent = 'Releasing...'; 
+   } 
  
-     console.log('Release response:', data); 
+   const response = await fetch( 
+     `${API_URL}/admin/escrow/release/${taskId}`, 
+     { method: 'POST' } 
+   ); 
+   const data = await response.json(); 
  
-     if (data.success) { 
-       alert('✅ Payment released to worker!'); 
-       loadPendingEscrows(); 
-     } else { 
-       alert('❌ ' + data.message); 
+   if (data.success) { 
+     alert('✅ Payment released successfully!'); 
+     loadPendingEscrows(); 
+   } else { 
+     alert('❌ ' + data.message); 
+     if (btn) { 
+       btn.disabled = false; 
+       btn.textContent = 'Retry Release'; 
      } 
-   } catch (error) { 
-     alert('Error: ' + error.message); 
    } 
  } 
  
- // Call on page load 
+ // Load on page load 
  loadPendingEscrows(); 
 
 
