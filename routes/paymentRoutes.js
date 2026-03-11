@@ -44,29 +44,81 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
 
+    const totalAmount = Number(amount); 
+    const adminCommission = Math.round( 
+      totalAmount * 20 / 100 
+    ); 
+    const workerAmount = totalAmount - adminCommission; 
+    
+    console.log('=== COMMISSION CALC ==='); 
+    console.log('Total:', totalAmount); 
+    console.log('Commission:', adminCommission); 
+    console.log('Worker gets:', workerAmount); 
+    
+    // Save to admin wallet 
+    const adminWallet = await Wallet.findOneAndUpdate( 
+      { role: 'admin' }, 
+      { 
+        $inc: { 
+          balance: Number(adminCommission), 
+          totalInflow: Number(totalAmount), 
+          totalCommission: Number(adminCommission) 
+        }, 
+        $push: { 
+          transactions: { 
+            $each: [ 
+              { 
+                type: 'escrow_received', 
+                amount: Number(totalAmount), 
+                taskId: taskId, 
+                description: `Provider paid ₹${totalAmount} escrow`, 
+                status: 'completed', 
+                date: new Date() 
+              }, 
+              { 
+                type: 'commission', 
+                amount: Number(adminCommission), 
+                taskId: taskId, 
+                description: `20% commission ₹${adminCommission}`, 
+                status: 'completed', 
+                date: new Date() 
+              } 
+            ] 
+          } 
+        } 
+      }, 
+      { upsert: true, new: true } 
+    ); 
+    
+    console.log('Admin wallet updated:', adminWallet.balance); 
+    console.log('Admin commission:', adminWallet.totalCommission); 
+    
     // Fix 1: After escrow payment verified save to DB correctly
     // Save or Update Escrow record using findOneAndUpdate with upsert
-    const escrow = await Escrow.findOneAndUpdate(
-      { taskId: taskId },
-      {
-        taskId: taskId,
-        taskTitle: task.title,
-        providerId: providerId,
-        amount: Number(amount),
-        razorpayPaymentId: razorpay_payment_id,
-        razorpayOrderId: razorpay_order_id,
-        status: 'held',
-        heldAt: new Date()
-      },
-      { upsert: true, new: true }
-    );
+    const escrow = await Escrow.findOneAndUpdate( 
+      { taskId: taskId }, 
+      { 
+        taskId: taskId, 
+        providerId: providerId, 
+        totalAmount: totalAmount, 
+        adminCommission: adminCommission, 
+        workerAmount: workerAmount, 
+        razorpayPaymentId: razorpay_payment_id, 
+        razorpayOrderId: razorpay_order_id, 
+        status: 'held', 
+        heldAt: new Date() 
+      }, 
+      { upsert: true, new: true } 
+    ); 
 
-    // Update task status to open
-    await Task.findByIdAndUpdate(taskId, {
-      status: 'open',
-      escrowPaid: true,
-      escrowAmount: Number(amount)
-    });
+    // Update task 
+    await Task.findByIdAndUpdate(taskId, { 
+      status: 'open', 
+      escrowPaid: true, 
+      escrowAmount: totalAmount, 
+      workerAmount: workerAmount, 
+      adminCommission: adminCommission 
+    }); 
 
     console.log('Escrow saved successfully');
 
