@@ -2156,21 +2156,7 @@
             if (pRole) pRole.textContent = isProvider ? 'Task Provider' : 'User';
             
             // Wallet Balances
-            const wBal = document.getElementById('walletBalanceValue');
-            const pwBal = document.getElementById('provWalletBalance');
-            
-            // Fix: Fetch fresh balance from API instead of using cached currentUser.wallet
-            fetch(`${API_URL}/users/wallet-balance/${currentUser.userId}`)
-                .then(r => r.json())
-                .then(data => {
-                    const balance = '₹' + Number(data.balance || 0).toFixed(2);
-                    if (wBal) wBal.textContent = balance;
-                    if (pwBal) pwBal.textContent = balance;
-                })
-                .catch(e => {
-                    if (wBal) wBal.textContent = '₹' + Number(currentUser.wallet || 0).toFixed(2);
-                    if (pwBal) pwBal.textContent = '₹' + Number(currentUser.wallet || 0).toFixed(2);
-                });
+            refreshWalletBalance();
         }
         // --- END NEW DASHBOARD LOGIC ---
 
@@ -2327,7 +2313,6 @@
                         email: data.email,
                         name: data.name,
                         role: data.role,
-                        wallet: data.wallet != null ? data.wallet : 0,
                         bankDetails: data.bankDetails || null
                     };
                     document.getElementById('authSection').classList.add('hidden');
@@ -2513,9 +2498,9 @@
                 return;
             }
 
-            const freshBalance = balRes.balance;
+            const freshBalance = Number(balRes.balance || 0);
             if (parsedAmount > freshBalance) {
-                alert(`Insufficient wallet balance. Your current balance is ₹${freshBalance}.`);
+                alert(`Insufficient wallet balance. Your current balance is ₹${freshBalance.toFixed(2)}.`);
                 return;
             }
 
@@ -2668,12 +2653,7 @@
                     return true;
                 });
 
-                if (filtered.length === 0) {
-                    tasksList.innerHTML = `<p style="text-align: center; color: #666;">${isProvider ? 'No tasks created yet' : 'No tasks available yet'}</p>`;
-                    return;
-                }
-
-                tasksList.innerHTML = filtered.map(task => {
+                const taskHTML = filtered.map(task => {
                     const postedById = task && task.postedBy && (task.postedBy._id || task.postedBy);
                     const acceptedById = task && task.acceptedBy && (task.acceptedBy._id || task.acceptedBy);
                     const isOwner = userId && postedById && String(postedById) === String(userId);
@@ -2682,7 +2662,8 @@
                     // Status display label:
                     const rawStatus = (task && task.status) || 'open';
                     const overrides = getTaskOverrides();
-                    const overrideStatus = overrides[(task._id && task._id.toString ? task._id.toString() : task._id) || ''] && overrides[(task._id && task._id.toString ? task._id.toString() : task._id) || ''].status;
+                    const tid = (task._id && task._id.toString ? task._id.toString() : task._id) || '';
+                    const overrideStatus = overrides[tid] && overrides[tid].status;
                     const displayStatus = overrideStatus || rawStatus;
                     const statusClass = displayStatus;
                     const statusLabel = displayStatus;
@@ -2690,7 +2671,6 @@
                     const durationText = getTaskDuration(task);
                     const locationText = getTaskLocation(task);
                     const savedList = getSavedTasks();
-                    const tid = (task._id && task._id.toString ? task._id.toString() : task._id) || '';
                     const isSaved = savedList.some(s => String(s.taskId) === String(tid));
                     const reqCnt = getRequiredCount(task);
                     const accCnt = getAcceptedCount(task);
@@ -2764,6 +2744,21 @@
                         </div>
                     </div>
                 `}).join('');
+
+                if (filtered.length === 0) {
+                    tasksList.innerHTML = `<p style="text-align: center; color: #666;">${isProvider ? 'No tasks created yet' : 'No tasks available yet'}</p>`;
+                    return;
+                }
+
+                // Fix line 2599 and add null check:
+                const container = document.getElementById('taskList') 
+                  || document.getElementById('task-list') 
+                  || document.getElementById('tasksContainer')
+                  || document.getElementById('tasksList'); 
+                
+                if (container) { 
+                  container.innerHTML = taskHTML; 
+                } 
 
                 // Attach event listeners to buttons
                 tasksList.querySelectorAll('button[data-action]').forEach(btn => {
@@ -3782,14 +3777,14 @@
                     try { data = await response.json(); } catch (_) {}
                     if (data.success === true && data.wallet != null) {
                         const newBalance = Number(data.wallet);
-                        currentUser.wallet = newBalance;
+                        const balanceStr = '₹' + newBalance.toFixed(2);
                         const provBalanceEl = document.getElementById('provWalletBalance');
-                        if (provBalanceEl) provBalanceEl.textContent = String(newBalance);
+                        if (provBalanceEl) provBalanceEl.textContent = balanceStr;
                         const balanceEl = document.getElementById('walletBalance');
-                        if (balanceEl) balanceEl.textContent = String(newBalance);
+                        if (balanceEl) balanceEl.textContent = balanceStr;
                         if (activeBtn) { activeBtn.disabled = false; activeBtn.textContent = originalText; }
                         hideProvAddMoney();
-                        alert('Money added successfully. New balance: ₹' + newBalance);
+                        alert('Money added successfully. New balance: ' + balanceStr);
                     } else {
                         if (activeBtn) { activeBtn.disabled = false; activeBtn.textContent = originalText; }
                         alert(data.message || 'Failed to add money. Please try again.');
@@ -3866,10 +3861,10 @@
                     }
                     if (data.success === true && data.wallet != null) {
                         const newBalance = Number(data.wallet);
-                        currentUser.wallet = newBalance;
+                        const balanceStr = '₹' + newBalance.toFixed(2);
                         const balanceEl = document.getElementById('walletBalance');
                         if (balanceEl) {
-                            balanceEl.textContent = String(newBalance);
+                            balanceEl.textContent = balanceStr;
                         }
                         if (activeBtn) {
                             activeBtn.disabled = false;
@@ -3877,7 +3872,7 @@
                         }
                         hideAddMoney();
                         refreshWalletBalance();
-                        alert('Money added successfully. New balance: ₹' + newBalance);
+                        alert('Money added successfully. New balance: ' + balanceStr);
                     } else {
                         if (activeBtn) {
                             activeBtn.disabled = false;
@@ -3919,17 +3914,6 @@
                 document.getElementById('userWalletTab').classList.remove('hidden');
                 refreshWalletBalance();
                 buildTxTable();
-                const balEl = document.getElementById('walletBalanceValue');
-                
-                // Fix: Fetch fresh balance from API instead of using cached currentUser.wallet
-                fetch(`${API_URL}/users/wallet-balance/${currentUser.userId}`)
-                    .then(r => r.json())
-                    .then(data => {
-                        if (balEl) balEl.textContent = '₹' + Number(data.balance || 0).toFixed(2);
-                    })
-                    .catch(e => {
-                        if (balEl) balEl.textContent = '₹' + Number(currentUser.wallet || 0).toFixed(2);
-                    });
             } else if (name === 'dashboard') {
                 document.getElementById('userDashTab').classList.remove('hidden');
                 
