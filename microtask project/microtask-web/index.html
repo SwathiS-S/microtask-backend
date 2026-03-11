@@ -4822,7 +4822,9 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
+                        taskId: taskId, 
                         amount: totalAmount, 
+                        providerId: currentUser.userId,
                         userId: currentUser.userId,
                         currency: 'INR'
                     })
