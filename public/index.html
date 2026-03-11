@@ -2158,8 +2158,19 @@
             // Wallet Balances
             const wBal = document.getElementById('walletBalanceValue');
             const pwBal = document.getElementById('provWalletBalance');
-            if (wBal) wBal.textContent = currentUser.wallet || 0;
-            if (pwBal) pwBal.textContent = currentUser.wallet || 0;
+            
+            // Fix: Fetch fresh balance from API instead of using cached currentUser.wallet
+            fetch(`${API_URL}/users/wallet-balance/${currentUser.userId}`)
+                .then(r => r.json())
+                .then(data => {
+                    const balance = '₹' + Number(data.balance || 0).toFixed(2);
+                    if (wBal) wBal.textContent = balance;
+                    if (pwBal) pwBal.textContent = balance;
+                })
+                .catch(e => {
+                    if (wBal) wBal.textContent = '₹' + Number(currentUser.wallet || 0).toFixed(2);
+                    if (pwBal) pwBal.textContent = '₹' + Number(currentUser.wallet || 0).toFixed(2);
+                });
         }
         // --- END NEW DASHBOARD LOGIC ---
 
@@ -3909,7 +3920,16 @@
                 refreshWalletBalance();
                 buildTxTable();
                 const balEl = document.getElementById('walletBalanceValue');
-                if (balEl) balEl.textContent = String(currentUser && currentUser.wallet != null ? currentUser.wallet : 0);
+                
+                // Fix: Fetch fresh balance from API instead of using cached currentUser.wallet
+                fetch(`${API_URL}/users/wallet-balance/${currentUser.userId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (balEl) balEl.textContent = '₹' + Number(data.balance || 0).toFixed(2);
+                    })
+                    .catch(e => {
+                        if (balEl) balEl.textContent = '₹' + Number(currentUser.wallet || 0).toFixed(2);
+                    });
             } else if (name === 'dashboard') {
                 document.getElementById('userDashTab').classList.remove('hidden');
                 
@@ -3978,10 +3998,7 @@
                 loadProviderTasks();
             } else if (name === 'wallet') {
                 document.getElementById('provWalletTab').classList.remove('hidden');
-                refreshWalletBalance().then(()=> {
-                    const w = document.getElementById('provWalletBalance');
-                    if (w) w.textContent = String(currentUser && currentUser.wallet != null ? currentUser.wallet : 0);
-                });
+                refreshWalletBalance();
                 buildProvTxTable();
                 buildProvPayments();
             } else if (name === 'dashboard') {
