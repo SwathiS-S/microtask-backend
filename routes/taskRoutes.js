@@ -590,54 +590,38 @@ router.post('/approve-work/:taskId', async (req, res) => {
   }
 });
 
-// APPROVE TASK (provider approves → marks as approved → returns Razorpay order)
-router.post('/approve', async (req, res) => {
-  const { taskId, approvedBy } = req.body;
-  console.log('POST /tasks/approve', { taskId, approvedBy });
+router.post('/approve', async (req, res) => { 
+   try { 
+     const { taskId, approvedBy } = req.body; 
+ 
+     console.log('Approve route hit!'); 
+     console.log('taskId:', taskId); 
+ 
+     const task = await Task.findByIdAndUpdate( 
+       taskId, 
+       { 
+         status: 'pending_release', 
+         finalStatus: 'APPROVED', 
+         providerApprovedAt: new Date() 
+       }, 
+       { new: true } 
+     ); 
+ 
+     console.log('Task status:', task.status); 
+ 
+     return res.json({ 
+       success: true, 
+       message: 'Work approved! Admin will release payment shortly.' 
+     }); 
+ 
+   } catch (error) { 
+     return res.status(500).json({ 
+       success: false, 
+       message: error.message 
+     }); 
+   } 
+ }); 
 
-  try {
-    if (!taskId || !approvedBy)
-      return res.status(400).json({ message: 'taskId and approvedBy are required' });
-
-    const task = await Task.findById(String(taskId));
-
-    if (!task)
-      return res.status(404).json({ message: 'Task not found' });
-
-    if (!['submitted', 'accepted', 'inProgress', 'underReview'].includes(task.status))
-      return res.status(400).json({ message: 'Task is not ready for approval' });
-
-    if (String(task.postedBy) !== String(approvedBy))
-      return res.status(403).json({ message: 'Only the task provider can approve this task' });
-
-    if (!task.acceptedBy)
-      return res.status(400).json({ message: 'Task not accepted by anyone yet' });
-
-    // Mark as approved (waiting for payment)
-    task.status = 'reviewed';
-    task.finalStatus = 'APPROVED';
-    await task.save();
-
-    // Create Razorpay Order
-    const { createOrder } = require('../services/razorpay');
-    const orderRes = await createOrder(task.amount, `task_pay_${task._id}`);
-
-    if (!orderRes.ok) {
-      return res.status(500).json({ success: false, message: 'Failed to create Razorpay order', error: orderRes.error });
-    }
-
-    res.json({
-      success: true,
-      message: 'Task approved. Please complete the payment.',
-      order: orderRes.data,
-      amount: task.amount,
-      taskId: task._id
-    });
-  } catch (err) {
-    console.error('Approve error:', err);
-    res.status(500).json({ message: err.message || 'Server error' });
-  }
-});
 
 // DECLINE TASK (task provider declines → user can continue work)
 router.post('/decline', async (req, res) => {
