@@ -42,14 +42,46 @@ router.post('/admin/escrow/release/:taskId',
    try { 
      const { taskId } = req.params; 
  
+     console.log('Releasing taskId:', taskId); 
+ 
+     // Get task 
      const task = await Task.findById(taskId); 
+     console.log('Task found:', task); 
+ 
+     // Check task exists 
+     if (!task) { 
+       return res.status(404).json({ 
+         success: false, 
+         message: 'Task not found for ID: ' + taskId 
+       }); 
+     } 
+ 
+     // Get worker ID safely 
      const workerId = task.acceptedBy 
-       || task.assignedTo; 
-     const releaseAmount = task.workerAmount 
+       || task.assignedTo 
+       || null; 
+ 
+     console.log('Worker ID:', workerId); 
+ 
+     if (!workerId) { 
+       return res.status(400).json({ 
+         success: false, 
+         message: 'No worker assigned to this task' 
+       }); 
+     } 
+ 
+     // Get escrow 
+     const escrow = await Escrow.findOne({ 
+       taskId: taskId 
+     }); 
+     console.log('Escrow found:', escrow); 
+ 
+     // Get release amount 
+     const releaseAmount = escrow?.workerAmount 
+       || task.workerAmount 
        || Math.round(Number(task.amount) * 0.8); 
  
-     console.log('Releasing to worker:', workerId); 
-     console.log('Amount:', releaseAmount); 
+     console.log('Release amount:', releaseAmount); 
  
      // Credit worker wallet 
      const workerWallet = await Wallet.findOneAndUpdate( 
@@ -83,20 +115,23 @@ router.post('/admin/escrow/release/:taskId',
      }); 
  
      // Update escrow 
-     await Escrow.findOneAndUpdate( 
-       { taskId: taskId }, 
-       { 
-         $set: { 
-           status: 'released', 
-           releasedAt: new Date() 
+     if (escrow) { 
+       await Escrow.findOneAndUpdate( 
+         { taskId: taskId }, 
+         { 
+           $set: { 
+             status: 'released', 
+             releasedAt: new Date() 
+           } 
          } 
-       } 
-     ); 
+       ); 
+     } 
  
      return res.json({ 
        success: true, 
        message: 'Payment released to worker!', 
-       workerBalance: workerWallet.balance 
+       workerBalance: workerWallet.balance, 
+       releaseAmount: releaseAmount 
      }); 
  
    } catch (error) { 
