@@ -64,6 +64,7 @@ app.use('/users', userRoutes);
 app.use('/bank', bankRoutes);
 app.use('/wallet', walletRoutes);
 app.use('/escrow', escrowRoutes);
+app.use('/', escrowRoutes);
 // Explicit auth endpoints to avoid path conflicts with /users/:id
 const User = require('./models/User');
 app.post('/auth/register', async (req, res) => {
