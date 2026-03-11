@@ -3647,21 +3647,18 @@
         async function refreshUserWallet() {
             if (!currentUser || !currentUser.userId) return;
             try {
-                const res = await fetch(`${API_URL}/users/${currentUser.userId}`);
+                const res = await fetch(`${API_URL}/users/wallet-balance/${currentUser.userId}`);
                 const data = await res.json();
-                if (data.success && data.user) {
-                    if (data.user.wallet != null) {
-                        currentUser.wallet = data.user.wallet;
-                        const w1 = document.getElementById('walletBalance');
-                        if (w1) w1.textContent = data.user.wallet;
-                        const w2 = document.getElementById('walletBalanceValue');
-                        if (w2) w2.textContent = data.user.wallet;
-                        const w3 = document.getElementById('provWalletBalance');
-                        if (w3) w3.textContent = data.user.wallet;
-                    }
-                    if (data.user.bankDetails) {
-                        currentUser.bankDetails = data.user.bankDetails;
-                    }
+                if (data.success) {
+                    const balance = data.balance != null ? data.balance : 0;
+                    currentUser.wallet = balance;
+                    const w1 = document.getElementById('walletBalance');
+                    if (w1) w1.textContent = balance;
+                    const w2 = document.getElementById('walletBalanceValue');
+                    if (w2) w2.textContent = balance;
+                    const w3 = document.getElementById('provWalletBalance');
+                    if (w3) w3.textContent = balance;
+                    
                     updateDashboardUI(); // Refresh UI to show/hide "Create Wallet"
                 }
             } catch (e) { /* ignore */ }
