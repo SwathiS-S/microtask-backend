@@ -423,48 +423,71 @@
 
     // Fix 5: Admin dashboard show pending escrows
     async function loadPendingEscrows() { 
-   const response = await fetch( 
-     `${API_URL}/admin/escrow/pending` 
-   ); 
-   const data = await response.json(); 
+   try { 
+     const response = await fetch( 
+       `${API_URL}/admin/escrow/pending`, 
+       { headers: getAdminIdHeader() } 
+     ); 
+     const data = await response.json(); 
  
-   console.log('Pending escrows:', data); 
+     console.log('Full data:', JSON.stringify(data)); 
+     console.log('Escrows array:', data.escrows); 
+     console.log('Escrows length:', data.escrows?.length); 
+     console.log('Tasks array:', data.tasks); 
+     console.log('Tasks length:', data.tasks?.length); 
  
-   // Find correct container 
-   const container = document.getElementById('pendingEscrows'); 
+     const container = document.getElementById( 
+       'pendingEscrows' 
+     ); 
  
-   console.log('Container found:', container?.id); 
+     // Try rendering tasks instead of escrows 
+     const items = data.escrows?.length > 0 
+       ? data.escrows 
+       : data.tasks; 
  
-   if (!container) { 
-     console.log('ERROR: No escrow container found in HTML!'); 
-     return; 
+     console.log('Items to render:', items); 
+     console.log('Items length:', items?.length); 
+ 
+     if (!items || items.length === 0) { 
+       container.innerHTML = '<p>No pending releases</p>'; 
+       return; 
+     } 
+ 
+     container.innerHTML = items.map(item => { 
+       console.log('Rendering item:', JSON.stringify(item)); 
+       const title = item.title 
+         || item.taskId?.title 
+         || 'N/A'; 
+       const amount = item.amount 
+         || item.totalAmount 
+         || item.workerAmount 
+         || 'N/A'; 
+       const taskId = item._id 
+         || item.taskId?._id 
+         || item.taskId; 
+ 
+       return ` 
+         <div style="background:#1e293b; 
+           padding:16px; border-radius:8px; 
+           margin:8px 0;"> 
+           <p><b>Task:</b> ${title}</p> 
+           <p><b>Amount:</b> ₹${amount}</p> 
+           <p><b>Task ID:</b> ${taskId}</p> 
+           <button 
+             onclick="releaseEscrow('${taskId}')" 
+             style="background:green; 
+             color:white; padding:8px 16px; 
+             border:none; border-radius:4px; 
+             cursor:pointer;"> 
+             ✅ Release to Worker 
+           </button> 
+         </div> 
+       `; 
+     }).join(''); 
+ 
+   } catch (error) { 
+     console.log('Error:', error.message); 
    } 
- 
-   if (!data.escrows || data.escrows.length === 0) { 
-     container.innerHTML = '<p>No pending releases</p>'; 
-     return; 
-   } 
- 
-   container.innerHTML = data.escrows.map(escrow => ` 
-     <div class="escrow-card"> 
-       <p><b>Task:</b> 
-         ${escrow.taskId?.title || 'N/A'}</p> 
-       <p><b>Provider:</b> 
-         ${escrow.providerId?.name || 'N/A'}</p> 
-       <p><b>Total Amount:</b> 
-         ₹${escrow.totalAmount || escrow.amount}</p> 
-       <p><b>Worker Gets:</b> 
-         ₹${escrow.workerAmount || 
-           Math.round(escrow.amount * 0.8)}</p> 
-       <p><b>Commission:</b> 
-         ₹${escrow.adminCommission || 
-           Math.round(escrow.amount * 0.2)}</p> 
-       <button onclick="releaseEscrow( 
-         '${escrow.taskId?._id}')"> 
-         ✅ Release to Worker 
-       </button> 
-     </div> 
-   `).join(''); 
  } 
  
  async function releaseEscrow(taskId, btn) { 
