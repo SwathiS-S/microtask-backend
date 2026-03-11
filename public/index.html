@@ -3646,40 +3646,44 @@
 
         async function refreshWalletBalance() { 
    try { 
-     if (!currentUser || !currentUser.userId) return;
+     const userId = currentUser?.userId 
+       || currentUser?._id; 
+ 
+     console.log('Fetching wallet for:', userId); 
+ 
      const response = await fetch( 
-       `${API_URL}/users/wallet-balance/${currentUser.userId}` 
+       `${API_URL}/users/wallet-balance/${userId}` 
      ); 
      const data = await response.json(); 
-     console.log('Wallet response:', data); 
+ 
+     console.log('Wallet data:', data); 
+     console.log('Balance:', data.balance); 
  
      const balance = Number(data.balance || 0) 
        .toFixed(2); 
  
-     // Update ALL balance elements 
-     const ids = [ 
+     // Update ALL possible elements 
+     [ 
        'walletBalanceValue', 
        'walletBalance', 
        'wallet-balance', 
        'provWalletBalance', 
        'userWalletBalance', 
        'walletAmount' 
-     ]; 
- 
-     ids.forEach(id => { 
+     ].forEach(id => { 
        const el = document.getElementById(id); 
        if (el) { 
          el.textContent = '₹' + balance; 
-         console.log('Updated:', id, balance); 
+         console.log('Updated element:', id); 
        } 
      }); 
  
    } catch (error) { 
-     console.log('Wallet fetch error:', error); 
+     console.log('Wallet error:', error); 
    } 
  } 
  
- // Call on load 
+ // Call immediately 
  refreshWalletBalance(); 
 
         async function loadTransactions() {
