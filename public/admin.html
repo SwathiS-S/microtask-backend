@@ -430,9 +430,21 @@
  
    console.log('Pending escrows:', data); 
  
-   const container = document.getElementById( 
-     'pendingEscrows' 
-   ); 
+   // Find correct container 
+   const container = 
+     document.getElementById('pendingEscrows') || 
+     document.getElementById('escrowList') || 
+     document.getElementById('escrow-list') || 
+     document.getElementById('escrowReleases') || 
+     document.getElementById('pendingReleases') || 
+     document.getElementById('escrow-releases'); 
+ 
+   console.log('Container found:', container?.id); 
+ 
+   if (!container) { 
+     console.log('ERROR: No escrow container found in HTML!'); 
+     return; 
+   } 
  
    if (!data.escrows || data.escrows.length === 0) { 
      container.innerHTML = '<p>No pending releases</p>'; 
