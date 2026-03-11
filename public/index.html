@@ -2063,7 +2063,7 @@
                     
                     showTriTabsForRole();
                     initTriFilters();
-                    refreshUserWallet();
+                    refreshWalletBalance();
                     
                     navigateDashboard('tasks', document.querySelector('.sidebar .nav-item'));
                     loadTasks();
@@ -2343,7 +2343,7 @@
                     initTriFilters();
                     
                     // NEW: Refresh wallet and bank details immediately
-                    refreshUserWallet();
+                    refreshWalletBalance();
                     
                     // Default view after login
                     navigateDashboard('tasks', document.querySelector('.sidebar .nav-item'));
@@ -2540,7 +2540,7 @@
             .then(data => {
                 if (data.success) {
                     alert("Withdrawal requested successfully!");
-                    refreshUserWallet();
+                    refreshWalletBalance();
                 } else {
                     alert(data.message || "Withdrawal failed");
                 }
@@ -3555,7 +3555,7 @@
                 });
                 const data = await response.json();
                 alert(data.message || (response.ok ? 'Task completed' : data.error));
-                await refreshUserWallet();
+                await refreshWalletBalance();
                 loadTasks();
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -3601,7 +3601,7 @@
                                 });
                                 const verifyData = await verifyRes.json();
                                 alert(verifyData.message || 'Payment verified and worker paid!');
-                                await refreshUserWallet();
+                                await refreshWalletBalance();
                                 loadProviderTasks(); // Use loadProviderTasks to refresh the provider's view
                                 if (workerId) {
                                     showRatingModal(workerId, taskId);
@@ -3644,25 +3644,43 @@
             }
         }
 
-        async function refreshUserWallet() {
-            if (!currentUser || !currentUser.userId) return;
-            try {
-                const res = await fetch(`${API_URL}/users/wallet-balance/${currentUser.userId}`);
-                const data = await res.json();
-                if (data.success) {
-                    const balance = data.balance != null ? data.balance : 0;
-                    currentUser.wallet = balance;
-                    const w1 = document.getElementById('walletBalance');
-                    if (w1) w1.textContent = balance;
-                    const w2 = document.getElementById('walletBalanceValue');
-                    if (w2) w2.textContent = balance;
-                    const w3 = document.getElementById('provWalletBalance');
-                    if (w3) w3.textContent = balance;
-                    
-                    updateDashboardUI(); // Refresh UI to show/hide "Create Wallet"
-                }
-            } catch (e) { /* ignore */ }
-        }
+        async function refreshWalletBalance() { 
+   try { 
+     if (!currentUser || !currentUser.userId) return;
+     const response = await fetch( 
+       `${API_URL}/users/wallet-balance/${currentUser.userId}` 
+     ); 
+     const data = await response.json(); 
+     console.log('Wallet response:', data); 
+ 
+     const balance = Number(data.balance || 0) 
+       .toFixed(2); 
+ 
+     // Update ALL balance elements 
+     const ids = [ 
+       'walletBalanceValue', 
+       'walletBalance', 
+       'wallet-balance', 
+       'provWalletBalance', 
+       'userWalletBalance', 
+       'walletAmount' 
+     ]; 
+ 
+     ids.forEach(id => { 
+       const el = document.getElementById(id); 
+       if (el) { 
+         el.textContent = '₹' + balance; 
+         console.log('Updated:', id, balance); 
+       } 
+     }); 
+ 
+   } catch (error) { 
+     console.log('Wallet fetch error:', error); 
+   } 
+ } 
+ 
+ // Call on load 
+ refreshWalletBalance(); 
 
         async function loadTransactions() {
             if (!currentUser || !currentUser.userId) return;
@@ -3708,7 +3726,7 @@
                 if (createBtn) createBtn.style.display = currentUser && currentUser.role === 'taskProvider' ? 'inline-block' : 'none';
             }
             if (tabName === 'wallet') {
-                refreshUserWallet();
+                refreshWalletBalance();
                 loadTransactions();
             }
         }
@@ -3843,7 +3861,7 @@
                             activeBtn.textContent = originalText;
                         }
                         hideAddMoney();
-                        refreshUserWallet();
+                        refreshWalletBalance();
                         alert('Money added successfully. New balance: ₹' + newBalance);
                     } else {
                         if (activeBtn) {
@@ -3884,7 +3902,7 @@
                 renderFilterTasks();
             } else if (name === 'wallet') {
                 document.getElementById('userWalletTab').classList.remove('hidden');
-                refreshUserWallet();
+                refreshWalletBalance();
                 buildTxTable();
                 const balEl = document.getElementById('walletBalanceValue');
                 if (balEl) balEl.textContent = String(currentUser && currentUser.wallet != null ? currentUser.wallet : 0);
@@ -3956,7 +3974,7 @@
                 loadProviderTasks();
             } else if (name === 'wallet') {
                 document.getElementById('provWalletTab').classList.remove('hidden');
-                refreshUserWallet().then(()=> {
+                refreshWalletBalance().then(()=> {
                     const w = document.getElementById('provWalletBalance');
                     if (w) w.textContent = String(currentUser && currentUser.wallet != null ? currentUser.wallet : 0);
                 });
@@ -5067,7 +5085,7 @@
                 if (data.success) {
                     alert('Wallet connected successfully!');
                     closeWalletModal();
-                    refreshUserWallet();
+                    refreshWalletBalance();
                 } else {
                     alert(data.message || 'Failed to connect wallet');
                 }
@@ -5159,7 +5177,7 @@
     }).then(r=>r.json()).then(d=>{
         alert(d.message || (d.success ? 'Withdrawal successful' : 'Failed'));
         closeWithdrawModal();
-        refreshUserWallet();
+        refreshWalletBalance();
     }).catch(e=>alert(e.message));
 }
 
