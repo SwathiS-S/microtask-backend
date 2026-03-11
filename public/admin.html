@@ -431,13 +431,7 @@
    console.log('Pending escrows:', data); 
  
    // Find correct container 
-   const container = 
-     document.getElementById('pendingEscrows') || 
-     document.getElementById('escrowList') || 
-     document.getElementById('escrow-list') || 
-     document.getElementById('escrowReleases') || 
-     document.getElementById('pendingReleases') || 
-     document.getElementById('escrow-releases'); 
+   const container = document.getElementById('pendingEscrows'); 
  
    console.log('Container found:', container?.id); 
  
