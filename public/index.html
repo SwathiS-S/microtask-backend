@@ -2047,7 +2047,7 @@
                     if (auth) auth.classList.add('hidden');
                     if (dashboard) dashboard.classList.remove('hidden');
 
-                    updateDashboardUI();
+                    await updateDashboardUI();
                     
                     // Role-based UI
                     const heading = document.getElementById('tasksHeading');
@@ -2112,7 +2112,7 @@
             loadTasks();
         }
 
-        function updateDashboardUI() {
+        async function updateDashboardUI() {
             if (!currentUser) return;
             
             const isProvider = currentUser.role === 'taskProvider';
@@ -2125,9 +2125,24 @@
             const userWD = document.getElementById('userWithdrawalContainer');
             const provCW = document.getElementById('provCreateWalletContainer');
 
-            if (userCW) userCW.classList.toggle('hidden', isProvider || isWalletCreated);
-            if (userWD) userWD.classList.toggle('hidden', isProvider || !isWalletCreated);
-            if (provCW) provCW.classList.toggle('hidden', !isProvider || isWalletCreated);
+            // Fix: Check wallet exists in database correctly
+            const walletRes = await fetch(`${API_URL}/users/wallet-balance/${currentUser.userId}`);
+            const walletData = await walletRes.json();
+            console.log('Wallet check:', walletData);
+
+            if (walletData.success && walletData.balance >= 0) {
+                // Wallet exists - hide create wallet container
+                if (userCW) userCW.classList.add('hidden');
+                // For providers, still use the isWalletCreated for create wallet banner if needed, 
+                // but userWD should show if balance >= 0
+                if (userWD) userWD.classList.toggle('hidden', isProvider || !isWalletCreated);
+                if (provCW) provCW.classList.toggle('hidden', !isProvider || isWalletCreated);
+            } else {
+                // No wallet - show create wallet
+                if (userCW) userCW.classList.toggle('hidden', isProvider || isWalletCreated);
+                if (userWD) userWD.classList.toggle('hidden', isProvider || !isWalletCreated);
+                if (provCW) provCW.classList.toggle('hidden', !isProvider || isWalletCreated);
+            }
             
             // Update Top Bar
             const nameEl = document.getElementById('displayUserName');
@@ -2319,7 +2334,7 @@
                     document.getElementById('dashboardSection').classList.remove('hidden');
                     
                     // NEW: Update dashboard header and sidebar UI
-                    updateDashboardUI();
+                    await updateDashboardUI();
                     
                     updateProfileSavedCount();
                     // Role-based UI (provider can create tasks; user cannot)
