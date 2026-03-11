@@ -239,6 +239,9 @@
       }
     }
     function getAdminIdHeader() {
+      console.log('Admin header:', adminUser && adminUser.userId ? { 'x-admin-user-id': String(adminUser.userId) } : {}); 
+      console.log('Current admin:', adminUser); 
+      console.log('Admin ID:', adminUser?._id || adminUser?.id || adminUser?.userId); 
       return adminUser && adminUser.userId ? { 'x-admin-user-id': String(adminUser.userId) } : {};
     }
     function logoutAdmin() {
@@ -424,9 +427,23 @@
     // Fix 5: Admin dashboard show pending escrows
     async function loadPendingEscrows() { 
    try { 
+     const adminId = adminUser?._id 
+       || adminUser?.id 
+       || adminUser?.userId 
+       || localStorage.getItem('adminId'); 
+ 
+     console.log('Using adminId:', adminId); 
+ 
      const response = await fetch( 
        `${API_URL}/admin/escrow/pending`, 
-       { headers: getAdminIdHeader() } 
+       { 
+         headers: { 
+           'Content-Type': 'application/json', 
+           'adminid': adminId, 
+           'admin-id': adminId, 
+           'x-admin-id': adminId 
+         } 
+       } 
      ); 
      const data = await response.json(); 
  

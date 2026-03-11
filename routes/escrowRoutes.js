@@ -8,28 +8,28 @@ const Notification = require('../models/Notification');
 // Fix 2: Admin dashboard fetch all pending escrows
 router.get('/admin/escrow/pending', async (req, res) => { 
    try { 
+     // Remove adminId check completely 
+     // Just return pending tasks 
+ 
+     const pendingTasks = await Task.find({ 
+       status: 'pending_release' 
+     }); 
+ 
      const pendingEscrows = await Escrow.find({ 
        status: 'held' 
      }).populate('taskId').populate('providerId'); 
  
-     const pendingTasks = await Task.find({ 
-       $or: [ 
-         { status: 'pending_release' }, 
-         { status: 'reviewed' } 
-       ] 
-     }); 
- 
-     console.log('Pending escrows:', pendingEscrows.length); 
      console.log('Pending tasks:', pendingTasks.length); 
+     console.log('Pending escrows:', pendingEscrows.length); 
  
-     res.json({ 
+     return res.json({ 
        success: true, 
-       escrows: pendingEscrows, 
-       tasks: pendingTasks 
+       tasks: pendingTasks, 
+       escrows: pendingEscrows 
      }); 
  
    } catch (error) { 
-     res.status(500).json({ 
+     return res.status(500).json({ 
        success: false, 
        message: error.message 
      }); 
