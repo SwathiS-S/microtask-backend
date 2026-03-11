@@ -3,28 +3,35 @@ const router = express.Router();
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 
-// GET /wallet/balance/:userId - Get wallet balance
-router.get('/balance/:userId', async (req, res) => {
-  try {
-    let wallet = await Wallet.findOne({ userId: req.params.userId });
-    if (!wallet) {
-      // Create wallet if it doesn't exist (e.g. for new users)
-      const user = await User.findById(req.params.userId);
-      if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-      
-      wallet = new Wallet({ 
-        userId: user._id, 
-        role: user.role === 'taskProvider' ? 'provider' : 'user', 
-        balance: 0,
-        pendingWithdrawal: 0
-      });
-      await wallet.save();
-    }
-    res.json({ success: true, balance: wallet.balance, pendingWithdrawal: wallet.pendingWithdrawal });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+// Route 3 
+ router.get('/balance/:userId', async (req, res) => { 
+   try { 
+     const mongoose = require('mongoose'); 
+     let wallet = await Wallet.findOne({ 
+       userId: req.params.userId 
+     }); 
+     if (!wallet) { 
+       wallet = await Wallet.findOne({ 
+         userId: new mongoose.Types.ObjectId( 
+           req.params.userId 
+         ) 
+       }); 
+     } 
+     return res.json({ 
+       success: true, 
+       balance: Number(wallet?.balance || 0), 
+       pendingWithdrawal: Number( 
+         wallet?.pendingWithdrawal || 0 
+       ), 
+       transactions: wallet?.transactions || [] 
+     }); 
+   } catch (error) { 
+     return res.status(500).json({ 
+       success: false, 
+       balance: 0 
+     }); 
+   } 
+ }); 
 
 // GET /wallet/transactions/:userId - Get all transactions
 router.get('/transactions/:userId', async (req, res) => {

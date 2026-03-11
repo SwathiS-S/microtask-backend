@@ -1,10 +1,69 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose'); 
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const Wallet = require('../models/Wallet');
 const WithdrawalRequest = require('../models/WithdrawalRequest');
 const { createPayoutForUser } = require('../services/razorpay');
+
+// Helper function to get wallet 
+async function getWalletByUserId(userId) { 
+   let wallet = await Wallet.findOne({ userId }); 
+   if (!wallet) { 
+     wallet = await Wallet.findOne({ 
+       userId: new mongoose.Types.ObjectId(userId) 
+     }); 
+   } 
+   return wallet; 
+ } 
+ 
+ // Route 1 
+ router.get('/wallet-balance/:userId', 
+   async (req, res) => { 
+   try { 
+     const wallet = await getWalletByUserId( 
+       req.params.userId 
+     ); 
+     console.log('Wallet balance:', wallet?.balance); 
+     return res.json({ 
+       success: true, 
+       balance: Number(wallet?.balance || 0), 
+       pendingWithdrawal: Number( 
+         wallet?.pendingWithdrawal || 0 
+       ), 
+       transactions: wallet?.transactions || [] 
+     }); 
+   } catch (error) { 
+     return res.status(500).json({ 
+       success: false, 
+       balance: 0 
+     }); 
+   } 
+ }); 
+ 
+ // Route 2 
+ router.get('/wallet/details/:userId', 
+   async (req, res) => { 
+   try { 
+     const wallet = await getWalletByUserId( 
+       req.params.userId 
+     ); 
+     return res.json({ 
+       success: true, 
+       balance: Number(wallet?.balance || 0), 
+       pendingWithdrawal: Number( 
+         wallet?.pendingWithdrawal || 0 
+       ), 
+       transactions: wallet?.transactions || [] 
+     }); 
+   } catch (error) { 
+     return res.status(500).json({ 
+       success: false, 
+       balance: 0 
+     }); 
+   } 
+ }); 
 
 // Phone verification removed. Email verification only.
 // const otpStore = new Map(); // removed
