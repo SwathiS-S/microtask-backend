@@ -3743,12 +3743,13 @@
                     return;
                 }
                 const rows = data.transactions.map(tx => {
-                    const sign = tx.type === 'CREDIT' ? '+' : '-';
-                    const color = tx.type === 'CREDIT' ? '#28a745' : '#dc3545';
-                    const when = tx.created_at ? new Date(tx.created_at).toLocaleString() : '';
+                    const tType = tx.transactionType || tx.type;
+                    const sign = (tType === 'credit' || tType === 'escrow_release' || tType === 'refund' || tType === 'CREDIT') ? '+' : '-';
+                    const color = (tType === 'credit' || tType === 'escrow_release' || tType === 'refund' || tType === 'CREDIT') ? '#28a745' : '#dc3545';
+                    const when = tx.date || tx.created_at ? new Date(tx.date || tx.created_at).toLocaleString() : '';
                     return `<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f2f2f2; font-size:13px;">
                                 <div>
-                                    <div style="font-weight:600; color:${color};">${tx.type}</div>
+                                    <div style="font-weight:600; color:${color}; text-transform: capitalize;">${tType.replace('_', ' ')}</div>
                                     <div style="color:#777;">${when}</div>
                                 </div>
                                 <div style="font-weight:600; color:${color};">${sign}₹${tx.amount}</div>

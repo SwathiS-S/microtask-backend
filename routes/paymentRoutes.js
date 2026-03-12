@@ -68,7 +68,7 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
           transactions: { 
             $each: [ 
               { 
-                type: 'escrow_received', 
+                transactionType: 'escrow_received', 
                 amount: Number(totalAmount), 
                 taskId: taskId, 
                 description: `Provider paid ₹${totalAmount} escrow`, 
@@ -76,7 +76,7 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
                 date: new Date() 
               }, 
               { 
-                type: 'commission', 
+                transactionType: 'commission', 
                 amount: Number(adminCommission), 
                 taskId: taskId, 
                 description: `20% commission ₹${adminCommission}`, 
@@ -95,21 +95,25 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
     
     // Fix 1: After escrow payment verified save to DB correctly
     // Save or Update Escrow record using findOneAndUpdate with upsert
-    const escrow = await Escrow.findOneAndUpdate( 
-      { taskId: taskId }, 
-      { 
-        taskId: taskId, 
-        providerId: providerId, 
-        totalAmount: totalAmount, 
-        adminCommission: adminCommission, 
-        workerAmount: workerAmount, 
-        razorpayPaymentId: razorpay_payment_id, 
-        razorpayOrderId: razorpay_order_id, 
-        status: 'held', 
-        heldAt: new Date() 
-      }, 
-      { upsert: true, new: true } 
-    ); 
+    // ✅ FIXED - use correct field names matching Escrow schema 
+     const escrow = await Escrow.findOneAndUpdate( 
+       { taskId: taskId }, 
+       { 
+         $set: { 
+           taskId: taskId, 
+           providerId: providerId, 
+           amount: totalAmount,          // ✅ 'amount' not 'totalAmount' 
+           workerAmount: workerAmount, 
+           platformFee: adminCommission, // ✅ 'platformFee' not 'adminCommission' 
+           totalPaid: totalAmount,       // ✅ required field 
+           razorpayPaymentId: razorpay_payment_id, 
+           razorpayOrderId: razorpay_order_id, 
+           status: 'held', 
+           heldAt: new Date() 
+         } 
+       }, 
+       { upsert: true, new: true } 
+     ); 
 
     // Update task 
     await Task.findByIdAndUpdate(taskId, { 
@@ -130,7 +134,7 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
     
     // Log the funding in transactions
     wallet.transactions.push({
-      type: 'escrow_hold',
+      transactionType: 'escrow_hold',
       amount: Number(amount),
       taskId: task._id,
       taskTitle: task.title,
@@ -188,7 +192,7 @@ router.post('/razorpay/verify-task-payment', async (req, res) => {
       if (!adminWallet) adminWallet = new Wallet({ userId: admin._id, role: 'user', balance: 0 });
       adminWallet.balance = (adminWallet.balance || 0) + adminCommission;
       adminWallet.transactions.push({
-        type: 'credit',
+        transactionType: 'credit',
         amount: adminCommission,
         taskId: task._id,
         taskTitle: task.title,
@@ -204,7 +208,7 @@ router.post('/razorpay/verify-task-payment', async (req, res) => {
     if (!workerWallet) workerWallet = new Wallet({ userId: worker._id, role: 'user', balance: 0 });
     workerWallet.balance = (workerWallet.balance || 0) + userEarnings;
     workerWallet.transactions.push({
-      type: 'credit',
+      transactionType: 'credit',
       amount: userEarnings,
       taskId: task._id,
       taskTitle: task.title,
@@ -248,7 +252,7 @@ router.post('/razorpay/verify', async (req, res) => {
     if (!wallet) wallet = new Wallet({ userId, role: user.role === 'taskProvider' ? 'provider' : 'user', balance: 0 });
     wallet.balance = (Number(wallet.balance) || 0) + addAmount;
     wallet.transactions.push({
-      type: 'credit',
+      transactionType: 'credit',
       amount: addAmount,
       description: 'Added Funds via Razorpay',
       status: 'completed',

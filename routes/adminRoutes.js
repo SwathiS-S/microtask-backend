@@ -55,16 +55,17 @@ router.post('/users/:id/activate', async (req, res) => {
   }
 });
 
-router.get('/tasks', async (req, res) => {
-  try {
-    const tasks = await Task.find()
-      .populate('postedBy', 'name email')
-      .populate('acceptedBy', 'name email');
-    res.json({ success: true, count: tasks.length, tasks });
-  } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
-  }
-});
+router.get('/tasks', async (req, res) => { 
+   try { 
+     const tasks = await Task.find({}) 
+       .populate('postedBy', 'name email') 
+       .populate('acceptedBy', 'name email') 
+       .select('title amount status postedBy acceptedBy createdAt'); // ✅ amount included 
+     res.json({ success: true, count: tasks.length, tasks }); 
+   } catch (e) { 
+     res.status(500).json({ success: false, message: e.message }); 
+   } 
+ }); 
 
 router.delete('/tasks/:id', async (req, res) => {
   try {
@@ -161,7 +162,7 @@ router.put('/withdrawals/complete/:id', async (req, res) => {
         $inc: { pendingWithdrawal: -withdrawal.amount },
         $push: {
           transactions: {
-            type: 'withdrawal_completed',
+            transactionType: 'withdrawal_completed',
             amount: withdrawal.amount,
             description: `Withdrawal to ${withdrawal.bankDetails.bankName} completed`,
             transactionReference,
@@ -203,7 +204,7 @@ router.put('/withdrawals/reject/:id', async (req, res) => {
         },
         $push: {
           transactions: {
-            type: 'withdrawal_rejected',
+            transactionType: 'withdrawal_rejected',
             amount: withdrawal.amount,
             description: `Withdrawal rejected. Reason: ${reason}`,
             status: 'failed',
@@ -400,14 +401,14 @@ router.put('/withdrawals/:id', async (req, res) => {
     // Update wallet transaction status
     const wallet = await Wallet.findOne({ userId: item.userId });
     if (wallet) {
-      const tx = wallet.transactions.find(t => t.type === 'withdrawal' && t.status === 'pending' && t.amount === item.amount);
+      const tx = wallet.transactions.find(t => t.transactionType === 'withdrawal' && t.status === 'pending' && t.amount === item.amount);
       if (tx) tx.status = status === 'completed' ? 'completed' : 'failed';
       
       // If rejected, refund the balance
       if (status === 'failed') {
         wallet.balance += item.amount;
         wallet.transactions.push({
-          type: 'credit',
+          transactionType: 'credit',
           amount: item.amount,
           description: 'Withdrawal refund due to rejection',
           status: 'completed'
@@ -456,7 +457,7 @@ router.put('/dispute/:taskId', async (req, res) => {
       if (workerWallet) {
         workerWallet.balance += escrow.amount;
         workerWallet.transactions.push({
-          type: 'credit',
+          transactionType: 'credit',
           amount: escrow.amount,
           taskId: req.params.taskId,
           description: 'Payment released by admin after dispute',
@@ -475,7 +476,7 @@ router.put('/dispute/:taskId', async (req, res) => {
         providerWallet.escrowBalance -= escrow.amount;
         providerWallet.balance += escrow.amount;
         providerWallet.transactions.push({
-          type: 'refund',
+          transactionType: 'refund',
           amount: escrow.amount,
           taskId: req.params.taskId,
           description: 'Refunded by admin after dispute',

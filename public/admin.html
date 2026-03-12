@@ -326,26 +326,30 @@
         loadUsers();
       } catch (e) { alert(e.message); }
     }
-    async function loadTasks() {
-      const tbody = document.getElementById('tasksTable');
-      tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
-      try {
-        const data = await fetch(`${API_URL}/admin/tasks`, { headers: getAdminIdHeader() }).then(r => r.json());
-        const items = data.tasks || [];
-        tbody.innerHTML = items.map(t => `
-          <tr>
-            <td>${t.title || '-'}</td>
-            <td>₹ ${Number(t.amount || 0).toFixed(2)}</td>
-            <td><span class="badge">${t.status}</span></td>
-            <td>${t.postedBy ? (t.postedBy.email || t.postedBy.name || t.postedBy._id) : '-'}</td>
-            <td>${t.acceptedBy ? (t.acceptedBy.email || t.acceptedBy.name || t.acceptedBy._id) : '-'}</td>
-            <td><button class="btn small danger" onclick="removeTask('${t._id}')">Remove</button></td>
-          </tr>
-        `).join('');
-      } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="6">${e.message}</td></tr>`;
-      }
-    }
+    async function loadTasks() { 
+   const tbody = document.getElementById('tasksTable'); 
+   tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>'; 
+   try { 
+     const data = await fetch(`${API_URL}/admin/tasks`, { headers: getAdminIdHeader() }).then(r => r.json()); 
+     const items = data.tasks || []; 
+     tbody.innerHTML = items.map(t => { 
+       // ✅ amount can live on task directly or nested — check both 
+       const amount = Number(t.amount ?? t.taskAmount ?? 0); 
+       return ` 
+         <tr> 
+           <td>${t.title || '-'}</td> 
+           <td>₹ ${amount.toFixed(2)}</td> 
+           <td><span class="badge">${t.status}</span></td> 
+           <td>${t.postedBy ? (t.postedBy.email || t.postedBy.name || t.postedBy._id) : '-'}</td> 
+           <td>${t.acceptedBy ? (t.acceptedBy.email || t.acceptedBy.name || t.acceptedBy._id) : '-'}</td> 
+           <td><button class="btn small danger" onclick="removeTask('${t._id}')">Remove</button></td> 
+         </tr> 
+       `; 
+     }).join(''); 
+   } catch (e) { 
+     tbody.innerHTML = `<tr><td colspan="6">${e.message}</td></tr>`; 
+   } 
+ } 
     async function removeTask(id) {
       if (!confirm('Remove this task?')) return;
       try {
@@ -364,7 +368,7 @@
         tbody.innerHTML = items.map(x => `
           <tr>
             <td>${x.user_id ? (x.user_id.name || x.user_id.email || x.user_id) : '-'}</td>
-            <td><span class="badge" style="background:${x.type==='COMMISSION'?'#fef3c7':x.type==='CREDIT'?'#dcfce7':'#fee2e2'};color:${x.type==='COMMISSION'?'#92400e':x.type==='CREDIT'?'#166534':'#991b1b'}">${x.type}</span></td>
+            <td><span class="badge" style="background:${(x.transactionType || x.type)==='COMMISSION'?'#fef3c7':(x.transactionType || x.type)==='CREDIT'?'#dcfce7':'#fee2e2'};color:${(x.transactionType || x.type)==='COMMISSION'?'#92400e':(x.transactionType || x.type)==='CREDIT'?'#166534':'#991b1b'}">${(x.transactionType || x.type)}</span></td>
             <td>₹ ${Number(x.amount || 0).toFixed(2)}</td>
             <td>${x.status}</td>
             <td>${new Date(x.created_at).toLocaleString()}</td>
@@ -426,119 +430,90 @@
 
     // Fix 5: Admin dashboard show pending escrows
     async function loadPendingEscrows() { 
-   try { 
-     const adminId = adminUser?._id 
-       || adminUser?.id 
-       || adminUser?.userId 
-       || localStorage.getItem('adminId'); 
+      const container = document.getElementById('pendingEscrows'); 
+      container.innerHTML = '<p>Loading pending releases...</p>'; 
  
-     console.log('Using adminId:', adminId); 
+      try { 
+        const response = await fetch(`${API_URL}/admin/escrow/pending`, { 
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() } 
+        }); 
+        const data = await response.json(); 
+        const items = data.escrows || data.tasks || []; 
  
-     const response = await fetch( 
-       `${API_URL}/admin/escrow/pending`, 
-       { 
-         headers: { 
-           'Content-Type': 'application/json', 
-           'adminid': adminId, 
-           'admin-id': adminId, 
-           'x-admin-id': adminId 
-         } 
-       } 
-     ); 
-     const data = await response.json(); 
+        if (!items.length) { 
+          container.innerHTML = '<p>No pending escrow releases.</p>'; 
+          return; 
+        } 
  
-     console.log('Full data:', JSON.stringify(data)); 
-     console.log('Escrows array:', data.escrows); 
-     console.log('Escrows length:', data.escrows?.length); 
-     console.log('Tasks array:', data.tasks); 
-     console.log('Tasks length:', data.tasks?.length); 
+        container.innerHTML = items.map(item => { 
+          // ✅ FIX 1: use numbers, never fallback to string 'N/A' 
+          const rawAmount  = Number(item.amount || item.totalAmount || 0); 
+          const workerAmt  = Number(item.workerAmount || Math.round(rawAmount * 0.8) || 0); 
+          const taskId     = item.taskId?._id || item.taskId || item._id; 
+          const title      = item.title || item.taskId?.title || 'Untitled Task'; 
+          const provider   = item.providerId?.name || item.providerId?.email || 'Unknown'; 
  
-     const container = document.getElementById( 
-       'pendingEscrows' 
-     ); 
+          return ` 
+            <div style="background:#1e293b; padding:16px; border-radius:8px; margin:8px 0;"> 
+              <p><b>Task:</b> ${title}</p> 
+              <p><b>Worker receives:</b> ₹${workerAmt.toFixed(2)}</p> 
+              <p><b>Total held:</b> ₹${rawAmount.toFixed(2)}</p> 
+              <p style="font-size:12px; color:#94a3b8">Provider: ${provider}</p> 
+              <button 
+                id="btn-${taskId}" 
+                onclick="releaseEscrow('${taskId}', this)" 
+                style="background:green; color:white; padding:8px 16px; border:none; border-radius:4px; cursor:pointer;"> 
+                ✅ Release ₹${workerAmt.toFixed(2)} to Worker 
+              </button> 
+            </div> 
+          `; 
+        }).join(''); 
  
-     // Try rendering tasks instead of escrows 
-     const items = data.escrows?.length > 0 
-       ? data.escrows 
-       : data.tasks; 
+      } catch (error) { 
+        container.innerHTML = `<p style="color:red">Error: ${error.message}</p>`; 
+      } 
+    } 
  
-     console.log('Items to render:', items); 
-     console.log('Items length:', items?.length); 
+    // ✅ FIX 2: btn is now passed and used, auth header added 
+    async function releaseEscrow(taskId, btn) { 
+      if (!confirm('Release payment to worker?')) return; 
  
-     if (!items || items.length === 0) { 
-       container.innerHTML = '<p>No pending releases</p>'; 
-       return; 
-     } 
+      if (btn) { 
+        btn.disabled = true; 
+        btn.textContent = 'Releasing...'; 
+      } 
  
-     container.innerHTML = items.map(item => { 
-       console.log('Item full:', JSON.stringify(item)); 
+      try { 
+        const response = await fetch(`${API_URL}/admin/escrow/release/${taskId}`, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() } 
+        }); 
+        const data = await response.json(); 
  
-       // Get correct taskId 
-       const taskId = item.taskId?._id 
-         || item.taskId 
-         || item._id; 
+        if (data.success) { 
+          if (btn) { 
+            btn.textContent = '✅ Released!'; 
+            btn.style.background = '#1e3a5f'; 
+          } 
+          setTimeout(() => loadPendingEscrows(), 1200); 
+        } else { 
+          alert('❌ ' + (data.message || 'Release failed')); 
+          if (btn) { 
+            btn.disabled = false; 
+            btn.textContent = '⚠️ Retry Release'; 
+          } 
+        } 
+      } catch (e) { 
+        alert('Network error: ' + e.message); 
+        if (btn) { 
+          btn.disabled = false; 
+          btn.textContent = '⚠️ Retry Release'; 
+        } 
+      } 
+    } 
  
-       const title = item.title 
-         || item.taskId?.title 
-         || 'N/A'; 
- 
-       const amount = item.workerAmount 
-         || item.amount 
-         || item.totalAmount 
-         || 'N/A'; 
- 
-       console.log('Using taskId:', taskId); 
- 
-       return ` 
-         <div style="background:#1e293b; 
-           padding:16px; border-radius:8px; 
-           margin:8px 0;"> 
-           <p><b>Task:</b> ${title}</p> 
-           <p><b>Amount:</b> ₹${amount}</p> 
-           <button 
-             onclick="releaseEscrow('${taskId}')" 
-             style="background:green; color:white; 
-             padding:8px 16px; border:none; 
-             border-radius:4px; cursor:pointer;"> 
-             ✅ Release ₹${amount} to Worker 
-           </button> 
-         </div> 
-       `; 
-     }).join(''); 
- 
-   } catch (error) { 
-     console.log('Error:', error.message); 
-   } 
- } 
- 
- async function releaseEscrow(taskId, btn) { 
-   if (!confirm('Release payment to worker?')) return; 
- 
-   if (btn) { 
-     btn.disabled = true; 
-     btn.textContent = 'Releasing...'; 
-   } 
- 
-   const response = await fetch( 
-     `${API_URL}/admin/escrow/release/${taskId}`, 
-     { method: 'POST' } 
-   ); 
-   const data = await response.json(); 
- 
-   if (data.success) { 
-     alert('✅ Payment released successfully!'); 
-     loadPendingEscrows(); 
-   } else { 
-     alert('❌ ' + data.message); 
-     if (btn) { 
-       btn.disabled = false; 
-       btn.textContent = 'Retry Release'; 
-     } 
-   } 
- } 
- 
- // Load on page load 
- loadPendingEscrows(); 
+    // Load on page load 
+    loadPendingEscrows(); 
 
 
     loadPersisted();

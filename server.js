@@ -160,7 +160,7 @@ async function checkDeadlines() {
           wallet.escrowBalance -= escrow.amount;
           wallet.balance += escrow.amount;
           wallet.transactions.push({
-            type: 'refund',
+            transactionType: 'refund',
             amount: escrow.amount,
             taskId: task._id,
             description: 'Auto-refund due to deadline expiry',

@@ -317,7 +317,7 @@ router.post('/approve-final', async (req, res) => {
     
     workerWallet.balance = (workerWallet.balance || 0) + escrow.amount;
     workerWallet.transactions.push({
-      type: 'credit',
+      transactionType: 'credit',
       amount: escrow.amount,
       taskId: task._id,
       taskTitle: task.title,
@@ -337,7 +337,7 @@ router.post('/approve-final', async (req, res) => {
     if (providerWallet) {
       providerWallet.escrowBalance = Math.max(0, (providerWallet.escrowBalance || 0) - escrow.amount);
       providerWallet.transactions.push({
-        type: 'escrow_release',
+        transactionType: 'escrow_release',
         amount: escrow.amount,
         taskId: task._id,
         taskTitle: task.title,

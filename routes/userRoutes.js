@@ -114,7 +114,7 @@ router.post('/withdraw-money', async (req, res) => {
          }, 
          $push: { 
            transactions: { 
-             type: 'withdrawal', 
+             transactionType: 'withdrawal', 
              amount: parseFloat(amount), 
              description: `Withdrawal ₹${amount} requested`, 
              status: 'pending', 

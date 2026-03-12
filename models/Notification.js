@@ -27,7 +27,8 @@ const notificationSchema = new mongoose.Schema({
       'UPDATE_SUBMITTED',
       'WORK_SUBMITTED',
       'PAYMENT_RELEASED',
-      'DISPUTE_RESOLVED'
+      'DISPUTE_RESOLVED',
+      'ESCROW_RELEASE_REQUEST'
     ],
     required: true
   },

@@ -8,31 +8,33 @@ const Notification = require('../models/Notification');
 // Fix 2: Admin dashboard fetch all pending escrows
 router.get('/admin/escrow/pending', async (req, res) => { 
    try { 
-     // Remove adminId check completely 
-     // Just return pending tasks 
+     const pendingEscrows = await Escrow.find({ status: 'held' }) 
+       .populate('taskId', 'title amount workerAmount status acceptedBy assignedTo') 
+       .populate('providerId', 'name email'); 
  
-     const pendingTasks = await Task.find({ 
-       status: 'pending_release' 
+     const normalized = pendingEscrows.map(escrow => { 
+       const task = escrow.taskId; 
+       const rawAmount = Number(escrow.amount || task?.amount || 0); 
+       const workerAmount = Number( 
+         escrow.workerAmount || 
+         task?.workerAmount || 
+         Math.round(rawAmount * 0.8) 
+       ); 
+       return { 
+         _id: escrow._id, 
+         taskId: task?._id || escrow.taskId, 
+         title: task?.title || 'Untitled Task', 
+         amount: rawAmount, 
+         workerAmount: workerAmount,  // ✅ always a number 
+         providerId: escrow.providerId, 
+         status: escrow.status, 
+         createdAt: escrow.createdAt, 
+       }; 
      }); 
  
-     const pendingEscrows = await Escrow.find({ 
-       status: 'held' 
-     }).populate('taskId').populate('providerId'); 
- 
-     console.log('Pending tasks:', pendingTasks.length); 
-     console.log('Pending escrows:', pendingEscrows.length); 
- 
-     return res.json({ 
-       success: true, 
-       tasks: pendingTasks, 
-       escrows: pendingEscrows 
-     }); 
- 
+     return res.json({ success: true, escrows: normalized, tasks: [] }); 
    } catch (error) { 
-     return res.status(500).json({ 
-       success: false, 
-       message: error.message 
-     }); 
+     return res.status(500).json({ success: false, message: error.message }); 
    } 
  }); 
 
@@ -128,7 +130,7 @@ router.post('/admin/escrow/release/:taskId',
          $inc: { balance: Number(workerAmount) }, 
          $push: { 
            transactions: { 
-             type: 'credit', 
+             transactionType: 'credit', 
              amount: Number(workerAmount), 
              taskId: task._id, 
              description: `Payment ₹${workerAmount} released from escrow`, 
@@ -149,7 +151,7 @@ router.post('/admin/escrow/release/:taskId',
          $inc: { totalOutflow: Number(workerAmount) }, 
          $push: { 
            transactions: { 
-             type: 'escrow_release', 
+             transactionType: 'escrow_release', 
              amount: Number(workerAmount), 
              taskId: task._id, 
              description: `Released ₹${workerAmount} to worker`, 
@@ -205,46 +207,48 @@ router.post('/admin/escrow/release/:taskId',
  }); 
 
 
-// POST /escrow/deposit/:taskId - Provider deposits escrow
-router.post('/deposit/:taskId', async (req, res) => {
-  try {
-    const { providerId, amount } = req.body;
-    
-    // Check provider wallet balance
-    const wallet = await Wallet.findOne({ userId: providerId });
-    if (!wallet || wallet.balance < amount) {
-      return res.status(400).json({ success: false, message: 'Insufficient balance' });
-    }
-
-    // Deduct from wallet and add to escrowBalance
-    wallet.balance -= amount;
-    wallet.escrowBalance += amount;
-    wallet.transactions.push({
-      type: 'escrow_hold',
-      amount,
-      taskId: req.params.taskId,
-      description: 'Funds held in escrow for task',
-      status: 'completed'
-    });
-    await wallet.save();
-
-    // Create escrow record
-    const escrow = new Escrow({
-      taskId: req.params.taskId,
-      providerId,
-      amount,
-      status: 'held'
-    });
-    await escrow.save();
-
-    // Update task status to "funded"
-    await Task.findByIdAndUpdate(req.params.taskId, { status: 'funded' });
-
-    res.json({ success: true, message: 'Funds deposited to escrow', escrow });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+router.post('/deposit/:taskId', async (req, res) => { 
+   try { 
+     const { providerId, amount } = req.body; 
+ 
+     const wallet = await Wallet.findOne({ userId: providerId }); 
+     if (!wallet || wallet.balance < amount) { 
+       return res.status(400).json({ success: false, message: 'Insufficient balance' }); 
+     } 
+ 
+     wallet.balance -= amount; 
+     wallet.escrowBalance += amount; 
+     wallet.transactions.push({ 
+       transactionType: 'escrow_hold', // ✅ use transactionType not type 
+       amount, 
+       taskId: req.params.taskId, 
+       description: 'Funds held in escrow for task', 
+       status: 'completed' 
+     }); 
+     await wallet.save(); 
+ 
+     // ✅ Compute and store workerAmount at creation time 
+     const workerAmount = Math.round(Number(amount) * 0.8); 
+     const platformFee  = Number(amount) - workerAmount; 
+ 
+     const escrow = new Escrow({ 
+       taskId: req.params.taskId, 
+       providerId, 
+       amount: Number(amount), 
+       workerAmount: workerAmount,  // ✅ stored now 
+       platformFee: platformFee, 
+       totalPaid: Number(amount), 
+       status: 'held' 
+     }); 
+     await escrow.save(); 
+ 
+     await Task.findByIdAndUpdate(req.params.taskId, { status: 'funded' }); 
+ 
+     res.json({ success: true, message: 'Funds deposited to escrow', escrow }); 
+   } catch (error) { 
+     res.status(500).json({ success: false, message: error.message }); 
+   } 
+ }); 
 
 // POST /escrow/release/:taskId - Release to user
 router.post('/release/:taskId', async (req, res) => {
@@ -272,7 +276,7 @@ router.post('/release/:taskId', async (req, res) => {
         $inc: { balance: Number(releaseAmount) }, 
         $push: { 
           transactions: { 
-            type: 'credit', 
+            transactionType: 'credit', 
             amount: Number(releaseAmount), 
             taskId: task._id, 
             description: 'Payment released from escrow', 
@@ -344,7 +348,7 @@ router.post('/refund/:taskId', async (req, res) => {
       providerWallet.escrowBalance -= escrow.amount;
       providerWallet.balance += escrow.amount;
       providerWallet.transactions.push({
-        type: 'refund',
+        transactionType: 'refund',
         amount: escrow.amount,
         taskId: req.params.taskId,
         description: 'Escrow refunded to wallet',

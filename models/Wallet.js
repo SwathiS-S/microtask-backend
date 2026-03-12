@@ -8,7 +8,7 @@ const walletSchema = new mongoose.Schema({
   pendingWithdrawal: { type: Number, default: 0 },
   transactions: [
     {
-      type: { 
+      transactionType: { 
         type: String, 
         enum: ['credit', 'debit', 'escrow_hold', 'escrow_release', 'refund', 'withdrawal'], 
         required: true 
