@@ -45,8 +45,18 @@ router.post('/admin/escrow/release/:taskId',
      console.log('=== RELEASE START ==='); 
      console.log('taskId:', taskId); 
  
-     // Get task 
-     const task = await Task.findById(taskId); 
+     // Try finding task directly first 
+     let task = await Task.findById(taskId); 
+ 
+     // If not found try finding via escrow 
+     if (!task) { 
+       const escrowRecord = await Escrow.findById(taskId); 
+       console.log('Found escrow record as ID:', escrowRecord); 
+       if (escrowRecord) { 
+         task = await Task.findById(escrowRecord.taskId); 
+       } 
+     } 
+ 
      if (!task) { 
        return res.status(404).json({ 
          success: false, 
@@ -98,7 +108,7 @@ router.post('/admin/escrow/release/:taskId',
  
      // Get escrow 
      const escrow = await Escrow.findOne({ 
-       taskId: taskId 
+       taskId: task._id 
      }); 
      console.log('Escrow:', escrow?.amount); 
  
@@ -120,7 +130,7 @@ router.post('/admin/escrow/release/:taskId',
            transactions: { 
              type: 'credit', 
              amount: Number(workerAmount), 
-             taskId: taskId, 
+             taskId: task._id, 
              description: `Payment ₹${workerAmount} released from escrow`, 
              status: 'completed', 
              date: new Date() 
@@ -141,7 +151,7 @@ router.post('/admin/escrow/release/:taskId',
            transactions: { 
              type: 'escrow_release', 
              amount: Number(workerAmount), 
-             taskId: taskId, 
+             taskId: task._id, 
              description: `Released ₹${workerAmount} to worker`, 
              status: 'completed', 
              date: new Date() 
@@ -152,7 +162,7 @@ router.post('/admin/escrow/release/:taskId',
      ); 
  
      // Step 3: Update task to completed 
-     await Task.findByIdAndUpdate(taskId, { 
+     await Task.findByIdAndUpdate(task._id, { 
        $set: { 
          status: 'completed', 
          finalStatus: 'COMPLETED', 
@@ -166,7 +176,7 @@ router.post('/admin/escrow/release/:taskId',
      // Step 4: Update escrow to released 
      if (escrow) { 
        await Escrow.findOneAndUpdate( 
-         { taskId: taskId }, 
+         { taskId: task._id }, 
          { 
            $set: { 
              status: 'released', 
