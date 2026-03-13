@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const Wallet = require('../models/Wallet');
+const Withdrawal = require('../models/Withdrawal');   // ← ADD THIS 
 const WithdrawalRequest = require('../models/WithdrawalRequest');
 const { createPayoutForUser } = require('../services/razorpay');
 

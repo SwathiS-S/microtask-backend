@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
-const Notification = require('../models/Notification');
+const User = require('../models/User'); 
+const Notification = require('../models/Notification'); 
+const Wallet = require('../models/Wallet');           // ← ADD THIS 
+const Withdrawal = require('../models/Withdrawal');   // ← ADD THIS 
 
 // GET /wallet/balance/:userId - Get wallet balance
 router.get('/balance/:userId', async (req, res) => {
@@ -19,6 +21,7 @@ router.get('/balance/:userId', async (req, res) => {
     res.json({
       success: true,
       balance: wallet?.balance || 0,
+      escrowBalance: wallet?.escrowBalance || 0,  // ← ADD THIS 
       pendingWithdrawal: wallet?.pendingWithdrawal || 0,
       transactions: (wallet?.transactions || []).map(tx => ({
         ...tx.toObject(),
@@ -55,7 +58,8 @@ router.get('/transactions/:userId', async (req, res) => {
         .sort((a,b) => b.date - a.date)
         .map(tx => ({
           ...tx.toObject(),
-          type: tx.transactionType // for backward compatibility
+          type: tx.transactionType,
+          transactionType: tx.transactionType  // ← ADD THIS (Flutter reads both) 
         }))
     });
   } catch (error) {
@@ -118,9 +122,14 @@ router.post('/withdraw', async (req, res) => {
 
     console.log('Updated balance:', updated.balance);
 
+    // Fetch user name before creating withdrawal 
+    const user = await User.findById(userId); 
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' }); 
+
     // Create withdrawal record
     const withdrawal = await Withdrawal.create({
       userId: userId,
+      userName: user.name || user.fullName || user.email, // ← ADD THIS 
       amount: Number(amount),
       bankDetails: bankDetails,
       status: 'pending',
