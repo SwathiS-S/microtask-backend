@@ -33,19 +33,19 @@
       <div class="brand">TaskNest Admin</div>
       <div class="subtitle">Sign in to your admin account</div>
     </div>
-    <div class="card-body">
+    <form class="card-body" id="adminLoginForm">
       <div id="errorBox" class="error"></div>
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" type="email" placeholder="admin@example.com" autocomplete="username">
+        <input id="email" type="email" placeholder="admin@example.com" autocomplete="username" required>
       </div>
       <div class="field">
         <label for="password">Password</label>
-        <input id="password" type="password" placeholder="Enter password" autocomplete="current-password">
+        <input id="password" type="password" placeholder="Enter password" autocomplete="current-password" required>
       </div>
-      <button class="btn" onclick="login()">Sign in</button>
+      <button class="btn" type="submit">Sign in</button>
       <div class="hint">Only accounts with role set to admin can sign in.</div>
-    </div>
+    </form>
   </div>
   <script>
     const API_URL = 'https://microtask-backend-bc7z.onrender.com';
@@ -54,7 +54,8 @@
       box.textContent = msg || 'Login failed';
       box.style.display = 'block';
     }
-    async function login() {
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       if (!email || !password) { showError('Enter email and password'); return; }
@@ -72,7 +73,7 @@
       } catch (e) {
         showError(e.message);
       }
-    }
+    });
     (function bootstrap() {
       const raw = localStorage.getItem('adminUser');
       if (raw) {

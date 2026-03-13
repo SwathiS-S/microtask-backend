@@ -290,7 +290,7 @@
                         <label for="loginPassword">Password</label>
                         <input type="password" id="loginPassword" placeholder="Enter password" required>
                     </div>
-                    <button type="button" class="submit-btn" id="loginBtn" onclick="document.getElementById('loginForm').requestSubmit();">Login</button>
+                    <button type="submit" class="submit-btn" id="loginBtn">Login</button>
                     <div class="auth-toggle">
                         Don't have an account? <a href="/#auth">Register</a>
                     </div>
@@ -308,7 +308,7 @@
     </div>
 
     <script>
-        const API_URL = window.location.origin + '/api';
+        const API_URL = window.location.origin;
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
