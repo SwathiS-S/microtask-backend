@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   late UserRole selectedRole;
   String? errorMessage;
+  String? loadingMessage; // ← add this state variable 
   
   // Set to false for production use with real backend
   static const bool _devMode = false;
@@ -56,17 +57,40 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       isLoading = true;
       errorMessage = null;
+      loadingMessage = 'Connecting to server...'; // ← add this 
     });
 
+    // After 10 seconds, update message 
+    Future.delayed(const Duration(seconds: 10), () { 
+      if (mounted && isLoading) { 
+        setState(() { 
+          loadingMessage = 'Server is waking up, please wait...'; 
+        }); 
+      } 
+    }); 
+
     try {
-      final response = await ApiService.post("/users/login", {
-        "email": email.text,
-        "password": password.text,
-        "role": selectedRole == UserRole.taskProvider ? "taskProvider" : "taskUser",
-      });
+      final response = await ApiService.post("/users/login", { 
+        "email": email.text.trim(), 
+        "password": password.text, 
+        "role": selectedRole == UserRole.taskProvider ? "taskProvider" : "taskUser", 
+      }).timeout( 
+        const Duration(seconds: 60),  // ← increase to 60s for Render cold start 
+        onTimeout: () { 
+          setState(() { 
+            isLoading = false; 
+            errorMessage = 'Request timed out. Please check your connection.'; 
+          }); 
+          return {}; 
+        }, 
+      ); 
+      
+      // ← ADD null/empty check 
+      if (response == null || response.isEmpty) return; 
 
       setState(() {
         isLoading = false;
+        loadingMessage = null; // Clear loading message on success
       });
 
       // Check if login was successful
@@ -100,6 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       setState(() {
         isLoading = false;
+        loadingMessage = null; // Clear on error
         errorMessage = 'Something went wrong. Please try again.';
       });
 
@@ -265,13 +290,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _handleLogin();
                               },
                               child: isLoading && selectedRole == UserRole.taskUser
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
+                                  ? Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          loadingMessage ?? 'Please wait...',
+                                          style: const TextStyle(fontSize: 10, color: Colors.white),
+                                        ),
+                                      ],
                                     )
                                   : const Text(
                                       'Login as User',
@@ -302,13 +337,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _handleLogin();
                               },
                               child: isLoading && selectedRole == UserRole.taskProvider
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
+                                  ? Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          loadingMessage ?? 'Please wait...',
+                                          style: const TextStyle(fontSize: 10, color: Colors.white),
+                                        ),
+                                      ],
                                     )
                                   : const Text(
                                       'Login as Task Provider',
