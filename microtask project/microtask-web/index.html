@@ -1162,11 +1162,11 @@
             background-repeat: no-repeat;
             background-position: center;
         }
-        .hero-wrap { width:100vw; min-height:100vh; min-height:100svh; min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#0b0b0e; color:#fff; padding:40px; position:relative; overflow:hidden; }
+        .hero-wrap { width:100vw; min-height:100vh; min-height:100svh; min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#f8fafc; color:#1e293b; padding:40px; position:relative; overflow:hidden; }
         .hero-grid { max-width:1200px; width:100%; display:grid; grid-template-columns: 1fr; gap:32px; align-items:center; }
-        .hero-title { font-size:64px; font-weight:800; letter-spacing:.2px; margin:0 0 12px; }
+        .hero-title { font-size:64px; font-weight:800; letter-spacing:.2px; margin:0 0 12px; color: #111827; }
         .hero-cta { display:flex; gap:14px; }
-        .info-panel { background:#101217; border:1px solid #ffffff12; border-radius:20px; padding:22px; }
+        .info-panel { background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:22px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .info-tiles { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
         @media (max-width: 900px) {
             .hero-wrap { padding: 24px; }
@@ -1182,7 +1182,7 @@
         /* Updated Auth Styles */
         /* Updated Auth Styles */
         #authSection {
-            background-color: #050505;
+            background-color: #f8fafc;
             min-height: 100vh;
             width: 100%;
             display: flex;
@@ -1194,7 +1194,7 @@
             min-height: 100vh;
             display: grid;
             grid-template-columns: 1fr 1.2fr;
-            background: #0f0f12;
+            background: #ffffff;
             overflow: hidden;
             box-shadow: none;
             margin: 0;
@@ -1204,7 +1204,8 @@
             flex-direction: column;
             justify-content: center;
             padding: 60px;
-            background: #141418;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
         }
         .auth-card {
             width: 100%;
@@ -1216,14 +1217,14 @@
         .auth-card .logo h1 {
             font-size: 28px;
             font-weight: 800;
-            color: #fff;
+            color: #111827;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
         .auth-card .logo p {
-            color: #8e8e93;
+            color: #64748b;
             font-size: 16px;
             margin-bottom: 40px;
         }
@@ -1231,7 +1232,7 @@
             display: block;
             font-size: 14px;
             font-weight: 600;
-            color: #5c5c63;
+            color: #64748b;
             margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -1239,17 +1240,17 @@
         .auth-card input {
             width: 100%;
             padding: 16px;
-            background: #1c1c21;
-            border: 1px solid #2c2c34;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
-            color: #fff;
+            color: #1e293b;
             font-size: 16px;
             margin-bottom: 24px;
             transition: all 0.3s ease;
         }
         .auth-card input:focus {
             border-color: #3b82f6;
-            background: #25252b;
+            background: #ffffff;
             outline: none;
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
@@ -1265,16 +1266,16 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
         }
         .auth-card button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.3);
             background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
         }
         .auth-toggle {
             margin-top: 32px;
-            color: #5c5c63;
+            color: #64748b;
             font-size: 15px;
         }
         .auth-toggle a {
@@ -1289,7 +1290,7 @@
         }
         .auth-right {
             position: relative;
-            background: #0a0a0c;
+            background: #f1f5f9;
             display: flex;
             align-items: center;
             justify-content: center;
