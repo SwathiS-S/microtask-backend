@@ -1655,6 +1655,10 @@
                     <svg class="icon"><use href="#icon-briefcase"/></svg>
                     <span>Dashboard</span>
                 </a>
+                <a href="javascript:void(0)" class="nav-item" onclick="navigateDashboard('legal', this)">
+                    <svg class="icon"><use href="#icon-list"/></svg>
+                    <span>Legal & Policies</span>
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <div style="margin-top: 20px;">
@@ -1920,6 +1924,117 @@
                         <div id="provStatusReports"></div>
                     </div>
                 </div>
+
+                <!-- Legal & Policies Tab --> 
+                <div id="userLegalTab" class="tri-tab-content hidden"> 
+                  <div style="max-width:700px; margin:0 auto; padding:20px;"> 
+                    <h2 style="font-size:22px; font-weight:700; color:#1E3A5F; margin-bottom:6px;"> 
+                      📋 Legal & Policies 
+                    </h2> 
+                    <p style="color:#666; font-size:13px; margin-bottom:24px;"> 
+                      Read our legal documents and policies 
+                    </p> 
+                     
+                    <!-- Policy Cards --> 
+                    <div style="display:flex; flex-direction:column; gap:12px;"> 
+                     
+                      <a href="https://swathis-s.github.io/-tasknest-policies#terms" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;"  
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <span style="font-size:24px;">📋</span> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Terms & Conditions</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Rules and guidelines for using TaskNest</div> 
+                          </div> 
+                        </div> 
+                        <span style="color:#1E3A5F; font-size:18px;">→</span> 
+                      </a> 
+                       
+                      <a href="https://swathis-s.github.io/-tasknest-policies#privacy" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;" 
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <span style="font-size:24px;">🔒</span> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Privacy Policy</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">How we collect and protect your data</div> 
+                          </div> 
+                        </div> 
+                        <span style="color:#1E3A5F; font-size:18px;">→</span> 
+                      </a> 
+                       
+                      <a href="https://swathis-s.github.io/-tasknest-policies#shipping" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;" 
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <span style="font-size:24px;">📦</span> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Shipping Policy</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Digital delivery and payment timelines</div> 
+                          </div> 
+                        </div> 
+                        <span style="color:#1E3A5F; font-size:18px;">→</span> 
+                      </a> 
+                       
+                      <a href="https://swathis-s.github.io/-tasknest-policies#cancellation" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;" 
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <span style="font-size:24px;">↩️</span> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Cancellation & Refunds</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Refund eligibility and process</div> 
+                          </div> 
+                        </div> 
+                        <span style="color:#1E3A5F; font-size:18px;">→</span> 
+                      </a> 
+                       
+                      <a href="https://swathis-s.github.io/-tasknest-policies#contact" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;" 
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <span style="font-size:24px;">📞</span> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Contact Us</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">teamtasknest@gmail.com • Mon-Sat 9AM-6PM IST</div> 
+                          </div> 
+                        </div> 
+                        <span style="color:#1E3A5F; font-size:18px;">→</span> 
+                      </a> 
+                       
+                    </div> 
+                     
+                    <!-- Footer note --> 
+                    <div style="margin-top:24px; padding:14px 16px; background:#f8f9fa;  
+                                border-radius:10px; text-align:center;"> 
+                      <p style="font-size:12px; color:#888; margin:0;"> 
+                        © 2026 TaskNest · Unregistered Business · India 🇮🇳<br> 
+                        For support: <a href="mailto:teamtasknest@gmail.com" style="color:#1E3A5F;">teamtasknest@gmail.com</a> 
+                      </p> 
+                    </div> 
+                  </div> 
+                </div> 
             </div>
 
             <!-- Modals (Moved outside content-area for better layering) -->
@@ -2090,6 +2205,7 @@
         function hideAllDashboardViews() {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tri-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('userLegalTab')?.classList.add('hidden');
         }
 
         function navigateDashboard(section, element) {
@@ -2110,6 +2226,9 @@
             } else if (section === 'dashboard') {
                 if (isProvider) switchProviderTriTab('dashboard');
                 else switchUserTriTab('dashboard');
+            } else if (section === 'legal') {
+                if (isProvider) switchProviderTriTab('legal');
+                else switchUserTriTab('legal');
             }
         }
 
@@ -3966,6 +4085,8 @@
                 renderUserGraphs();
                 renderUserAppliedStatus();
                 notifyNewCredits();
+            } else if (name === 'legal') { 
+                document.getElementById('userLegalTab').classList.remove('hidden'); 
             }
         }
         async function renderUserAppliedStatus() {
@@ -4029,6 +4150,8 @@
                 document.getElementById('provDashTab').classList.remove('hidden');
                 renderProviderMetrics();
                 renderProviderStatusReports();
+            } else if (name === 'legal') { 
+                document.getElementById('userLegalTab').classList.remove('hidden'); 
             }
         }
         // FILTER TASKS (USER)
