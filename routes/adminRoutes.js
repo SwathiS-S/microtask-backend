@@ -37,7 +37,8 @@ router.get('/users', async (req, res) => {
 
 router.get('/wallet-transactions', async (req, res) => {
   try {
-    const wallets = await Wallet.find({}).populate('userId', 'name email');
+    const wallets = await Wallet.find({})
+      .populate({ path: 'userId', model: 'User', select: 'name email role' });
     
     let allTransactions = [];
     wallets.forEach(wallet => {
@@ -45,7 +46,7 @@ router.get('/wallet-transactions', async (req, res) => {
         wallet.transactions.forEach(tx => {
           allTransactions.push({
             ...tx.toObject(),
-            userName: wallet.userId?.name || 'Unknown',
+            userName: wallet.userId?.name || wallet.userId?.email || ('User-' + wallet.userId),
             userEmail: wallet.userId?.email || '',
             walletRole: wallet.role
           });
