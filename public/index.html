@@ -6,17 +6,28 @@
     <title>TaskNest - Microtask Platform</title>
     <style>
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --bg-dark: #0b0b0e;
-            --sidebar-bg: #141418;
-            --content-bg: #f3f4f6;
-            --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
+            --bg-cream: #FAF8F3;
+            --primary-navy: #1E3A5F;
+            --gold-accent: #C9A84C;
+            --gold-light: #E8C87A;
+            --card-white: #FFFFFF;
+            --text-dark: #1a1a2e;
+            --text-muted: #5a6a7a;
+            --border-light: #e2e8f0;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            
+            /* Legacy variables map to new theme */
+            --primary: var(--primary-navy);
+            --primary-dark: #152942;
+            --bg-dark: var(--bg-cream);
+            --sidebar-bg: var(--primary-navy);
+            --content-bg: var(--bg-cream);
+            --card-bg: var(--card-white);
+            --text-main: var(--text-dark);
             --text-light: #ffffff;
-            --border: #e5e7eb;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --border: var(--border-light);
         }
 
         /* Dashboard Layout */
@@ -24,7 +35,7 @@
             display: flex;
             width: 100vw;
             height: 100vh;
-            background: var(--bg-dark);
+            background: var(--bg-cream);
             overflow: hidden;
         }
 
@@ -46,6 +57,15 @@
             font-weight: 800;
             margin-bottom: 50px;
             padding-left: 10px;
+            color: #fff;
+        }
+
+        .sidebar-logo span {
+            color: #fff;
+        }
+
+        .sidebar-logo .gold-text {
+            color: var(--gold-accent);
         }
 
         .sidebar-nav {
@@ -63,30 +83,23 @@
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #8e8e93;
+            color: rgba(255, 255, 255, 0.7);
             font-weight: 600;
             text-decoration: none;
         }
 
-        .nav-item:hover, .nav-item.active {
-            background: rgba(255, 255, 255, 0.05);
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
             color: #fff;
         }
 
         .nav-item.active {
-            position: relative;
+            background: var(--gold-accent);
+            color: #fff;
         }
 
         .nav-item.active::before {
-            content: '';
-            position: absolute;
-            left: -20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 24px;
-            background: var(--primary);
-            border-radius: 0 4px 4px 0;
+            display: none; /* Removed the old indicator */
         }
 
         .sidebar-footer {
@@ -97,7 +110,7 @@
         .add-task-btn {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: var(--primary-navy);
             border: none;
             border-radius: 12px;
             color: #fff;
@@ -107,7 +120,12 @@
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .add-task-btn:hover {
+            background: #152942;
+            transform: translateY(-2px);
         }
 
         .main-content-wrapper {
@@ -116,6 +134,7 @@
             flex-direction: column;
             padding: 20px;
             overflow: hidden;
+            background: var(--bg-cream);
         }
 
         .top-bar {
@@ -123,6 +142,10 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px 30px;
+        }
+
+        .top-bar span {
+            color: var(--primary-navy) !important;
         }
 
         .search-container {
@@ -134,10 +157,10 @@
         .search-container input {
             width: 100%;
             padding: 12px 20px 12px 45px;
-            background: #1c1c21;
-            border: 1px solid #2c2c34;
+            background: #fff;
+            border: 1px solid var(--border-light);
             border-radius: 12px;
-            color: #fff;
+            color: var(--text-dark);
             font-size: 15px;
         }
 
@@ -146,7 +169,7 @@
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #5c5c63;
+            color: var(--text-muted);
         }
 
         .user-actions {
@@ -156,48 +179,39 @@
         }
 
         .logout-btn-new {
-            background: #dc3545;
+            background: var(--error-red);
             color: #fff;
             padding: 10px 24px;
             border-radius: 10px;
             font-weight: 700;
             border: none;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn-new:hover {
+            background: #bd2130;
         }
 
         .content-area {
             flex: 1;
-            background: var(--content-bg);
+            background: var(--bg-cream);
             border-radius: 32px;
             padding: 40px;
             overflow-y: auto;
-            color: var(--text-main);
+            color: var(--text-dark);
         }
 
         .content-area h2 {
             font-size: 32px;
             font-weight: 800;
             margin-bottom: 10px;
+            color: var(--primary-navy);
         }
 
         .content-area p {
             color: var(--text-muted);
             margin-bottom: 30px;
-        }
-
-        .popular-tags {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .tag {
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 15px;
         }
 
         /* Redesigned Task Cards */
@@ -207,216 +221,284 @@
             gap: 24px;
         }
 
-        .task-card-new {
-            background: #fff;
+        .task-card-new, .task-item {
+            background: var(--card-white);
             border-radius: 20px;
             padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+            border-left: 5px solid var(--gold-accent) !important;
             transition: transform 0.3s ease;
         }
 
-        .task-card-new:hover {
+        .task-card-new:hover, .task-item:hover {
             transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
         }
 
-        .task-card-header {
+        .task-card-header, .task-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
         }
 
-        .task-card-title {
+        .task-card-title, .task-title {
             font-size: 18px;
             font-weight: 700;
-            color: #111827;
+            color: var(--primary-navy) !important;
             line-height: 1.4;
-            max-width: 220px;
         }
 
-        .task-card-reward {
+        .task-card-reward, .task-reward {
             font-size: 20px;
             font-weight: 800;
-            color: #111827;
+            color: var(--primary-navy);
         }
 
-        .task-card-category {
-            background: #eff6ff;
-            color: #3b82f6;
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 600;
-            align-self: flex-start;
-        }
-
-        .task-card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            color: #9ca3af;
-            font-size: 13px;
-        }
-
-        .task-card-footer span:first-child {
-            color: #4b5563;
-            font-weight: 500;
-        }
-
-        @media (max-width: 1024px) {
-            .sidebar {
-                width: 80px;
-                padding: 30px 10px;
-                align-items: center;
-            }
-            .sidebar-logo span, .nav-item span, .add-task-btn span {
-                display: none;
-            }
-            .sidebar-logo {
-                padding-left: 0;
-                justify-content: center;
-            }
-            .nav-item {
-                justify-content: center;
-                padding: 14px;
-            }
-            .nav-item.active::before {
-                left: -10px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-layout {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                height: 65px;
-                flex-direction: row;
-                padding: 0 10px;
-                order: 2;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                z-index: 1000;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-                border-top: 1px solid rgba(255,255,255,0.05);
-            }
-            .sidebar-logo { display: none; }
-            .sidebar-nav {
-                flex-direction: row;
-                justify-content: space-around;
-                align-items: center;
-                width: 100%;
-                gap: 0;
-            }
-            .nav-item {
-                flex-direction: column;
-                gap: 4px;
-                padding: 8px;
-                font-size: 11px;
-                border-radius: 0;
-                flex: 1;
-                justify-content: center;
-            }
-            .nav-item .icon {
-                width: 20px;
-                height: 20px;
-            }
-            .nav-item.active::before {
-                left: 50%;
-                top: 0;
-                transform: translateX(-50%);
-                width: 30px;
-                height: 3px;
-                border-radius: 0 0 4px 4px;
-            }
-            .sidebar-footer { display: none; }
-            .main-content-wrapper {
-                order: 1;
-                height: calc(100vh - 65px);
-                padding: 10px;
-            }
-            .top-bar {
-                padding: 10px 5px 20px;
-            }
-            .content-area {
-                border-radius: 24px;
-                padding: 20px 15px;
-            }
-            .content-area h2 {
-                font-size: 24px;
-            }
-            
-            /* Metrics Grid for Mobile */
-            [style*="grid-template-columns: repeat(4, 1fr)"],
-            [style*="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))"] {
-                grid-template-columns: 1fr 1fr !important;
-                gap: 12px !important;
-            }
-            
-            /* Dual columns to single on mobile */
-            [style*="grid-template-columns: 1fr 1fr"] {
-                grid-template-columns: 1fr !important;
-                gap: 15px !important;
-            }
-
-            .task-grid-new {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-            
-            .card-soft {
-                padding: 20px !important;
-            }
-
-            /* Modals on Mobile */
-            #taskDetailModal > div,
-            #submissionModal > div,
-            #ratingModal > div,
-            #statusModal > div {
-                width: 100% !important;
-                height: 100% !important;
-                max-width: 100% !important;
-                max-height: 100% !important;
-                border-radius: 0 !important;
-                padding: 24px 20px !important;
-                overflow-y: auto !important;
-            }
-            
-            /* Profile Hero on Mobile */
-            .profile-hero {
-                flex-direction: column !important;
-                text-align: center !important;
-                gap: 20px !important;
-            }
-            .profile-hero .avatar {
-                width: 100px !important;
-                height: 100px !important;
-                margin: 0 auto !important;
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        html, body { width:100%; max-width:100%; overflow-x:hidden; }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0b0b0e;
-            min-height: 100vh;
+        /* Category Chips & Tags */
+        .category-card {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: 24px;
+            padding: 32px 20px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
-            padding: 0;
+            justify-content: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            text-align: center;
         }
+
+        .category-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--gold-accent);
+        }
+
+        .category-card.active {
+            border: 2px solid var(--gold-accent);
+            background: #fff;
+        }
+
+        .category-icon-wrapper {
+            color: var(--primary-navy);
+            background: #f8fafc;
+        }
+
+        .category-card:hover .category-icon-wrapper, .category-card.active .category-icon-wrapper {
+            color: var(--gold-accent);
+            background: #fefce8;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+        }
+
+        thead tr {
+            background: var(--primary-navy);
+            color: #fff !important;
+        }
+
+        thead th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #fff !important;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-light);
+            transition: background 0.2s;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background: #fffdf5;
+        }
+
+        tbody td {
+            padding: 15px;
+            color: var(--text-dark);
+        }
+
+        /* Buttons */
+        .btn-small, .cta, button {
+            background: var(--primary-navy);
+            color: #fff !important;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-small:hover, .cta:hover, button:hover {
+            background: #152942;
+            transform: translateY(-1px);
+        }
+
+        .btn-small[data-action="apply"], .btn-small[data-action="accept"], .btn-small[data-action="approve"], .btn-small[data-action="rate"], #verifyOtpBtn, #resendOtpBtn, .confirm-btn {
+            background: var(--gold-accent) !important;
+        }
+
+        .btn-small[data-action="apply"]:hover, .btn-small[data-action="accept"]:hover, .btn-small[data-action="approve"]:hover, .confirm-btn:hover {
+            background: #b39440 !important;
+        }
+
+        /* Wallet Section */
+        .wallet-balance-card {
+            background: linear-gradient(135deg, #1E3A5F 0%, #2C5282 100%);
+            color: #fff;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(30, 58, 95, 0.2);
+        }
+
+        .wallet-balance-card h1, .wallet-balance-card h2, .wallet-balance-card p {
+            color: #fff !important;
+        }
+
+        /* Modals */
+        #taskDetailModal > div, #submissionModal > div, #ratingModal > div, #statusModal > div, #withdrawModal .modal-content, #walletModal .card-soft {
+            background: #fff !important;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        #taskDetailModal h3, #submissionModal h3, #ratingModal h4, #statusModal h3, #withdrawModal h2, #walletModal h3 {
+            background: var(--primary-navy);
+            color: #fff;
+            margin: -32px -32px 24px -32px;
+            padding: 24px 32px;
+            border-radius: 24px 24px 0 0;
+        }
+
+        /* Auth Section */
+        #authSection {
+            background: var(--bg-cream);
+        }
+
+        .auth-split {
+            background: var(--bg-cream);
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            min-height: 100vh;
+        }
+
+        .auth-left {
+            background: var(--primary-navy);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .auth-card .logo h1 {
+            color: #fff;
+        }
+
+        .auth-card .logo .gold-text {
+            color: var(--gold-accent);
+        }
+
+        .auth-card .logo p {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .auth-card label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .auth-card input {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            color: var(--text-dark);
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .auth-card input:focus {
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.1);
+        }
+
+        .auth-card button {
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-navy);
+            font-weight: 800;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .auth-right {
+            background: var(--bg-cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-toggle {
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 32px;
+        }
+
+        .auth-toggle a {
+            color: var(--gold-accent);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Status Badges */
+        .status-open, .status-pending { background: #fff3cd; color: #856404; }
+        .status-accepted, .status-inprogress { background: #cfe2ff; color: #084298; }
+        .status-completed, .status-paid, .status-success { background: #d1e7dd; color: #0f5132; }
+        .status-rejected, .status-failed, .status-error { background: #f8d7da; color: #842029; }
+
+        /* General UI components */
+        .card-soft {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow);
+        }
+
+        .search-input {
+            background: #fff !important;
+            border: 1px solid var(--border-light) !important;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-navy) !important;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1) !important;
+        }
+
+        /* Avatar */
+        .avatar {
+            background: var(--gold-accent) !important;
+            color: var(--primary-navy) !important;
+        }
+
+        .hidden { display: none !important; }
+    </style>
 
         .container {
             background: var(--card-bg);
@@ -1492,50 +1574,50 @@
         </symbol>
     </svg>
     <div id="landingSection" class="landing" style="width:100%; padding:0;">
-        <div class="hero-wrap">
+        <div class="hero-wrap" style="background: var(--bg-cream);">
             <div class="hero-grid">
                 <div>
-                    <div style="display:inline-block; padding:6px 12px; border:1px solid #ffffff22; border-radius:999px; font-size:12px; margin-bottom:14px;">Task<span style="color: var(--primary);">Nest</span></div>
-                    <div class="hero-title">Find a Task • Post a Task</div>
-                    <div style="color:#cfd2d9; margin:0 0 20px;">Quick local tasks for everyone</div>
+                    <div style="display:inline-block; padding:6px 12px; border:1px solid var(--border-light); border-radius:999px; font-size:12px; margin-bottom:14px; color: var(--primary-navy);">Task<span style="color: var(--gold-accent);">Nest</span></div>
+                    <div class="hero-title" style="color: var(--primary-navy);">Find a Task • Post a Task</div>
+                    <div style="color: var(--text-muted); margin:0 0 20px;">Quick local tasks for everyone</div>
                     <div class="hero-cta">
-                        <button class="cta" style="background:#fff; color:#0b0b0e;" onclick="chooseRole('taskUser')">Find a Task</button>
-                        <button class="cta" style="background:#1f2937; color:#fff; border:1px solid #ffffff33;" onclick="chooseRole('taskProvider')">Post a Task</button>
+                        <button class="cta" style="background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="chooseRole('taskUser')">Find a Task</button>
+                        <button class="cta" style="background: var(--primary-navy); color: #fff !important;" onclick="chooseRole('taskProvider')">Post a Task</button>
                     </div>
                 </div>
                 <div>
-                    <div class="info-panel">
-                        <div style="font-weight:700; margin-bottom:10px;">About the app</div>
-                        <div style="color:#cfd2d9; font-size:14px; line-height:1.6; margin-bottom:14px;">
+                    <div class="info-panel" style="background: #fff; border: 1px solid var(--border-light); box-shadow: var(--shadow);">
+                        <div style="font-weight:700; margin-bottom:10px; color: var(--primary-navy);">About the app</div>
+                        <div style="color: var(--text-muted); font-size:14px; line-height:1.6; margin-bottom:14px;">
                             Connect with nearby people for quick help. Post small tasks, accept work, and get paid safely.
                         </div>
                         <div class="info-tiles">
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#9bb5ff;"><use href="#icon-pin"/></svg>
+                            <div style="background: var(--bg-cream); border:1px solid var(--border-light); border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
+                                <svg class="icon" style="width:24px; height:24px; color: var(--gold-accent);"><use href="#icon-pin"/></svg>
                                 <div>
-                                    <div style="font-weight:700;">Local & Nearby</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Find help around your area</div>
+                                    <div style="font-weight:700; color: var(--primary-navy);">Local & Nearby</div>
+                                    <div style="color: var(--text-muted); font-size:12px;">Find help around your area</div>
                                 </div>
                             </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#ffd27f;"><use href="#icon-briefcase"/></svg>
+                            <div style="background: var(--bg-cream); border:1px solid var(--border-light); border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
+                                <svg class="icon" style="width:24px; height:24px; color: var(--gold-accent);"><use href="#icon-briefcase"/></svg>
                                 <div>
-                                    <div style="font-weight:700;">Post Simple Tasks</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Household, delivery, errands</div>
+                                    <div style="font-weight:700; color: var(--primary-navy);">Post Simple Tasks</div>
+                                    <div style="color: var(--text-muted); font-size:12px;">Household, delivery, errands</div>
                                 </div>
                             </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#7fffb0;"><use href="#icon-wallet"/></svg>
+                            <div style="background: var(--bg-cream); border:1px solid var(--border-light); border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
+                                <svg class="icon" style="width:24px; height:24px; color: var(--gold-accent);"><use href="#icon-wallet"/></svg>
                                 <div>
-                                    <div style="font-weight:700;">Secure Payouts</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Razorpay wallet & bank</div>
+                                    <div style="font-weight:700; color: var(--primary-navy);">Secure Payouts</div>
+                                    <div style="color: var(--text-muted); font-size:12px;">Razorpay wallet & bank</div>
                                 </div>
                             </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#9bd2ff;"><use href="#icon-list"/></svg>
+                            <div style="background: var(--bg-cream); border:1px solid var(--border-light); border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
+                                <svg class="icon" style="width:24px; height:24px; color: var(--gold-accent);"><use href="#icon-list"/></svg>
                                 <div>
-                                    <div style="font-weight:700;">Easy Management</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Track tasks and approvals</div>
+                                    <div style="font-weight:700; color: var(--primary-navy);">Easy Management</div>
+                                    <div style="color: var(--text-muted); font-size:12px;">Track tasks and approvals</div>
                                 </div>
                             </div>
                         </div>
@@ -1552,7 +1634,7 @@
                 <div class="auth-card">
                     <form id="loginForm">
                         <div class="logo">
-                            <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px;"><use href="#logo-new"/></svg>Task<span style="color: var(--primary);">Nest</span></h1>
+                            <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px; color: #fff;"><use href="#logo-new"/></svg>Task<span class="gold-text">Nest</span></h1>
                             <p>Complete micro tasks & earn rewards</p>
                         </div>
                         <div id="loginMessage"></div>
@@ -1571,7 +1653,7 @@
                     </form>
                     <form id="registerForm" class="hidden">
                         <div class="logo">
-                            <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px;"><use href="#logo-new"/></svg>Task<span style="color: var(--primary);">Nest</span></h1>
+                            <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px; color: #fff;"><use href="#logo-new"/></svg>Task<span class="gold-text">Nest</span></h1>
                             <p>Join our platform & start earning</p>
                         </div>
                         <div id="registerMessage"></div>
@@ -1590,7 +1672,7 @@
                         <div id="otpBlock" class="form-group hidden">
                             <label for="registerOtp">One-Time Password</label>
                             <input type="text" id="registerOtp" placeholder="Enter OTP">
-                            <div id="otpStatus" class="small" style="margin-top:6px;color:#666;">Resend in 60s</div>
+                            <div id="otpStatus" class="small" style="margin-top:6px;color:rgba(255,255,255,0.6);">Resend in 60s</div>
                             <div style="display:flex; gap:8px; margin-top:8px;">
                                 <button type="button" id="verifyOtpBtn" class="btn-small" onclick="verifyEmail()">Verify Email</button>
                                 <button type="button" id="resendOtpBtn" class="btn-small" onclick="resendOtp()" disabled>Resend OTP</button>
@@ -1599,13 +1681,6 @@
                         <div class="form-group">
                             <label for="registerPassword">Password</label>
                             <input type="password" id="registerPassword" placeholder="Create password" required>
-                        </div>
-                        <div class="form-group" style="display:none;">
-                            <label for="registerRole">User Type</label>
-                            <select id="registerRole">
-                                <option value="taskUser">User</option>
-                                <option value="taskProvider">Task Provider</option>
-                            </select>
                         </div>
                         <button type="submit" id="registerBtn">Register</button>
                         <div class="auth-toggle">
@@ -1617,8 +1692,8 @@
             <div class="auth-right">
                 <div class="illustration-container">
                     <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" alt="Task Management Illustration" class="illustration-img">
-                    <h2 class="illustration-text">
-                        Find tasks and <br><span>earn rewards.</span>
+                    <h2 class="illustration-text" style="color: var(--primary-navy);">
+                        Find tasks and <br><span style="color: var(--gold-accent);">earn rewards.</span>
                     </h2>
                 </div>
             </div>
@@ -1630,8 +1705,8 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
-            <svg class="icon" style="width: 32px; height: 32px;"><use href="#logo-new"/></svg>
-            <span style="font-weight: 800; font-size: 20px; color: #fff; letter-spacing: -0.5px;">Task<span style="color: var(--primary);">Nest</span></span>
+            <svg class="icon" style="width: 32px; height: 32px; color: #fff;"><use href="#logo-new"/></svg>
+            <span>Task<span class="gold-text">Nest</span></span>
         </div>
             <nav class="sidebar-nav">
                 <a href="javascript:void(0)" class="nav-item active" onclick="navigateDashboard('tasks', this)">
@@ -1661,14 +1736,14 @@
         <main class="main-content-wrapper">
             <header class="top-bar">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-weight: 800; font-size: 18px; color: #fff; letter-spacing: -0.5px;">Dashboard</span>
+                    <span style="font-weight: 800; font-size: 18px; color: var(--primary-navy); letter-spacing: -0.5px;">Dashboard</span>
                 </div>
                 <div class="user-actions">
                     <div style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px;">
-                        <span id="displayUserName" style="font-weight: 700; color: #fff; font-size: 15px;">User Name</span>
-                        <span id="displayUserRole" style="font-size: 12px; color: #8e8e93;">User Role</span>
+                        <span id="displayUserName" style="font-weight: 700; color: var(--primary-navy); font-size: 15px;">User Name</span>
+                        <span id="displayUserRole" style="font-size: 12px; color: var(--text-muted);">User Role</span>
                     </div>
-                    <div class="avatar" id="userAvatar" style="width: 42px; height: 42px; font-size: 16px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800;">TN</div>
+                    <div class="avatar" id="userAvatar" style="width: 42px; height: 42px; font-size: 16px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800;">TN</div>
                 </div>
             </header>
 
@@ -1677,114 +1752,132 @@
                 <div id="userFilterTab" class="tri-tab-content hidden">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
                         <div>
-                            <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Find Tasks</h2>
-                            <p style="color: #6b7280;">Browse and apply for microtasks in your area.</p>
+                            <h2>Find Tasks</h2>
+                            <p>Browse and apply for microtasks in your area.</p>
                         </div>
                     </div>
-                    <div class="card-soft" style="padding:24px; background: #fff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;">
-                        <h4 style="margin:0 0 16px 0; font-size: 18px; font-weight: 700;">Popular Categories</h4>
+                    <div class="card-soft" style="padding:24px; border-radius: 20px;">
+                        <h4 style="margin:0 0 16px 0; font-size: 18px; font-weight: 700; color: var(--primary-navy);">Popular Categories</h4>
                         <div id="categoryChips" class="chips" style="flex-wrap:wrap; gap: 10px;"></div>
                         <div style="display:grid; grid-template-columns: 1fr auto; gap:12px; margin-top:24px;">
-                            <input id="simpleSearchInput" class="search-input" style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 14px 20px; border-radius: 12px;" placeholder="Search by title, skill, or location..." oninput="syncAndSearch(this.value)"/>
-                            <button class="btn-small" style="padding: 0 24px; height: 100%;" onclick="renderFilterTasks()">Search</button>
+                            <input id="simpleSearchInput" class="search-input" style="padding: 14px 20px; border-radius: 12px;" placeholder="Search by title, skill, or location..." oninput="syncAndSearch(this.value)"/>
+                            <button class="btn-small" style="padding: 0 24px; height: 100%; background: var(--primary-navy);" onclick="renderFilterTasks()">Search</button>
                         </div>
                     </div>
                     <div id="filterTasksList" class="task-grid-new" style="margin-top:32px;"></div>
                 </div>
 
                 <div id="userWalletTab" class="tri-tab-content hidden">
-                    <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">My Wallet</h2>
-                    <p style="color: #6b7280;">Manage your earnings and transaction history.</p>
-                    <div class="card-soft" style="padding:40px; margin-top:24px; display:flex; align-items:center; justify-content:space-between; background: #fff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;">
+                    <h2>My Wallet</h2>
+                    <p>Manage your earnings and transaction history.</p>
+                    <div class="wallet-balance-card" style="margin-top:24px; display:flex; align-items:center; justify-content:space-between;">
                         <div>
-                            <h2 style="font-size:14px; color:#6b7280; font-weight: 600; margin-bottom: 8px;">My Wallet</h2>
-                            <h1 id="walletBalanceValue" style="font-size:48px; font-weight:800; color:#111827;">₹0.00</h1>
-                            <p style="color: #6b7280;">Available Balance</p>
+                            <h2 style="font-size:14px; color:rgba(255,255,255,0.7) !important; font-weight: 600; margin-bottom: 8px;">My Wallet</h2>
+                            <h1 id="walletBalanceValue" style="font-size:48px; font-weight:800; color:#fff !important;">₹0.00</h1>
+                            <p style="color:rgba(255,255,255,0.7) !important;">Available Balance</p>
                         </div>
-                        <div style="width: 80px; height: 80px; background: #f0fdf4; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
-                            <svg class="icon" style="color: #22c55e; width: 36px; height: 36px;"><use href="#icon-wallet"/></svg>
+                        <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                            <svg class="icon" style="color: #fff; width: 36px; height: 36px;"><use href="#icon-wallet"/></svg>
                         </div>
                     </div>
                     <!-- Create Wallet Button for User -->
-                    <div id="userCreateWalletContainer" class="card-soft hidden" style="padding:24px; margin-top:24px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 20px; display:flex; align-items:center; justify-content:space-between;">
+                    <div id="userCreateWalletContainer" class="card-soft hidden" style="padding:24px; margin-top:24px; background: #fffdf5; border: 1px solid var(--gold-accent); border-radius: 20px; display:flex; align-items:center; justify-content:space-between;">
                         <div>
-                            <h4 style="margin:0; color:#856404;">Create Payout Wallet</h4>
-                            <p style="margin:4px 0 0 0; font-size:13px; color:#856404;">Connect your bank to withdraw your task earnings.</p>
+                            <h4 style="margin:0; color: var(--primary-navy);">Create Payout Wallet</h4>
+                            <p style="margin:4px 0 0 0; font-size:13px; color: var(--text-muted);">Connect your bank to withdraw your task earnings.</p>
                         </div>
-                        <button class="btn-small" style="background:#f59e0b; border-radius:12px;" onclick="showCreateWalletModal()">Connect Bank</button>
+                        <button class="btn-small" style="background: var(--gold-accent); color: var(--primary-navy) !important; border-radius:12px;" onclick="showCreateWalletModal()">Connect Bank</button>
                     </div>
                     <!-- Withdrawal Button for User (Hidden if no wallet) -->
                     <div id="userWithdrawalContainer" class="hidden" style="margin-top:24px;">
-                        <button class="btn-small" style="width:100%; padding:14px; background:#22c55e;" onclick="showWithdrawModal()">Withdraw to Bank</button>
+                        <button class="btn-small" style="width:100%; padding:14px; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="showWithdrawModal()">Withdraw to Bank</button>
                     </div>
-                    <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;">
-                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Transaction History</h4>
+                    <div class="card-soft" style="padding:32px; margin-top:24px; border-radius: 24px;">
+                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700; color: var(--primary-navy);">Transaction History</h4>
                         <div style="overflow:auto;">
-                            <table style="width:100%; border-collapse: collapse;">
+                            <table style="width: 100%; border-collapse: collapse;">
                                 <thead>
-                                    <tr style="text-align:left; border-bottom:1px solid #f3f4f6; color: #6b7280; font-size: 13px;">
-                                        <th style="padding:15px;">Date</th>
-                                        <th style="padding:15px;">Task</th>
-                                        <th style="padding:15px;">Type</th>
-                                        <th style="padding:15px;">Amount</th>
-                                        <th style="padding:15px;">Status</th>
+                                    <tr style="background: var(--primary-navy); color: #fff;">
+                                        <th style="padding: 15px; text-align: left;">Date</th>
+                                        <th style="padding: 15px; text-align: left;">Task</th>
+                                        <th style="padding: 15px; text-align: left;">Type</th>
+                                        <th style="padding: 15px; text-align: left;">Amount</th>
+                                        <th style="padding: 15px; text-align: left;">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="txTableBody"></tbody>
                             </table>
                         </div>
                     </div>
+                    
+                    <!-- Withdrawal History Section -->
+                    <div class="card-soft" style="padding:32px; margin-top:24px; border-radius: 24px;">
+                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700; color: var(--primary-navy);">Withdrawal History</h4>
+                        <div style="overflow:auto;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: var(--primary-navy); color: #fff;">
+                                        <th style="padding: 15px; text-align: left;">Date</th>
+                                        <th style="padding: 15px; text-align: left;">Amount</th>
+                                        <th style="padding: 15px; text-align: left;">Method</th>
+                                        <th style="padding: 15px; text-align: left;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="withdrawalHistoryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="userDashTab" class="tri-tab-content hidden">
-                    <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Worker Dashboard</h2>
-                    <p style="color: #6b7280; margin-bottom: 30px;">Track your performance and ongoing tasks.</p>
+                    <h2>Worker Dashboard</h2>
+                    <p>Track your performance and ongoing tasks.</p>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
-                        <div class="card-soft" id="metricCompleted" style="padding:24px; background:#fff; border-radius:20px;"></div>
-                        <div class="card-soft" id="metricOngoing" style="padding:24px; background:#fff; border-radius:20px;"></div>
-                        <div class="card-soft" id="metricPending" style="padding:24px; background:#fff; border-radius:20px;"></div>
-                        <div class="card-soft" id="metricEarnings" style="padding:24px; background:#fff; border-radius:20px;"></div>
+                        <div class="card-soft" id="metricCompleted" style="padding:24px; border-radius:20px;"></div>
+                        <div class="card-soft" id="metricOngoing" style="padding:24px; border-radius:20px;"></div>
+                        <div class="card-soft" id="metricPending" style="padding:24px; border-radius:20px;"></div>
+                        <div class="card-soft" id="metricEarnings" style="padding:24px; border-radius:20px;"></div>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; margin-top:24px;">
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:24px;">
+                        <div class="card-soft" style="padding:24px; border-radius:24px;">
                             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 20px;">
-                                <h4 style="margin:0; font-size: 18px;">Monthly Earnings</h4>
-                                <input type="month" id="dashMonth" onchange="renderUserMetrics(); renderUserGraphs();" style="width: auto; padding: 8px; border-radius: 8px; border: 1px solid #e5e7eb;"/>
+                                <h4 style="margin:0; font-size: 18px; color: var(--primary-navy);">Monthly Earnings</h4>
+                                <input type="month" id="dashMonth" onchange="renderUserMetrics(); renderUserGraphs();" style="width: auto; padding: 8px; border-radius: 8px; border: 1px solid var(--border-light);"/>
                             </div>
                             <div id="earningsGraph" style="height:200px; display:flex; align-items:flex-end; gap:8px;"></div>
                         </div>
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:24px;">
-                            <h4 style="margin:0 0 20px 0; font-size: 18px;">Task Completion Trend</h4>
+                        <div class="card-soft" style="padding:24px; border-radius:24px;">
+                            <h4 style="margin:0 0 20px 0; font-size: 18px; color: var(--primary-navy);">Task Completion Trend</h4>
                             <div id="completionGraph" style="height:200px; display:flex; align-items:flex-end; gap:8px;"></div>
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; margin-top:24px;">
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:24px;">
-                            <h4 style="margin:0 0 16px 0; font-size: 18px;">Ongoing Tasks</h4>
+                        <div class="card-soft" style="padding:24px; border-radius:24px;">
+                            <h4 style="margin:0 0 16px 0; font-size: 18px; color: var(--primary-navy);">Ongoing Tasks</h4>
                             <div id="userOngoingList" class="task-list"></div>
                         </div>
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:24px;">
-                            <h4 style="margin:0 0 16px 0; font-size: 18px;">Completed Tasks</h4>
+                        <div class="card-soft" style="padding:24px; border-radius:24px;">
+                            <h4 style="margin:0 0 16px 0; font-size: 18px; color: var(--primary-navy);">Completed Tasks</h4>
                             <div id="userCompletedList" class="task-list"></div>
                         </div>
                     </div>
-                    <div class="card-soft" style="padding:24px; margin-top:24px; background:#fff; border-radius:24px;">
-                        <h4 style="margin:0 0 16px 0; font-size: 18px;">Applied Tasks & Status</h4>
+                    <div class="card-soft" style="padding:24px; margin-top:24px; border-radius:24px;">
+                        <h4 style="margin:0 0 16px 0; font-size: 18px; color: var(--primary-navy);">Applied Tasks & Status</h4>
                         <div id="userAppliedList" class="task-list"></div>
                     </div>
                 </div>
 
                 <!-- PROVIDER VIEWS -->
                 <div id="provCreateTab" class="tri-tab-content hidden">
-                    <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Manage Tasks</h2>
-                    <p style="color: #6b7280; margin-bottom: 30px;">Create and manage your posted microtasks.</p>
-                    <div class="card-soft" style="padding:32px; background: #fff; border-radius: 24px; border: 1px solid #f3f4f6; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Create New Task</h4>
+                    <h2>Manage Tasks</h2>
+                    <p>Create and manage your posted microtasks.</p>
+                    <div class="card-soft" style="padding:32px; border-radius: 24px;">
+                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700; color: var(--primary-navy);">Create New Task</h4>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
                             <div class="form-group"><label>Task Title</label><input id="provTitle" type="text" placeholder="e.g., Logo Design"></div>
                             <div class="form-group">
                                 <label>Task Category</label>
-                                <select id="provCategory" style="width:100%; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb;">
+                                <select id="provCategory" style="width:100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-light);">
                                     <option value="">Select Category</option>
                                     <option value="delivery">Delivery & Pickup</option>
                                     <option value="cleaning">Home Cleaning</option>
@@ -1801,7 +1894,7 @@
                                 </select>
                             </div>
                             <div class="form-group"><label>Required Skillset</label><input id="provSkill" type="text" placeholder="e.g., Photoshop, Creative"></div>
-                            <div class="form-group" style="grid-column:1 / -1;"><label>Task Description</label><textarea id="provDesc" style="width:100%;min-height:100px; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb;" placeholder="Describe the task requirements in detail..."></textarea></div>
+                            <div class="form-group" style="grid-column:1 / -1;"><label>Task Description</label><textarea id="provDesc" style="width:100%;min-height:100px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-light);" placeholder="Describe the task requirements in detail..."></textarea></div>
                             <div class="form-group"><label>Employees Required</label><input id="provEmployees" type="number" min="1" value="1"></div>
                             <div class="form-group"><label>Work Type</label><select id="provWorkType"><option value="WFH">Remote / Work from Home</option><option value="ONSITE">On-site</option></select></div>
                             <div class="form-group"><label>Location</label><input id="provLocation" type="text" placeholder="e.g., Remote or City Name"></div>
@@ -1811,13 +1904,13 @@
                         </div>
                         <div style="margin-top:24px;"><button class="add-task-btn" style="width: auto; padding: 14px 40px;" onclick="providerCreateTask()">Post Task Now</button></div>
                     </div>
-                    <div class="card-soft" style="padding:32px; margin-top:32px; background: #fff; border-radius: 24px;">
+                    <div class="card-soft" style="padding:32px; margin-top:32px; border-radius: 24px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
-                            <h4 style="margin:0; font-size: 20px; font-weight: 700;">Your Created Tasks</h4>
+                            <h4 style="margin:0; font-size: 20px; font-weight: 700; color: var(--primary-navy);">Your Created Tasks</h4>
                             <div style="display:flex; gap:12px; align-items:center;">
                                 <div class="form-group" style="margin:0;"><label style="font-size:12px;">From</label><input id="manageTasksFrom" type="date" style="padding:8px;"></div>
                                 <div class="form-group" style="margin:0;"><label style="font-size:12px;">To</label><input id="manageTasksTo" type="date" style="padding:8px;"></div>
-                                <button class="btn-small" style="padding: 8px 16px; margin-top: 18px;" onclick="loadProviderTasks()">Filter</button>
+                                <button class="btn-small" style="padding: 8px 16px; margin-top: 18px; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="loadProviderTasks()">Filter</button>
                             </div>
                         </div>
                         <div id="provTasksList" class="task-grid-new"></div>
@@ -1825,90 +1918,90 @@
                 </div>
 
                 <div id="provWalletTab" class="tri-tab-content hidden">
-                    <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Business Wallet</h2>
-                    <p style="color: #6b7280; margin-bottom: 30px;">Manage your funds and employee payments.</p>
-                    <div class="card-soft" style="padding:40px; display:flex; align-items:center; justify-content:space-between; background: #fff; border-radius: 24px;">
+                    <h2>Business Wallet</h2>
+                    <p>Manage your funds and employee payments.</p>
+                    <div class="wallet-balance-card" style="margin-top:24px; display:flex; align-items:center; justify-content:space-between;">
                         <div>
-                            <div style="font-size:14px; color:#6b7280; font-weight: 600; margin-bottom: 8px;">Available Balance</div>
-                            <div style="font-size:48px; font-weight:800; color:#111827;">₹<span id="provWalletBalance">0</span></div>
+                            <div style="font-size:14px; color:rgba(255,255,255,0.7) !important; font-weight: 600; margin-bottom: 8px;">Available Balance</div>
+                            <div style="font-size:48px; font-weight:800; color:#fff !important;">₹<span id="provWalletBalance">0</span></div>
                         </div>
-                        <div><button class="add-task-btn" style="width: auto; padding: 14px 30px;" onclick="showProvAddMoney()">+ Add Funds</button></div>
+                        <div><button class="btn-small" style="width: auto; padding: 14px 30px; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="showProvAddMoney()">+ Add Funds</button></div>
                     </div>
                     <!-- Create Wallet Button for Provider -->
-                    <div id="provCreateWalletContainer" class="card-soft hidden" style="padding:24px; margin-top:24px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 20px; display:flex; align-items:center; justify-content:space-between;">
+                    <div id="provCreateWalletContainer" class="card-soft hidden" style="padding:24px; margin-top:24px; background: #fffdf5; border: 1px solid var(--gold-accent); border-radius: 20px; display:flex; align-items:center; justify-content:space-between;">
                         <div>
-                            <h4 style="margin:0; color:#856404;">Connect Payout Wallet</h4>
-                            <p style="margin:4px 0 0 0; font-size:13px; color:#856404;">Add bank details to receive commissions and manage payouts.</p>
+                            <h4 style="margin:0; color: var(--primary-navy);">Connect Payout Wallet</h4>
+                            <p style="margin:4px 0 0 0; font-size:13px; color: var(--text-muted);">Add bank details to receive commissions and manage payouts.</p>
                         </div>
-                        <button class="btn-small" style="background:#f59e0b; border-radius:12px;" onclick="showCreateWalletModal()">Create Wallet</button>
+                        <button class="btn-small" style="background: var(--gold-accent); color: var(--primary-navy) !important; border-radius:12px;" onclick="showCreateWalletModal()">Create Wallet</button>
                     </div>
-                    <div id="provAddMoneySection" class="card-soft hidden" style="padding:32px; margin-top:24px; background: #f9fafb; border-radius: 24px;">
-                        <h4 style="margin:0 0 20px 0; font-size: 18px;">Add money to wallet</h4>
+                    <div id="provAddMoneySection" class="card-soft hidden" style="padding:32px; margin-top:24px; background: var(--bg-cream); border-radius: 24px;">
+                        <h4 style="margin:0 0 20px 0; font-size: 18px; color: var(--primary-navy);">Add money to wallet</h4>
                         <div class="form-group">
                             <label>Amount (₹)</label>
                             <input type="number" id="provAddMoneyAmount" placeholder="Enter amount" min="1" value="500" style="max-width: 300px;">
                         </div>
-                        <p style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">Choose payment method:</p>
+                        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Choose payment method:</p>
                         <div style="display:flex; gap:12px; flex-wrap: wrap;">
-                            <button type="button" class="btn-small" onclick="payAndAddMoneyProv('upi')" style="background:#22c55e; padding: 12px 24px;">📱 GPay / UPI</button>
-                            <button type="button" class="btn-small" onclick="payAndAddMoneyProv('bank')" style="background:#3b82f6; padding: 12px 24px;">🏦 Bank Transfer</button>
-                            <button type="button" class="btn-small btn-secondary" onclick="hideProvAddMoney()" style="padding: 12px 24px;">Cancel</button>
+                            <button type="button" class="btn-small" onclick="payAndAddMoneyProv('upi')" style="background: var(--success-green); padding: 12px 24px;">📱 GPay / UPI</button>
+                            <button type="button" class="btn-small" onclick="payAndAddMoneyProv('bank')" style="background: var(--primary-navy); padding: 12px 24px;">🏦 Bank Transfer</button>
+                            <button type="button" class="btn-small btn-secondary" onclick="hideProvAddMoney()" style="padding: 12px 24px; background: transparent; color: var(--text-muted) !important; border: 1px solid var(--border-light);">Cancel</button>
                         </div>
                     </div>
-                    <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px;">
-                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Transaction History</h4>
+                    <div class="card-soft" style="padding:32px; margin-top:24px; border-radius: 24px;">
+                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700; color: var(--primary-navy);">Transaction History</h4>
                         <div id="provTxTableWrapper" style="overflow:auto;">
-                            <table style="width:100%; border-collapse: collapse;">
+                            <table>
                                 <thead>
-                                    <tr style="text-align:left; border-bottom:1px solid #f3f4f6; color: #6b7280; font-size: 13px;">
-                                        <th style="padding:15px;">Date</th>
-                                        <th style="padding:15px;">Type</th>
-                                        <th style="padding:15px;">Amount</th>
-                                        <th style="padding:15px;">Status</th>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="provTxTableBody"></tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px;">
-                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Paid Tasks</h4>
+                    <div class="card-soft" style="padding:32px; margin-top:24px; border-radius: 24px;">
+                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700; color: var(--primary-navy);">Paid Tasks</h4>
                         <div id="provPaidTasksList" class="task-list"></div>
                     </div>
-                    <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px;">
-                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Employee Payments</h4>
+                    <div class="card-soft" style="padding:32px; margin-top:24px; border-radius: 24px;">
+                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700; color: var(--primary-navy);">Employee Payments</h4>
                         <div id="provPaymentsList" class="task-list"></div>
                     </div>
                 </div>
 
                 <div id="provDashTab" class="tri-tab-content hidden">
-                    <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Provider Dashboard</h2>
-                    <p style="color: #6b7280; margin-bottom: 30px;">Overview of your task metrics and reports.</p>
-                    <div class="card-soft" style="padding:24px; margin-bottom:24px; background: #fff; border-radius: 20px;">
-                        <h4 style="margin:0 0 16px 0; font-size: 18px;">Filter by Date</h4>
+                    <h2>Provider Dashboard</h2>
+                    <p>Overview of your task metrics and reports.</p>
+                    <div class="card-soft" style="padding:24px; margin-bottom:24px; border-radius: 20px;">
+                        <h4 style="margin:0 0 16px 0; font-size: 18px; color: var(--primary-navy);">Filter by Date</h4>
                         <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end;">
                             <div class="form-group" style="margin:0;"><label>From</label><input id="provStartDate" type="date"></div>
                             <div class="form-group" style="margin:0;"><label>To</label><input id="provEndDate" type="date"></div>
-                            <button class="btn-small" style="padding: 12px 24px;" onclick="renderProviderMetrics()">Apply Filter</button>
+                            <button class="btn-small" style="padding: 12px 24px; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="renderProviderMetrics()">Apply Filter</button>
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:20px;">
+                        <div class="card-soft" style="padding:24px; border-radius:20px;">
                             <div id="provMetricCreated"></div>
                             <div id="provListCreated" style="margin-top:16px; max-height: 200px; overflow:auto;"></div>
                         </div>
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:20px;">
+                        <div class="card-soft" style="padding:24px; border-radius:20px;">
                             <div id="provMetricActive"></div>
                             <div id="provListActive" style="margin-top:16px; max-height: 200px; overflow:auto;"></div>
                         </div>
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:20px;">
+                        <div class="card-soft" style="padding:24px; border-radius:20px;">
                             <div id="provMetricCompleted"></div>
                             <div id="provListCompleted" style="margin-top:16px; max-height: 200px; overflow:auto;"></div>
                         </div>
-                        <div class="card-soft" id="provMetricSpent" style="padding:24px; background:#fff; border-radius:20px;"></div>
+                        <div class="card-soft" id="provMetricSpent" style="padding:24px; border-radius:20px;"></div>
                     </div>
-                    <div class="card-soft" style="padding:32px; margin-top:24px; background:#fff; border-radius:24px;">
-                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Daily Status Reports</h4>
+                    <div class="card-soft" style="padding:32px; margin-top:24px; border-radius:24px;">
+                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700; color: var(--primary-navy);">Daily Status Reports</h4>
                         <div id="provStatusReports"></div>
                     </div>
                 </div>
@@ -1916,25 +2009,25 @@
 
             <!-- Modals (Moved outside content-area for better layering) -->
             <div id="taskDetailModal" class="hidden" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:1000;">
-                <div style="width:600px; max-width:95%; background:#fff; border-radius:24px; padding:32px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
+                <div style="width:600px; max-width:95%; padding:32px;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 24px;">
                         <h3 style="margin:0; font-size: 24px;">Task Details</h3>
-                        <button class="btn-small btn-secondary" onclick="closeTaskDetail()">Close</button>
+                        <button class="btn-small btn-secondary" onclick="closeTaskDetail()" style="background: transparent; color: #fff !important; border: 1px solid rgba(255,255,255,0.3);">Close</button>
                     </div>
                     <div id="taskDetailBody"></div>
                     <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:32px;">
-                        <button id="taskDetailStatusBtn" class="btn-small" style="display:none;" onclick="openStatusModal()">Update Status</button>
-                        <button id="taskDetailApplyBtn" class="add-task-btn" style="width: auto; padding: 12px 32px;" onclick="applyFromDetail()">Apply for Task</button>
+                        <button id="taskDetailStatusBtn" class="btn-small" style="display:none; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="openStatusModal()">Update Status</button>
+                        <button id="taskDetailApplyBtn" class="add-task-btn" style="width: auto; padding: 12px 32px; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="applyFromDetail()">Apply for Task</button>
                     </div>
                 </div>
             </div>
 
             <div id="submissionModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
-                <div style="background: #fff; width: 92%; max-width: 600px; border-radius: 24px; padding: 32px;">
+                <div style="width: 92%; max-width: 600px; padding: 32px;">
                     <h3 style="margin:0 0 24px 0; font-size: 24px;">Submit Work</h3>
                     <div class="form-group">
                         <label>Submission Notes</label>
-                        <textarea id="submissionText" placeholder="Describe what you've done..." style="width: 100%; padding: 16px; border: 1px solid #e5e7eb; border-radius: 12px; min-height: 120px;"></textarea>
+                        <textarea id="submissionText" placeholder="Describe what you've done..." style="width: 100%; padding: 16px; border: 1px solid var(--border-light); border-radius: 12px; min-height: 120px;"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Attachments</label>
@@ -1942,18 +2035,18 @@
                         <div id="submissionPreview" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:16px;"></div>
                     </div>
                     <div style="margin-top: 32px; display: flex; gap: 12px;">
-                        <button class="add-task-btn" style="flex: 1;" onclick="submitWork()">Submit Work</button>
-                        <button class="btn-small btn-secondary" onclick="closeSubmissionModal()">Cancel</button>
+                        <button class="add-task-btn" style="flex: 1; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="submitWork()">Submit Work</button>
+                        <button class="btn-small btn-secondary" onclick="closeSubmissionModal()" style="background: transparent; color: var(--text-muted) !important; border: 1px solid var(--border-light);">Cancel</button>
                     </div>
                 </div>
             </div>
 
             <div id="ratingModal" class="hidden" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:1001;">
-                <div style="width:420px; max-width:92%; background:#fff; border-radius:24px; padding:32px;">
+                <div style="width:420px; max-width:92%; padding:32px;">
                     <h4 style="margin:0 0 20px 0; font-size: 20px;">Rate Performance</h4>
                     <div class="form-group">
                         <label>Rating</label>
-                        <select id="ratingValue" style="padding: 12px; border-radius: 12px; background: #f9fafb;">
+                        <select id="ratingValue" style="padding: 12px; border-radius: 12px; background: var(--bg-cream); border: 1px solid var(--border-light);">
                             <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
                             <option value="4">⭐⭐⭐⭐ - Good</option>
                             <option value="3">⭐⭐⭐ - Average</option>
@@ -1963,35 +2056,35 @@
                     </div>
                     <div class="form-group">
                         <label>Feedback</label>
-                        <textarea id="ratingComment" style="width:100%; padding:12px; border:1px solid #e5e7eb; border-radius:12px; min-height: 80px;"></textarea>
+                        <textarea id="ratingComment" style="width:100%; padding:12px; border:1px solid var(--border-light); border-radius:12px; min-height: 80px;"></textarea>
                     </div>
                     <div style="display:flex; gap:12px; margin-top:24px;">
-                        <button class="add-task-btn" style="flex: 1;" onclick="submitRating()">Submit</button>
-                        <button class="btn-small btn-secondary" onclick="closeRatingModal()">Cancel</button>
+                        <button class="add-task-btn" style="flex: 1; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="submitRating()">Submit</button>
+                        <button class="btn-small btn-secondary" onclick="closeRatingModal()" style="background: transparent; color: var(--text-muted) !important; border: 1px solid var(--border-light);">Cancel</button>
                     </div>
                 </div>
             </div>
 
-            <div id="createTaskPage" class="hidden" style="position: fixed; inset: 0; background: #fff; z-index: 2000; overflow: auto;">
+            <div id="createTaskPage" class="hidden" style="position: fixed; inset: 0; background: var(--bg-cream); z-index: 2000; overflow: auto;">
                 <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 40px;">
-                        <h2 style="margin:0;">Create Task</h2>
-                        <button class="btn-small btn-secondary" onclick="hideCreateTask()">← Back to Dashboard</button>
+                        <h2 style="margin:0; color: var(--primary-navy);">Create Task</h2>
+                        <button class="btn-small btn-secondary" onclick="hideCreateTask()" style="background: var(--primary-navy); color: #fff !important;">← Back to Dashboard</button>
                     </div>
                     <div id="createTaskPageContent"></div>
                 </div>
             </div>
 
             <div id="statusModal" class="hidden" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); z-index:1001;">
-                <div style="width:500px; max-width:95%; background:#fff; border-radius:24px; padding:32px;">
+                <div style="width:500px; max-width:95%; padding:32px;">
                     <h3 style="margin:0 0 20px 0; font-size: 20px;">Daily Status Update</h3>
                     <div class="form-group">
                         <label>What did you work on today?</label>
-                        <textarea id="statusText" style="width:100%; min-height:120px; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb;"></textarea>
+                        <textarea id="statusText" style="width:100%; min-height:120px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-light);"></textarea>
                     </div>
                     <div style="display:flex; gap:12px; margin-top:24px;">
-                        <button class="add-task-btn" style="flex: 1;" onclick="saveDailyStatus()">Submit Update</button>
-                        <button class="btn-small btn-secondary" onclick="closeStatusModal()">Cancel</button>
+                        <button class="add-task-btn" style="flex: 1; background: var(--gold-accent); color: var(--primary-navy) !important;" onclick="saveDailyStatus()">Submit Update</button>
+                        <button class="btn-small btn-secondary" onclick="closeStatusModal()" style="background: transparent; color: var(--text-muted) !important; border: 1px solid var(--border-light);">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -3760,6 +3853,44 @@
  // Call immediately 
  refreshWalletBalance(); 
 
+        async function loadWithdrawalHistory() {
+            if (!currentUser || !currentUser.userId) return;
+            const body = document.getElementById('withdrawalHistoryBody');
+            if (!body) return;
+            
+            try {
+                const res = await fetch(`${API_URL}/wallet/withdrawals/${currentUser.userId}`);
+                const data = await res.json();
+                
+                if (!data.success || !Array.isArray(data.withdrawals) || data.withdrawals.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="padding:15px; text-align:center; color:#666;">No withdrawal requests yet</td></tr>';
+                    return;
+                }
+                
+                body.innerHTML = data.withdrawals.map(w => {
+                    const date = new Date(w.createdAt).toLocaleString();
+                    const amount = `₹${w.amount.toFixed(2)}`;
+                    const method = w.method || 'Bank Transfer';
+                    let statusClass = 'pending';
+                    if (w.status === 'completed') statusClass = 'success';
+                    if (w.status === 'rejected') statusClass = 'failed';
+                    
+                    return `
+                        <tr>
+                            <td style="padding:15px; border-bottom:1px solid var(--border-light);">${date}</td>
+                            <td style="padding:15px; border-bottom:1px solid var(--border-light); font-weight:700;">${amount}</td>
+                            <td style="padding:15px; border-bottom:1px solid var(--border-light);">${method}</td>
+                            <td style="padding:15px; border-bottom:1px solid var(--border-light);">
+                                <span class="task-status status-${statusClass}" style="padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;">${w.status.toUpperCase()}</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="4" style="padding:15px; text-align:center; color:var(--error-red);">Failed to load history</td></tr>';
+            }
+        }
+
         async function loadTransactions() {
             if (!currentUser || !currentUser.userId) return;
             const listEl = document.getElementById('transactionsList');
@@ -3983,6 +4114,7 @@
                 document.getElementById('userWalletTab').classList.remove('hidden');
                 refreshWalletBalance();
                 buildTxTable();
+                loadWithdrawalHistory();
             } else if (name === 'dashboard') {
                 document.getElementById('userDashTab').classList.remove('hidden');
                 refreshWalletBalance(); // Added refreshWalletBalance() call
