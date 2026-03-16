@@ -117,14 +117,15 @@ router.post('/withdraw', async (req, res) => {
   }
 });
 
-// GET /wallet/withdrawal-history/:userId - Get withdrawal history
-router.get('/withdrawal-history/:userId', async (req, res) => {
-  try {
-    const history = await Withdrawal.find({ userId: req.params.userId }).sort({ requestedAt: -1 }).populate('bankAccountId');
-    res.json({ success: true, history });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+// GET /wallet/withdrawals/:userId - Get withdrawal history
+router.get('/withdrawals/:userId', async (req, res) => { 
+  try { 
+    const withdrawals = await Withdrawal.find({ userId: req.params.userId }) 
+      .sort({ requestedAt: -1 }); 
+    res.json({ success: true, withdrawals }); 
+  } catch(e) { 
+    res.status(500).json({ success: false, message: e.message }); 
+  } 
+}); 
 
 module.exports = router;
