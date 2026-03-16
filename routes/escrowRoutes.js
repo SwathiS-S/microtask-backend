@@ -26,24 +26,29 @@ router.post('/release/:id', async (req, res) => {
      const { id } = req.params; 
  
      console.log('=== RELEASE START ==='); 
-     console.log('Called with ID:', id); 
+     console.log('Param id:', id); 
  
      // 1. Find the escrow first
      const escrow = await Escrow.findById(id);
+     console.log('Escrow found:', escrow?._id);
+     console.log('Escrow taskId:', escrow?.taskId);
+     console.log('Escrow userId:', escrow?.userId);
+
      if (!escrow) {
        console.log('Escrow not found by ID:', id);
        return res.status(404).json({ success: false, message: 'Escrow not found' });
      }
      console.log('Escrow found, status:', escrow.status);
-     console.log('Task ID from escrow:', escrow.taskId);
 
      // 2. Find the task using escrow.taskId
      const task = await Task.findById(escrow.taskId); 
+     console.log('Task found:', task?._id, task?.title);
+
      if (!task) { 
        console.log('Task not found for escrow taskId:', escrow.taskId);
        return res.status(404).json({ 
          success: false, 
-         message: 'Task not found' 
+         message: 'Task not found - taskId: ' + escrow.taskId 
        }); 
      } 
  
