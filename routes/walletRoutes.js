@@ -73,88 +73,48 @@ router.get('/transactions/:userId', async (req, res) => {
 // POST /wallet/withdraw - User requests withdrawal
 router.post('/withdraw', async (req, res) => {
   try {
-    console.log('=== WITHDRAWAL START ===');
-    console.log('Body:', req.body);
-
     const { userId, amount, bankDetails } = req.body;
+    if (!userId || !amount) return res.status(400).json({ success: false, message: 'userId and amount required' });
+    if (amount < 100) return res.status(400).json({ success: false, message: 'Minimum withdrawal is ₹100' });
 
-    // Find wallet
-    const wallet = await Wallet.findOne({
-      userId: userId
-    });
+    const wallet = await Wallet.findOne({ userId });
+    if (!wallet) return res.status(404).json({ success: false, message: 'Wallet not found' });
+    if (wallet.balance < amount) return res.status(400).json({ success: false, message: 'Insufficient balance' });
 
-    console.log('Wallet:', wallet);
-    console.log('Balance:', wallet?.balance);
-    console.log('Requested:', amount);
-
-    if (!wallet) {
-      return res.status(400).json({
-        success: false,
-        message: 'Wallet not found'
-      });
-    }
-
-    if (Number(wallet.balance) < Number(amount)) {
-      return res.status(400).json({
-        success: false,
-        message: `Insufficient balance.
-        Available: ₹${wallet.balance}`
-      });
-    }
-
-    // Deduct balance
-    const updated = await Wallet.findOneAndUpdate(
-      { userId: userId },
-      {
-        $inc: {
-          balance: -Number(amount),
-          pendingWithdrawal: +Number(amount)
-        },
-        $push: {
+    // Deduct balance and add pending withdrawal 
+    await Wallet.findOneAndUpdate(
+      { userId },
+      { 
+        $inc: { balance: -Number(amount), pendingWithdrawal: +Number(amount) },
+        $push: { 
           transactions: {
-            transactionType: 'withdrawal',
-            amount: Number(amount),
-            description: 'Withdrawal requested',
-            status: 'pending',
-            date: new Date()
-          }
-        }
-      },
-      { new: true }
+            transactionType: 'withdrawal', 
+            amount: Number(amount), 
+            description: `Withdrawal ₹${amount} requested`, 
+            status: 'pending', 
+            date: new Date() 
+          } 
+        } 
+      }
     );
 
-    console.log('Updated balance:', updated.balance);
-
-    // Fetch user name before creating withdrawal 
-    const user = await User.findById(userId); 
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' }); 
-
-    // Create withdrawal record
-    const withdrawal = await Withdrawal.create({
-      userId: userId,
-      userName: user.name || user.fullName || user.email, // ← ADD THIS 
-      amount: Number(amount),
-      bankDetails: bankDetails,
-      status: 'pending',
-      requestedAt: new Date()
+    // Create withdrawal record 
+    const user = await User.findById(userId);
+    await Withdrawal.create({ 
+      userId, 
+      userName: user?.name || 'Unknown', 
+      amount: Number(amount), 
+      bankDetails: bankDetails || {}, 
+      status: 'pending', 
+      requestedAt: new Date() 
     });
 
-    console.log('Withdrawal created:', withdrawal._id);
-    console.log('=== WITHDRAWAL DONE ===');
+    // Update User model wallet for backward compatibility
+    await User.findByIdAndUpdate(userId, { $inc: { wallet: -Number(amount) } });
 
-    return res.json({
-      success: true,
-      message: 'Withdrawal requested successfully!',
-      withdrawalId: withdrawal._id
-    });
-
-  } catch (error) {
-    console.log('WITHDRAWAL ERROR:', error.message);
-    console.log('Full error:', error);
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.json({ success: true, message: `Withdrawal of ₹${amount} requested successfully!` });
+  } catch(e) {
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 

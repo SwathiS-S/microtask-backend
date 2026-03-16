@@ -298,7 +298,100 @@ router.get('/analytics/revenue', async (req, res) => {
   }
 });
 
-router.get('/payouts', async (req, res) => {
+router.get('/withdrawals', async (req, res) => { 
+   try { 
+     const withdrawals = await Withdrawal.find({}) 
+       .populate('userId', 'name email') 
+       .sort({ requestedAt: -1 }); 
+     res.json({ success: true, withdrawals }); 
+   } catch(e) { 
+     res.status(500).json({ success: false, message: e.message }); 
+   } 
+ }); 
+ 
+ router.post('/withdrawals/:id/approve', async (req, res) => { 
+   try { 
+     const withdrawal = await Withdrawal.findByIdAndUpdate( 
+       req.params.id, 
+       { status: 'completed', processedAt: new Date() }, 
+       { new: true } 
+     ); 
+     // Update wallet pendingWithdrawal 
+     await Wallet.findOneAndUpdate( 
+       { userId: withdrawal.userId }, 
+       { $inc: { pendingWithdrawal: -withdrawal.amount } } 
+     ); 
+     res.json({ success: true, message: 'Withdrawal approved!' }); 
+   } catch(e) { 
+     res.status(500).json({ success: false, message: e.message }); 
+   } 
+ }); 
+ 
+ router.post('/withdrawals/:id/reject', async (req, res) => { 
+   try { 
+     const withdrawal = await Withdrawal.findByIdAndUpdate( 
+       req.params.id, 
+       { status: 'rejected', rejectedAt: new Date() }, 
+       { new: true } 
+     ); 
+     // Refund balance back to wallet 
+     await Wallet.findOneAndUpdate( 
+       { userId: withdrawal.userId }, 
+       { 
+         $inc: { 
+           balance: +withdrawal.amount, 
+           pendingWithdrawal: -withdrawal.amount 
+         }, 
+         $push: { 
+           transactions: { 
+             transactionType: 'refund', 
+             amount: withdrawal.amount, 
+             description: 'Withdrawal rejected - amount refunded', 
+             status: 'completed', 
+             date: new Date() 
+           } 
+         } 
+       } 
+     ); 
+     // Update User model wallet for backward compatibility
+     const User = require('../models/User');
+     await User.findByIdAndUpdate(withdrawal.userId, { $inc: { wallet: +withdrawal.amount } });
+
+     res.json({ success: true, message: 'Withdrawal rejected and refunded!' }); 
+   } catch(e) { 
+     res.status(500).json({ success: false, message: e.message }); 
+   } 
+ }); 
+
+ router.get('/revenue', async (req, res) => { 
+   try { 
+     const wallets = await Wallet.find({}); 
+     let inflow = 0, outflow = 0, commission = 0, pendingWithdrawals = 0; 
+     
+     wallets.forEach(wallet => { 
+       wallet.transactions.forEach(tx => { 
+         const type = (tx.transactionType || '').toLowerCase(); 
+         if (type === 'escrow_hold') inflow += Number(tx.amount || 0); 
+         if (type === 'credit') outflow += Number(tx.amount || 0); 
+         if (type === 'commission') commission += Number(tx.amount || 0); 
+         if (type === 'withdrawal') pendingWithdrawals += Number(tx.amount || 0); 
+       }); 
+     }); 
+     
+     res.json({ 
+       success: true, 
+       totalInflow: inflow.toFixed(2), 
+       totalOutflow: outflow.toFixed(2), 
+       netCommission: commission.toFixed(2), 
+       pendingWithdrawals: pendingWithdrawals.toFixed(2), 
+       netRevenue: (inflow - outflow).toFixed(2) 
+     }); 
+   } catch(e) { 
+     res.status(500).json({ success: false, message: e.message }); 
+   } 
+ }); 
+
+ router.get('/payouts', async (req, res) => {
   try {
     const Payout = require('../models/Payout');
     const status = req.query.status;
