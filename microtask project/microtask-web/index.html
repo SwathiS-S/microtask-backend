@@ -8,15 +8,15 @@
         :root {
             --primary: #3b82f6;
             --primary-dark: #2563eb;
-            --bg-dark: #0b0b0e;
-            --sidebar-bg: #141418;
-            --content-bg: #f3f4f6;
+            --bg-dark: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --content-bg: #ffffff;
             --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --text-light: #ffffff;
-            --border: #e5e7eb;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --text-light: #1e293b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
         /* Dashboard Layout */
@@ -24,7 +24,7 @@
             display: flex;
             width: 100vw;
             height: 100vh;
-            background: var(--bg-dark);
+            background: #f8fafc;
             overflow: hidden;
         }
 
@@ -36,6 +36,7 @@
             padding: 30px 20px;
             color: var(--text-light);
             flex-shrink: 0;
+            border-right: 1px solid var(--border);
         }
 
         .sidebar-logo {
@@ -46,6 +47,7 @@
             font-weight: 800;
             margin-bottom: 50px;
             padding-left: 10px;
+            color: var(--primary);
         }
 
         .sidebar-nav {
@@ -63,18 +65,19 @@
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #8e8e93;
+            color: #64748b;
             font-weight: 600;
             text-decoration: none;
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            background: rgba(59, 130, 246, 0.08);
+            color: var(--primary);
         }
 
         .nav-item.active {
             position: relative;
+            background: rgba(59, 130, 246, 0.1);
         }
 
         .nav-item.active::before {
@@ -92,6 +95,7 @@
         .sidebar-footer {
             margin-top: auto;
             padding-top: 20px;
+            border-top: 1px solid var(--border);
         }
 
         .add-task-btn {
@@ -107,7 +111,7 @@
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
         }
 
         .main-content-wrapper {
@@ -116,6 +120,7 @@
             flex-direction: column;
             padding: 20px;
             overflow: hidden;
+            background: #f8fafc;
         }
 
         .top-bar {
@@ -134,11 +139,12 @@
         .search-container input {
             width: 100%;
             padding: 12px 20px 12px 45px;
-            background: #1c1c21;
-            border: 1px solid #2c2c34;
+            background: #ffffff;
+            border: 1px solid var(--border);
             border-radius: 12px;
-            color: #fff;
+            color: var(--text-main);
             font-size: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .search-container i {
@@ -146,7 +152,7 @@
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #5c5c63;
+            color: #94a3b8;
         }
 
         .user-actions {
@@ -156,22 +162,25 @@
         }
 
         .logout-btn-new {
-            background: #dc3545;
+            background: #ef4444;
             color: #fff;
             padding: 10px 24px;
             border-radius: 10px;
             font-weight: 700;
             border: none;
             cursor: pointer;
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
         }
 
         .content-area {
             flex: 1;
-            background: var(--content-bg);
-            border-radius: 32px;
+            background: #ffffff;
+            border-radius: 24px;
             padding: 40px;
             overflow-y: auto;
             color: var(--text-main);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
         }
 
         .content-area h2 {
