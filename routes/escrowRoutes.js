@@ -8,7 +8,7 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
 // Fix 2: Admin dashboard fetch all pending escrows
-router.get('/admin/escrow/pending', async (req, res) => {
+router.get('/pending', async (req, res) => {
   try {
     const escrows = await Escrow.find({ status: 'held' })
       .populate('taskId', 'title amount workerAmount status acceptedBy')
@@ -19,11 +19,9 @@ router.get('/admin/escrow/pending', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-}); 
+});
 
-
-router.post('/admin/escrow/release/:taskId', 
-   async (req, res) => { 
+router.post('/release/:taskId', async (req, res) => { 
    try { 
      const { taskId } = req.params; 
  
