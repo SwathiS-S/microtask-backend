@@ -549,6 +549,16 @@
                   ${w.bankDetails?.bankName || 'Bank'} - ${w.bankDetails?.accountNumber || 'N/A'}<br>
                   <small>${w.bankDetails?.ifscCode || ''}</small>
                 </div>
+                ${w.status === 'pending' ? ` 
+                <div style="background:#f8f9fa; border-radius:8px; padding:10px; margin-top:8px; font-size:11px; border:1px solid #eee;"> 
+                    <div style="font-weight:600; color:#1E3A5F; margin-bottom:4px;">💳 Bank Details for Transfer:</div> 
+                    <div>Account Holder: <strong>${w.bankDetails?.accountHolderName || 'N/A'}</strong></div> 
+                    <div>Account Number: <strong>${w.bankDetails?.accountNumber || 'N/A'}</strong></div> 
+                    <div>IFSC Code: <strong>${w.bankDetails?.ifscCode || 'N/A'}</strong></div> 
+                    <div>Bank: <strong>${w.bankDetails?.bankName || 'N/A'}</strong></div> 
+                    ${w.bankDetails?.branchName ? `<div>Branch: <strong>${w.bankDetails.branchName}</strong></div>` : ''} 
+                </div> 
+                ` : ''}
               </td>
               <td>
                 ${w.status === 'pending' ? `
@@ -576,7 +586,16 @@
                         <strong>${name}</strong> (${email})<br> 
                         <span style="color:#666; font-size:13px;">${date}</span><br> 
                         <span style="color:${statusColor}; font-weight:600;">${w.status.toUpperCase()}</span> 
-                        ${w.bankDetails ? `<br><small>Bank: ${w.bankDetails.bankName || ''} | AC: ${w.bankDetails.accountNumber || ''}</small>` : ''} 
+                        ${w.status === 'pending' ? ` 
+                        <div style="background:#f8f9fa; border-radius:8px; padding:10px; margin-top:8px; font-size:11px; border:1px solid #eee;"> 
+                            <div style="font-weight:600; color:#1E3A5F; margin-bottom:4px;">💳 Bank Details for Transfer:</div> 
+                            <div>Account Holder: <strong>${w.bankDetails?.accountHolderName || 'N/A'}</strong></div> 
+                            <div>Account Number: <strong>${w.bankDetails?.accountNumber || 'N/A'}</strong></div> 
+                            <div>IFSC Code: <strong>${w.bankDetails?.ifscCode || 'N/A'}</strong></div> 
+                            <div>Bank: <strong>${w.bankDetails?.bankName || 'N/A'}</strong></div> 
+                            ${w.bankDetails?.branchName ? `<div>Branch: <strong>${w.bankDetails.branchName}</strong></div>` : ''} 
+                        </div> 
+                        ` : (w.bankDetails ? `<br><small>Bank: ${w.bankDetails.bankName || ''} | AC: ${w.bankDetails.accountNumber || ''}</small>` : '')} 
                     </div> 
                     <div style="text-align:right;"> 
                         <strong style="font-size:20px;">₹${amount}</strong> 
@@ -618,35 +637,18 @@
     }
 
     async function rejectWithdrawal(id) {
-      if (!confirm('Reject and refund this withdrawal?')) return;
+      const reason = prompt('Enter rejection reason (shown to user):');
+      if (!reason) return;
       try {
         const res = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, { 
           method: 'POST',
-          headers: getAdminIdHeader()
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify({ reason })
         });
         const data = await res.json();
         alert(data.message || 'Done');
         loadWithdrawals();
         loadRevenue();
-        refreshMetrics();
-      } catch (e) {
-        alert(e.message);
-      }
-    }
-
-    async function rejectWithdrawal(id, modal) {
-      const reason = prompt('Enter reason for rejection:');
-      if (!reason) return;
-      try {
-        const r = await fetch(`${API_URL}/admin/withdrawals/reject/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
-          body: JSON.stringify({ adminId: adminUser.userId, reason })
-        });
-        const d = await r.json();
-        alert(d.message || (r.ok ? 'Withdrawal rejected' : 'Failed'));
-        modal.remove();
-        loadWithdrawals();
         refreshMetrics();
       } catch (e) {
         alert(e.message);
