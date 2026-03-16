@@ -75,7 +75,6 @@ router.post('/withdraw', async (req, res) => {
   try {
     const { userId, amount, bankDetails } = req.body;
     if (!userId || !amount) return res.status(400).json({ success: false, message: 'userId and amount required' });
-    if (amount < 100) return res.status(400).json({ success: false, message: 'Minimum withdrawal is ₹100' });
 
     const wallet = await Wallet.findOne({ userId });
     if (!wallet) return res.status(404).json({ success: false, message: 'Wallet not found' });
