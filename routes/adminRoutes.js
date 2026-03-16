@@ -247,7 +247,7 @@ router.get('/analytics/revenue', async (req, res) => {
     const pipeline = [
       {
         $group: {
-          _id: '$type',
+          _id: { $toUpper: '$type' },
           total_amount: { $sum: '$amount' },
           count: { $sum: 1 }
         }
