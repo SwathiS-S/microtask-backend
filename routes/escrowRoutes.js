@@ -29,9 +29,27 @@ router.post('/release/:id', async (req, res) => {
     // Get task if exists, but don't fail if deleted
     const task = await Task.findById(escrow.taskId);
     const taskTitle = task?.title || 'Deleted Task';
-    const totalAmount = escrow.amount;
-    const workerAmount = totalAmount * 0.8; // 80% to worker
-    const adminCommission = totalAmount * 0.2; // 20% commission
+    
+    // Get amount with fallbacks 
+    const totalAmount = Number(escrow.amount) || 
+                       Number(escrow.totalAmount) || 
+                       Number(task?.amount) || 
+                       Number(task?.budget) || 
+                       Number(task?.price) || 0; 
+ 
+    console.log('escrow.amount:', escrow.amount); 
+    console.log('task.amount:', task?.amount); 
+    console.log('totalAmount resolved:', totalAmount); 
+ 
+    if (totalAmount === 0) { 
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cannot release: Escrow amount is missing or zero' 
+      }); 
+    } 
+ 
+    const workerAmount = totalAmount * 0.8; 
+    const adminCommission = totalAmount * 0.2; 
 
     // Get worker ID from escrow or task
     const workerId = escrow.userId || escrow.workerId || task?.acceptedBy || task?.assignedTo;
