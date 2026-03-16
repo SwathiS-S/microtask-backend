@@ -78,8 +78,8 @@ mongoose.connect(MONGODB_URI || 'mongodb://127.0.0.1:27017/tasknest', dbOptions)
   .catch(err => console.error('❌ MongoDB connection error:', err.message));
 
 const PORT = process.env.PORT || 5000;
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const BASE_URL = process.env.BASE_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on ${BASE_URL}`);
 });
