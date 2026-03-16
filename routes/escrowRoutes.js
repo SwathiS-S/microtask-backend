@@ -11,9 +11,17 @@ const Transaction = require('../models/Transaction');
 router.get('/pending', async (req, res) => {
   try {
     const escrows = await Escrow.find({ status: 'held' })
-      .populate('taskId', 'title amount workerAmount status acceptedBy')
+      .populate('providerId', 'name email')
       .populate('userId', 'name email')
-      .populate('providerId', 'name email');
+      .populate({
+        path: 'taskId',
+        select: 'title amount acceptedBy assignedTo applications',
+        populate: {
+          path: 'acceptedBy',
+          model: 'User',
+          select: 'name email'
+        }
+      });
 
     res.json({ success: true, escrows });
   } catch (error) {
