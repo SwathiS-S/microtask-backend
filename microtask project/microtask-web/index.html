@@ -1540,6 +1540,15 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Withdrawal History Section --> 
+                    <div style="margin-top:28px;"> 
+                      <h3 style="font-size:16px; font-weight:700; margin-bottom:12px; color:#1E3A5F;"> 
+                        💸 Withdrawal History 
+                      </h3> 
+                      <div id="withdrawalHistoryList"> 
+                        <p style="color:#666;">Loading...</p> 
+                      </div> 
+                    </div>
                 </div>
             </div>
         </div>
@@ -3697,6 +3706,56 @@
             }
         }
 
+        async function loadWithdrawalHistory() { 
+            if (!currentUser || !currentUser.userId) return;
+            try { 
+                const res = await fetch(`${API_URL}/wallet/withdrawals/${currentUser.userId}`); 
+                const data = await res.json(); 
+                
+                const container = document.getElementById('withdrawalHistoryList'); 
+                if (!container) return; 
+                
+                if (!data.success || !data.withdrawals || data.withdrawals.length === 0) { 
+                    container.innerHTML = '<p style="color:#666; font-size: 13px;">No withdrawal requests yet.</p>'; 
+                    return; 
+                } 
+                
+                container.innerHTML = data.withdrawals.map(w => { 
+                    const date = new Date(w.requestedAt).toLocaleString(); 
+                    const amount = Number(w.amount).toFixed(2); 
+                    const statusColor = w.status === 'completed' ? '#28a745' : 
+                                       w.status === 'rejected' ? '#dc3545' : '#fd7e14'; 
+                    const statusIcon = w.status === 'completed' ? '✅' : 
+                                      w.status === 'rejected' ? '❌' : '⏳'; 
+                    
+                    return `<div style="background:white; border:1px solid #e2e8f0; border-radius:10px; 
+                                padding:14px 16px; margin-bottom:10px; display:flex; 
+                                justify-content:space-between; align-items:center;"> 
+                        <div> 
+                            <div style="font-weight:600; font-size:14px;">Withdrawal Request</div> 
+                            <div style="font-size:12px; color:#666; margin-top:3px;">${date}</div> 
+                            ${w.bankDetails?.bankName ? 
+                                `<div style="font-size:12px; color:#888; margin-top:2px;"> 
+                                    🏦 ${w.bankDetails.bankName} • ****${(w.bankDetails.accountNumber||'').slice(-4)} 
+                                </div>` : ''} 
+                            ${w.rejectionReason ? 
+                                `<div style="font-size:12px; color:#dc3545; margin-top:2px;"> 
+                                    Reason: ${w.rejectionReason} 
+                                </div>` : ''} 
+                        </div> 
+                        <div style="text-align:right;"> 
+                            <div style="font-size:18px; font-weight:700; color:#1E3A5F;">₹${amount}</div> 
+                            <div style="font-size:12px; font-weight:600; color:${statusColor}; margin-top:4px;"> 
+                                ${statusIcon} ${w.status.toUpperCase()} 
+                            </div> 
+                        </div> 
+                    </div>`; 
+                }).join(''); 
+            } catch(e) { 
+                console.error('loadWithdrawalHistory error:', e); 
+            } 
+        }
+
         function switchTab(tabName) {
             setNavTabsVisible(true);
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -3713,6 +3772,7 @@
             if (tabName === 'wallet') {
                 refreshUserWallet();
                 loadTransactions();
+                loadWithdrawalHistory();
             }
         }
 
