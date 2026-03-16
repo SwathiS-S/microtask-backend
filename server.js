@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 
 // SIMPLE OTP ALIAS ROUTES (email-only)
 const { sendEmail } = require('./services/email');
-app.post('/auth/verify-otp', async (req, res) => {
+app.post('/api/auth/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body || {};
     const User = require('./models/User');
@@ -60,14 +60,18 @@ const bankRoutes = require('./routes/bankRoutes');
 const walletRoutes = require('./routes/walletRoutes');
 const escrowRoutes = require('./routes/escrowRoutes');
 
-app.use('/users', userRoutes);
-app.use('/bank', bankRoutes);
-app.use('/wallet', walletRoutes);
-app.use('/escrow', escrowRoutes);
-app.use('/', escrowRoutes);
+const adminRoutes = require('./routes/adminRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+
+app.use('/api/users', userRoutes);
+app.use('/api/bank', bankRoutes);
+app.use('/api/wallet', walletRoutes);
+app.use('/api/admin/escrow', escrowRoutes);
+app.use('/api', escrowRoutes);
 // Explicit auth endpoints to avoid path conflicts with /users/:id
 const User = require('./models/User');
-app.post('/auth/register', async (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   try {
     const body = req.body || {};
     const otp = String(Math.floor(100000 + Math.random() * 900000));
@@ -98,7 +102,7 @@ app.post('/auth/register', async (req, res) => {
     });
   }
 });
-app.post('/auth/login', async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body || {};
     const user = await User.findOne({ email, password });
@@ -125,13 +129,10 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 const taskRoutes = require('./routes/taskRoutes');
-app.use('/tasks', taskRoutes);
-const adminRoutes = require('./routes/adminRoutes');
-app.use('/admin', adminRoutes);
-const paymentRoutes = require('./routes/paymentRoutes');
-app.use('/payments', paymentRoutes);
-const notificationRoutes = require('./routes/notificationRoutes');
-app.use('/notifications', notificationRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/notifications', notificationRoutes);
 // AUTO DEADLINE CHECK (Run Daily)
 const Escrow = require('./models/Escrow');
 const Wallet = require('./models/Wallet');

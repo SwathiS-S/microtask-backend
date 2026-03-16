@@ -251,13 +251,13 @@ router.post('/razorpay/verify', async (req, res) => {
     let wallet = await Wallet.findOne({ userId });
     if (!wallet) wallet = new Wallet({ userId, role: user.role === 'taskProvider' ? 'provider' : 'user', balance: 0 });
     wallet.balance = (Number(wallet.balance) || 0) + addAmount;
-    wallet.transactions.push({
-      transactionType: 'credit',
-      amount: addAmount,
-      description: 'Added Funds via Razorpay',
-      status: 'completed',
-      date: new Date()
-    });
+    wallet.transactions.push({ 
+      transactionType: 'credit',  // ← was 'type', now 'transactionType' 
+      amount: addAmount, 
+      description: 'Added Funds via Razorpay', 
+      status: 'completed', 
+      date: new Date() 
+    }); 
     await wallet.save();
 
     res.json({ success: true, message: 'Funds added to wallet', balance: wallet.balance });

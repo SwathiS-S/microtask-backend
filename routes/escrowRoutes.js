@@ -4,6 +4,8 @@ const Escrow = require('../models/Escrow');
 const Wallet = require('../models/Wallet');
 const Task = require('../models/Task');
 const Notification = require('../models/Notification');
+const User = require('../models/User');
+const Transaction = require('../models/Transaction');
 
 // Fix 2: Admin dashboard fetch all pending escrows
 router.get('/admin/escrow/pending', async (req, res) => { 
@@ -107,7 +109,11 @@ router.post('/admin/escrow/release/:taskId',
        // Continue with workerIdFromApp 
        workerId = workerIdFromApp; 
      } 
- 
+
+     console.log('workerId:', workerId);
+     console.log('task.assignedTo:', task.assignedTo);
+     console.log('task.workerId:', task.workerId);
+
      // Get escrow 
      const escrow = await Escrow.findOne({ 
        taskId: task._id 
@@ -122,29 +128,59 @@ router.post('/admin/escrow/release/:taskId',
        || Math.round(totalAmount * 0.8); 
  
      console.log('Worker amount:', workerAmount); 
- 
+     console.log('Release payment triggered for task:', taskId);
+
      // Step 1: Credit worker wallet 
-     const workerWallet = await Wallet.findOneAndUpdate( 
-       { userId: workerId }, 
-       { 
-         $inc: { balance: Number(workerAmount) }, 
-         $push: { 
-           transactions: { 
-             transactionType: 'credit', 
-             amount: Number(workerAmount), 
-             taskId: task._id, 
-             description: `Payment ₹${workerAmount} released from escrow`, 
-             status: 'completed', 
-             date: new Date() 
-           } 
-         } 
-       }, 
-       { upsert: true, new: true } 
-     ); 
+    const workerWallet = await Wallet.findOneAndUpdate( 
+      { userId: workerId }, 
+      { 
+        $inc: { balance: Number(workerAmount) }, 
+        $push: { 
+          transactions: { 
+            transactionType: 'credit', 
+            amount: Number(workerAmount), 
+            taskId: task._id, 
+            description: `Payment ₹${workerAmount} released from escrow`, 
+            status: 'completed', 
+            date: new Date() 
+          } 
+        }, 
+        $setOnInsert: { role: 'user', userId: workerId }  // ← ADD THIS 
+      }, 
+      { upsert: true, new: true } 
+    ); 
+
+    // Sync with User model wallet field
+    await User.findByIdAndUpdate(workerId, { $inc: { wallet: Number(workerAmount) } });
+
+    // Sync with Transaction collection (Old system)
+    await Transaction.create({
+      user_id: workerId,
+      task_id: task._id,
+      task_title: task.title,
+      taskTitle: task.title,
+      amount: Number(workerAmount),
+      type: 'CREDIT',
+      status: 'SUCCESS',
+      description: `Payment ₹${workerAmount} released from escrow`,
+      created_at: new Date()
+    });
+
+    // After findOneAndUpdate for worker wallet 
+    if (!workerWallet) { 
+      console.log('ERROR: Worker wallet not found and upsert may have failed due to missing role field'); 
+    } 
+
+     console.log('Worker wallet found:', workerWallet?._id);
+     console.log('Saving worker transaction...');
+     console.log('Worker wallet saved:', workerWallet?.balance); 
  
      console.log('Worker balance:', workerWallet.balance); 
  
      // Step 2: Update admin outflow 
+     const adminCommission = totalAmount - workerAmount;
+     const adminId = req.header('x-admin-user-id');
+
      await Wallet.findOneAndUpdate( 
        { role: 'admin' }, 
        { 
@@ -162,6 +198,23 @@ router.post('/admin/escrow/release/:taskId',
        }, 
        { upsert: true, new: true } 
      ); 
+
+     if (adminId) {
+       // Update Admin User wallet and create COMMISSION transaction
+       await User.findByIdAndUpdate(adminId, { $inc: { wallet: Number(adminCommission) } });
+       
+       await Transaction.create({
+         user_id: adminId,
+         task_id: task._id,
+         task_title: task.title,
+         taskTitle: task.title,
+         amount: Number(adminCommission),
+         type: 'COMMISSION',
+         status: 'SUCCESS',
+         description: `Platform commission for task: ${task.title}`,
+         created_at: new Date()
+       });
+     }
  
      // Step 3: Update task to completed 
      await Task.findByIdAndUpdate(task._id, { 
@@ -226,6 +279,20 @@ router.post('/deposit/:taskId', async (req, res) => {
        status: 'completed' 
      }); 
      await wallet.save(); 
+
+     // Sync with User model wallet field
+     await User.findByIdAndUpdate(providerId, { $inc: { wallet: -Number(amount) } });
+
+     // Sync with Transaction collection (Old system)
+     await Transaction.create({
+       user_id: providerId,
+       task_id: req.params.taskId,
+       amount: Number(amount),
+       type: 'ESCROW_HOLD',
+       status: 'SUCCESS',
+       description: 'Funds held in escrow for task',
+       created_at: new Date()
+     });
  
      // ✅ Compute and store workerAmount at creation time 
      const workerAmount = Math.round(Number(amount) * 0.8); 
@@ -287,6 +354,22 @@ router.post('/release/:taskId', async (req, res) => {
       }, 
       { upsert: true, new: true } 
     ); 
+
+    // Sync with User model wallet field
+    await User.findByIdAndUpdate(userId, { $inc: { wallet: Number(releaseAmount) } });
+
+    // Sync with Transaction collection (Old system)
+    await Transaction.create({
+      user_id: userId,
+      task_id: task._id,
+      task_title: task.title,
+      taskTitle: task.title,
+      amount: Number(releaseAmount),
+      type: 'CREDIT',
+      status: 'SUCCESS',
+      description: 'Payment released from escrow',
+      created_at: new Date()
+    });
     
     if (escrow) { 
       await Wallet.findOneAndUpdate( 
@@ -355,6 +438,20 @@ router.post('/refund/:taskId', async (req, res) => {
         status: 'completed'
       });
       await providerWallet.save();
+
+      // Sync with User model wallet field
+      await User.findByIdAndUpdate(escrow.providerId, { $inc: { wallet: Number(escrow.amount) } });
+
+      // Sync with Transaction collection (Old system)
+      await Transaction.create({
+        user_id: escrow.providerId,
+        task_id: req.params.taskId,
+        amount: Number(escrow.amount),
+        type: 'REFUND',
+        status: 'SUCCESS',
+        description: 'Escrow refunded to wallet',
+        created_at: new Date()
+      });
     }
 
     // Update task status to "expired" or "cancelled"

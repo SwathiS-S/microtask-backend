@@ -210,50 +210,44 @@ router.post('/register', async (req, res) => {
 // LOGIN
 router.post('/login', async (req, res) => {
   try {
-    const body = req.body || {};
-    const email = body.email;
-    const password = body.password;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password required' });
-    }
+    const { email, password, role } = req.body || {}; 
+    if (!email || !password) { 
+      return res.status(400).json({ success: false, message: 'Email and password required' }); 
+    } 
 
-    const user = await User.findOne({ email, password });
+    const user = await User.findOne({ email, password }); 
+    if (!user) { 
+      return res.status(401).json({ success: false, message: 'Invalid credentials' }); 
+    } 
 
-    if (!user) {
-      return res.status(401).json({ 
-        success: false,
-        message: 'Invalid credentials' 
-      });
-    }
-    if (user.status === 'BLOCKED') {
-      return res.status(403).json({
-        success: false,
-        message: 'Account is blocked. Please contact support.'
-      });
-    }
+    // ← ADD THIS: role mismatch check 
+    if (role && user.role !== role) { 
+      return res.status(403).json({ success: false, message: 'Invalid role for this account' }); 
+    } 
+
+    if (user.status === 'BLOCKED') { 
+      return res.status(403).json({ success: false, message: 'Account is blocked. Please contact support.' }); 
+    } 
+
     if (user.role !== 'admin' && !user.isEmailVerified) {
-      return res.status(403).json({
-        success: false,
-        message: 'Please verify your email before login'
-      });
+      return res.status(403).json({ success: false, message: 'Please verify your email before login' });
     }
 
-    res.json({
-      success: true,
-      message: 'Login successful',
-      userId: user._id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      wallet: user.wallet
-    });
-  } catch (err) {
-    res.status(400).json({ 
-      success: false,
-      message: err.message || 'Login failed',
-      error: err.message 
-    });
-  }
+    // Temporarily log the full user object being sent
+    console.log('Login response being sent:', JSON.stringify(user, null, 2));
+
+    res.json({ 
+      success: true, 
+      message: 'Login successful', 
+      userId: user._id, 
+      email: user.email, 
+      name: user.name, 
+      role: user.role, 
+      wallet: user.wallet 
+    }); 
+  } catch (err) { 
+    res.status(400).json({ success: false, message: err.message || 'Login failed' }); 
+  } 
 });
 
 // ADD MONEY TO WALLET (simulated after UPI/Card - no real payment gateway)

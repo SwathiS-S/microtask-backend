@@ -73,13 +73,13 @@
         <div>TaskNest Admin</div>
       </div>
       <div class="nav">
-        <button id="nav-overview" class="active" onclick="switchSection('overview')">Overview</button>
+        <button id="nav-overview" onclick="switchSection('overview')">Overview</button>
         <button id="nav-users" onclick="switchSection('users')">Users</button>
         <button id="nav-tasks" onclick="switchSection('tasks')">Tasks</button>
         <button id="nav-transactions" onclick="switchSection('transactions')">Transactions</button>
         <button id="nav-revenue" onclick="switchSection('revenue')">Revenue</button>
         <button id="nav-withdrawals" onclick="switchSection('withdrawals')">Withdrawals</button>
-        <button id="nav-escrow" onclick="switchSection('escrow')">Escrow Releases</button>
+        <button id="nav-escrow" class="active" onclick="switchSection('escrow')">Escrow Releases</button>
       </div>
       <div class="sidebar-footer">
         <div id="adminStatus">Not signed in</div>
@@ -95,7 +95,7 @@
 
       <!-- Sign-in panel removed in favor of a dedicated admin-login.html -->
 
-      <section id="section-overview" class="section active">
+      <section id="section-overview" class="section">
         <div class="metrics">
           <div class="metric">
             <div class="label">Total Users</div>
@@ -206,7 +206,7 @@
       </section>
 
       <!-- Fix 5: Admin dashboard show pending escrows -->
-      <section id="section-escrow" class="section">
+      <section id="section-escrow" class="section active">
         <div class="panel" style="margin-top:16px;">
           <div class="panel-header">
             <div>Pending Escrow Releases</div>
@@ -513,10 +513,8 @@
     } 
  
     // Load on page load 
-    loadPendingEscrows(); 
-
-
     loadPersisted();
+    loadPendingEscrows();
   </script>
 </body>
 </html>

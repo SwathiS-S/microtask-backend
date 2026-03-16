@@ -56,11 +56,14 @@ router.get('/transactions/:userId', async (req, res) => {
       success: true, 
       transactions: (wallet.transactions || [])
         .sort((a,b) => b.date - a.date)
-        .map(tx => ({
-          ...tx.toObject(),
-          type: tx.transactionType,
-          transactionType: tx.transactionType  // ← ADD THIS (Flutter reads both) 
-        }))
+        .map(tx => {
+          const txObj = tx.toObject ? tx.toObject() : tx;
+          return {
+            ...txObj,
+            type: txObj.transactionType,
+            transactionType: txObj.transactionType
+          };
+        })
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
