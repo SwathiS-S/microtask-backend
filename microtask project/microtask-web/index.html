@@ -3656,7 +3656,7 @@
                 }
 
                 // Check bank details
-                const bankRes = await fetch(`${API_URL}/users/profile/${currentUser.userId}`);
+                const bankRes = await fetch(`${API_URL}/users/${currentUser.userId}`);
                 const bankData = await bankRes.json();
                 if (bankData.success && bankData.user) {
                     currentUser.bankDetails = bankData.user.bankDetails;
