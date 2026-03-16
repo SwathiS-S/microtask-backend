@@ -310,6 +310,7 @@
           const taskTitle = esc.taskId?.title || esc.title || 'Untitled Task';
           const userName = esc.userId?.name || esc.userId?.email || 'N/A';
           const providerName = esc.providerId?.name || esc.providerId?.email || 'N/A';
+          const amount = esc.amount || esc.totalAmount || esc.escrowAmount || 0;
           return `
           <div class="card" style="padding:16px; border:1px solid #e5e7eb; border-radius:8px;">
             <div style="display:flex; justify-content:space-between; align-items:start;">
@@ -322,7 +323,7 @@
                 </div>
               </div>
               <div style="text-align:right;">
-                <div style="font-size:18px; font-weight:700; color:var(--primary);">₹${esc.amount}</div>
+                <div style="font-size:18px; font-weight:700; color:var(--primary);">₹${Number(amount).toFixed(2)}</div>
                 <button class="btn small" style="margin-top:8px;" onclick="releaseEscrow('${esc._id}')">Release to User</button>
               </div>
             </div>
