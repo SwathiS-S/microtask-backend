@@ -41,8 +41,14 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/tasks', taskRoutes);
 
 // Explicit Auth Endpoints (Redirect to userRoutes for consistency)
-app.post('/api/auth/register', (req, res) => res.redirect(307, '/api/users/register'));
-app.post('/api/auth/login', (req, res) => res.redirect(307, '/api/users/login'));
+app.post('/api/auth/register', (req, res, next) => {
+  req.url = '/register';
+  userRoutes(req, res, next);
+});
+app.post('/api/auth/login', (req, res, next) => {
+  req.url = '/login';
+  userRoutes(req, res, next);
+});
 
 // ROOT ROUTE - Serve landing page
 app.get('/', (req, res) => {
