@@ -8,37 +8,18 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
 // Fix 2: Admin dashboard fetch all pending escrows
-router.get('/admin/escrow/pending', async (req, res) => { 
-   try { 
-     const pendingEscrows = await Escrow.find({ status: 'held' }) 
-       .populate('taskId', 'title amount workerAmount status acceptedBy assignedTo') 
-       .populate('providerId', 'name email'); 
- 
-     const normalized = pendingEscrows.map(escrow => { 
-       const task = escrow.taskId; 
-       const rawAmount = Number(escrow.amount || task?.amount || 0); 
-       const workerAmount = Number( 
-         escrow.workerAmount || 
-         task?.workerAmount || 
-         Math.round(rawAmount * 0.8) 
-       ); 
-       return { 
-         _id: escrow._id, 
-         taskId: task?._id || escrow.taskId, 
-         title: task?.title || 'Untitled Task', 
-         amount: rawAmount, 
-         workerAmount: workerAmount,  // ✅ always a number 
-         providerId: escrow.providerId, 
-         status: escrow.status, 
-         createdAt: escrow.createdAt, 
-       }; 
-     }); 
- 
-     return res.json({ success: true, escrows: normalized, tasks: [] }); 
-   } catch (error) { 
-     return res.status(500).json({ success: false, message: error.message }); 
-   } 
- }); 
+router.get('/admin/escrow/pending', async (req, res) => {
+  try {
+    const escrows = await Escrow.find({ status: 'held' })
+      .populate('taskId', 'title amount workerAmount status acceptedBy')
+      .populate('userId', 'name email')
+      .populate('providerId', 'name email');
+
+    res.json({ success: true, escrows });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}); 
 
 
 router.post('/admin/escrow/release/:taskId', 
