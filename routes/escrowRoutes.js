@@ -37,6 +37,9 @@ router.post('/release/:id', async (req, res) => {
     const workerId = escrow.userId || escrow.workerId || task?.acceptedBy || task?.assignedTo;
     if (!workerId) return res.status(400).json({ success: false, message: 'Worker not found for this escrow' });
 
+    // Save workerId back to escrow for future reference 
+    await Escrow.findByIdAndUpdate(escrow._id, { userId: workerId }); 
+
     // Credit worker wallet
     await Wallet.findOneAndUpdate(
       { userId: workerId },
