@@ -368,4 +368,91 @@ router.get('/status/:taskId', async (req, res) => {
   }
 });
 
+// POST /api/admin/escrow/cancel/:taskId - Cancel task and refund provider 
+router.post('/cancel/:taskId', async (req, res) => { 
+  try { 
+    const { taskId } = req.params; 
+    
+    const task = await Task.findById(taskId); 
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' }); 
+    
+    // Only allow cancellation if no worker assigned yet 
+    const hasWorker = task.acceptedBy || task.assignedTo || 
+                      task.applications?.some(a => 
+                        ['accepted','approved'].includes((a.status||'').toLowerCase()) 
+                      ); 
+    
+    if (hasWorker) { 
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cannot cancel task — a worker has already been assigned. Please resolve with the worker first.' 
+      }); 
+    } 
+    
+    // Find escrow 
+    const escrow = await Escrow.findOne({ taskId, status: 'held' }); 
+    if (!escrow) { 
+      // No escrow found, just cancel the task 
+      await Task.findByIdAndUpdate(taskId, { status: 'cancelled' }); 
+      return res.json({ success: true, message: 'Task cancelled. No escrow found to refund.' }); 
+    } 
+    
+    const refundAmount = Number(escrow.amount) || Number(escrow.totalAmount) || Number(task.amount) || 0; 
+    const providerId = escrow.providerId || task.createdBy || task.providerId; 
+    
+    if (!providerId) { 
+      return res.status(400).json({ success: false, message: 'Provider not found for refund' }); 
+    } 
+    
+    // Refund to provider wallet 
+    await Wallet.findOneAndUpdate( 
+      { userId: providerId }, 
+      { 
+        $inc: { balance: Number(refundAmount) }, 
+        $push: { 
+          transactions: { 
+            transactionType: 'refund', 
+            amount: Number(refundAmount), 
+            taskId: task._id, 
+            description: `Refund ₹${refundAmount} for cancelled task: ${task.title}`, 
+            status: 'completed', 
+            date: new Date() 
+          } 
+        }, 
+        $setOnInsert: { role: 'provider', userId: providerId } 
+      }, 
+      { upsert: true, new: true } 
+    ); 
+    
+    // Update provider User model balance 
+    await User.findByIdAndUpdate(providerId, { $inc: { wallet: Number(refundAmount) } }); 
+    
+    // Update escrow status 
+    await Escrow.findByIdAndUpdate(escrow._id, { status: 'refunded' }); 
+    
+    // Cancel the task 
+    await Task.findByIdAndUpdate(taskId, { status: 'cancelled' }); 
+    
+    // Sync Transaction collection 
+    await Transaction.create({ 
+      user_id: providerId, 
+      task_id: task._id, 
+      taskTitle: task.title, 
+      amount: Number(refundAmount), 
+      type: 'refund', 
+      status: 'SUCCESS', 
+      description: `Refund for cancelled task: ${task.title}`, 
+      created_at: new Date() 
+    }); 
+    
+    res.json({ 
+      success: true, 
+      message: `Task cancelled and ₹${refundAmount} refunded to your wallet!` 
+    }); 
+  } catch(e) { 
+    console.error('Cancel task error:', e); 
+    res.status(500).json({ success: false, message: e.message }); 
+  } 
+});
+
 module.exports = router;

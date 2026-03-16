@@ -86,6 +86,65 @@ mongoose.connect(MONGODB_URI || 'mongodb://127.0.0.1:27017/tasknest', dbOptions)
 const PORT = process.env.PORT || 5000;
 const BASE_URL = process.env.BASE_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 
+// Models for Auto-refund
+const Task = require('./models/Task');
+const Escrow = require('./models/Escrow');
+const Wallet = require('./models/Wallet');
+
+// Auto-refund expired tasks daily 
+const autoRefundExpiredTasks = async () => { 
+  try { 
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); 
+    
+    // Find funded tasks older than 30 days with no worker 
+    const expiredTasks = await Task.find({ 
+      status: { $in: ['open', 'funded'] }, 
+      createdAt: { $lt: thirtyDaysAgo }, 
+      acceptedBy: { $exists: false } 
+    }); 
+    
+    console.log('Auto-refund check: found', expiredTasks.length, 'expired tasks'); 
+    
+    for (const task of expiredTasks) { 
+      const escrow = await Escrow.findOne({ taskId: task._id, status: 'held' }); 
+      if (!escrow) continue; 
+      
+      const providerId = escrow.providerId || task.createdBy; 
+      if (!providerId) continue; 
+      
+      // Refund provider 
+      await Wallet.findOneAndUpdate( 
+        { userId: providerId }, 
+        { 
+          $inc: { balance: Number(escrow.amount || 0) }, 
+          $push: { 
+            transactions: { 
+              transactionType: 'refund', 
+              amount: Number(escrow.amount || 0), 
+              taskId: task._id, 
+              description: `Auto-refund for expired task: ${task.title}`, 
+              status: 'completed', 
+              date: new Date() 
+            } 
+          } 
+        } 
+      ); 
+      
+      await Escrow.findByIdAndUpdate(escrow._id, { status: 'refunded' }); 
+      await Task.findByIdAndUpdate(task._id, { status: 'cancelled' }); 
+      
+      console.log('Auto-refunded task:', task.title, 'amount:', escrow.amount); 
+    } 
+  } catch(e) { 
+    console.error('Auto-refund error:', e); 
+  } 
+}; 
+ 
+// Run every 24 hours 
+setInterval(autoRefundExpiredTasks, 24 * 60 * 60 * 1000); 
+// Also run on server start after a short delay
+setTimeout(autoRefundExpiredTasks, 5000);
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on ${BASE_URL}`);
 });

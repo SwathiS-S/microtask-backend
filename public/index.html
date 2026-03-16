@@ -1448,6 +1448,21 @@
         <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 18l6-6-6-6"/>
         </symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </symbol>
+        <symbol id="icon-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="2" ry="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        </symbol>
+        <symbol id="icon-rotate-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </symbol>
+        <symbol id="icon-help-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </symbol>
+        <symbol id="icon-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </symbol>
 
         <!-- Category Icons -->
         <symbol id="cat-delivery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1550,7 +1565,7 @@
         <div class="auth-split">
             <div class="auth-left">
                 <div class="auth-card">
-                    <form id="loginForm">
+                    <div id="loginForm">
                         <div class="logo">
                             <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px;"><use href="#logo-new"/></svg>Task<span style="color: var(--primary);">Nest</span></h1>
                             <p>Complete micro tasks & earn rewards</p>
@@ -1558,18 +1573,18 @@
                         <div id="loginMessage"></div>
                         <div class="form-group">
                             <label for="loginEmail">Email</label>
-                            <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                            <input type="email" id="loginEmail" placeholder="your@email.com">
                         </div>
                         <div class="form-group">
                             <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" placeholder="Enter password" required>
+                            <input type="password" id="loginPassword" placeholder="Enter password">
                         </div>
-                        <button type="submit" id="loginBtn">Login</button>
+                        <button onclick="login()">Login</button>
                         <div class="auth-toggle">
                             Don't have an account? <a onclick="toggleForms()">Register</a>
                         </div>
-                    </form>
-                    <form id="registerForm" class="hidden">
+                    </div>
+                    <div id="registerForm" class="hidden">
                         <div class="logo">
                             <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px;"><use href="#logo-new"/></svg>Task<span style="color: var(--primary);">Nest</span></h1>
                             <p>Join our platform & start earning</p>
@@ -1577,28 +1592,28 @@
                         <div id="registerMessage"></div>
                         <div class="form-group">
                             <label for="registerName">Full Name</label>
-                            <input type="text" id="registerName" placeholder="Your name" required>
+                            <input type="text" id="registerName" placeholder="Your name">
                         </div>
                         <div class="form-group">
                             <label for="registerEmail">Email</label>
-                            <input type="email" id="registerEmail" placeholder="your@email.com" required>
+                            <input type="email" id="registerEmail" placeholder="your@email.com">
                         </div>
                         <div class="form-group">
                             <label for="registerPhone">Phone Number</label>
-                            <input type="tel" id="registerPhone" placeholder="Enter phone number" required>
+                            <input type="tel" id="registerPhone" placeholder="Enter phone number">
                         </div>
                         <div id="otpBlock" class="form-group hidden">
                             <label for="registerOtp">One-Time Password</label>
                             <input type="text" id="registerOtp" placeholder="Enter OTP">
                             <div id="otpStatus" class="small" style="margin-top:6px;color:#666;">Resend in 60s</div>
                             <div style="display:flex; gap:8px; margin-top:8px;">
-                                <button type="button" id="verifyOtpBtn" class="btn-small" onclick="verifyEmail()">Verify Email</button>
-                                <button type="button" id="resendOtpBtn" class="btn-small" onclick="resendOtp()" disabled>Resend OTP</button>
+                                <button id="verifyOtpBtn" class="btn-small" onclick="verifyEmail()">Verify Email</button>
+                                <button id="resendOtpBtn" class="btn-small" onclick="resendOtp()" disabled>Resend OTP</button>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="registerPassword">Password</label>
-                            <input type="password" id="registerPassword" placeholder="Create password" required>
+                            <input type="password" id="registerPassword" placeholder="Create password">
                         </div>
                         <div class="form-group" style="display:none;">
                             <label for="registerRole">User Type</label>
@@ -1607,11 +1622,11 @@
                                 <option value="taskProvider">Task Provider</option>
                             </select>
                         </div>
-                        <button type="submit" id="registerBtn">Register</button>
+                        <button onclick="register()">Register</button>
                         <div class="auth-toggle">
                             Already have an account? <a onclick="toggleForms()">Login</a>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
             <div class="auth-right">
@@ -1645,6 +1660,10 @@
                 <a href="javascript:void(0)" class="nav-item" onclick="navigateDashboard('dashboard', this)">
                     <svg class="icon"><use href="#icon-briefcase"/></svg>
                     <span>Dashboard</span>
+                </a>
+                <a href="javascript:void(0)" class="nav-item" onclick="navigateDashboard('legal', this)">
+                    <svg class="icon"><use href="#icon-list"/></svg>
+                    <span>Legal & Policies</span>
                 </a>
             </nav>
             <div class="sidebar-footer">
@@ -1697,9 +1716,8 @@
                     <p style="color: #6b7280;">Manage your earnings and transaction history.</p>
                     <div class="card-soft" style="padding:40px; margin-top:24px; display:flex; align-items:center; justify-content:space-between; background: #fff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;">
                         <div>
-                            <h2 style="font-size:14px; color:#6b7280; font-weight: 600; margin-bottom: 8px;">My Wallet</h2>
-                            <h1 id="walletBalanceValue" style="font-size:48px; font-weight:800; color:#111827;">₹0.00</h1>
-                            <p style="color: #6b7280;">Available Balance</p>
+                            <div style="font-size:14px; color:#6b7280; font-weight: 600; margin-bottom: 8px;">Total Balance</div>
+                            <div style="font-size:48px; font-weight:800; color:#111827;">₹<span id="walletBalanceValue">0</span></div>
                         </div>
                         <div style="width: 80px; height: 80px; background: #f0fdf4; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
                             <svg class="icon" style="color: #22c55e; width: 36px; height: 36px;"><use href="#icon-wallet"/></svg>
@@ -1733,6 +1751,15 @@
                                 <tbody id="txTableBody"></tbody>
                             </table>
                         </div>
+                    </div>
+                    <!-- Withdrawal History Section --> 
+                    <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;"> 
+                      <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700; color:#1E3A5F;"> 
+                        💸 Withdrawal History 
+                      </h4> 
+                      <div id="withdrawalHistoryList"> 
+                        <p style="color:#666;">No withdrawal requests yet.</p> 
+                      </div> 
                     </div>
                 </div>
 
@@ -1912,6 +1939,117 @@
                         <div id="provStatusReports"></div>
                     </div>
                 </div>
+
+                <!-- Legal & Policies Tab --> 
+                <div id="userLegalTab" class="tri-tab-content hidden"> 
+                  <div style="max-width:700px; margin:0 auto; padding:20px;"> 
+                    <h2 style="font-size:22px; font-weight:700; color:#1E3A5F; margin-bottom:6px;"> 
+                      📋 Legal & Policies 
+                    </h2> 
+                    <p style="color:#666; font-size:13px; margin-bottom:24px;"> 
+                      Read our legal documents and policies 
+                    </p> 
+                     
+                    <!-- Policy Cards --> 
+                    <div style="display:flex; flex-direction:column; gap:12px;"> 
+                     
+                      <a href="https://swathis-s.github.io/-tasknest-policies#terms" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;"  
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <svg style="width:24px; height:24px; color:var(--primary);"><use href="#icon-file-text"/></svg> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Terms & Conditions</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Rules and guidelines for using TaskNest</div> 
+                          </div> 
+                        </div> 
+                        <svg style="width:18px; height:18px; color:#cbd5e1;"><use href="#icon-chevron-right"/></svg> 
+                      </a> 
+                       
+                      <a href="https://swathis-s.github.io/-tasknest-policies#privacy" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;" 
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <svg style="width:24px; height:24px; color:#10b981;"><use href="#icon-shield"/></svg> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Privacy Policy</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">How we collect and protect your data</div> 
+                          </div> 
+                        </div> 
+                        <svg style="width:18px; height:18px; color:#cbd5e1;"><use href="#icon-chevron-right"/></svg> 
+                      </a> 
+                       
+                      <a href="https://swathis-s.github.io/-tasknest-policies#shipping" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;" 
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <svg style="width:24px; height:24px; color:#6366f1;"><use href="#icon-truck"/></svg> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Shipping Policy</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Digital delivery and payment timelines</div> 
+                          </div> 
+                        </div> 
+                        <svg style="width:18px; height:18px; color:#cbd5e1;"><use href="#icon-chevron-right"/></svg> 
+                      </a> 
+                       
+                      <a href="https://swathis-s.github.io/-tasknest-policies#cancellation" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;" 
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <svg style="width:24px; height:24px; color:#f43f5e;"><use href="#icon-rotate-ccw"/></svg> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Cancellation & Refunds</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">Refund eligibility and process</div> 
+                          </div> 
+                        </div> 
+                        <svg style="width:18px; height:18px; color:#cbd5e1;"><use href="#icon-chevron-right"/></svg> 
+                      </a> 
+                       
+                      <a href="https://swathis-s.github.io/-tasknest-policies#contact" target="_blank" 
+                         style="background:white; border:1px solid #e2e8f0; border-radius:12px;  
+                                padding:16px 20px; text-decoration:none; display:flex;  
+                                align-items:center; justify-content:space-between; 
+                                transition:box-shadow 0.2s;" 
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                         onmouseout="this.style.boxShadow='none'"> 
+                        <div style="display:flex; align-items:center; gap:14px;"> 
+                          <svg style="width:24px; height:24px; color:#8b5cf6;"><use href="#icon-help-circle"/></svg> 
+                          <div> 
+                            <div style="font-weight:600; color:#1E3A5F; font-size:15px;">Contact Us</div> 
+                            <div style="font-size:12px; color:#888; margin-top:2px;">teamtasknest@gmail.com • Mon-Sat 9AM-6PM IST</div> 
+                          </div> 
+                        </div> 
+                        <svg style="width:18px; height:18px; color:#cbd5e1;"><use href="#icon-chevron-right"/></svg> 
+                      </a> 
+                       
+                    </div> 
+                     
+                    <!-- Footer note --> 
+                    <div style="margin-top:24px; padding:14px 16px; background:#f8f9fa;  
+                                border-radius:10px; text-align:center;"> 
+                      <p style="font-size:12px; color:#888; margin:0;"> 
+                        © 2026 TaskNest · Unregistered Business · India 🇮🇳<br> 
+                        For support: <a href="mailto:teamtasknest@gmail.com" style="color:#1E3A5F;">teamtasknest@gmail.com</a> 
+                      </p> 
+                    </div> 
+                  </div> 
+                </div> 
             </div>
 
             <!-- Modals (Moved outside content-area for better layering) -->
@@ -2033,7 +2171,7 @@
         const savedKey = 'tn_saved_tasks';
 
         // Initialize User
-        async function initAuth() {
+        function initAuth() {
             const stored = localStorage.getItem('currentUser');
             if (stored) {
                 try {
@@ -2048,7 +2186,7 @@
                     if (auth) auth.classList.add('hidden');
                     if (dashboard) dashboard.classList.remove('hidden');
 
-                    await updateDashboardUI();
+                    updateDashboardUI();
                     
                     // Role-based UI
                     const heading = document.getElementById('tasksHeading');
@@ -2064,7 +2202,7 @@
                     
                     showTriTabsForRole();
                     initTriFilters();
-                    refreshWalletBalance();
+                    refreshUserWallet();
                     
                     navigateDashboard('tasks', document.querySelector('.sidebar .nav-item'));
                     loadTasks();
@@ -2082,6 +2220,7 @@
         function hideAllDashboardViews() {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tri-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('userLegalTab')?.classList.add('hidden');
         }
 
         function navigateDashboard(section, element) {
@@ -2102,6 +2241,9 @@
             } else if (section === 'dashboard') {
                 if (isProvider) switchProviderTriTab('dashboard');
                 else switchUserTriTab('dashboard');
+            } else if (section === 'legal') {
+                if (isProvider) switchProviderTriTab('legal');
+                else switchUserTriTab('legal');
             }
         }
 
@@ -2113,7 +2255,7 @@
             loadTasks();
         }
 
-        async function updateDashboardUI() {
+        function updateDashboardUI() {
             if (!currentUser) return;
             
             const isProvider = currentUser.role === 'taskProvider';
@@ -2126,24 +2268,9 @@
             const userWD = document.getElementById('userWithdrawalContainer');
             const provCW = document.getElementById('provCreateWalletContainer');
 
-            // Fix: Check wallet exists in database correctly
-            const walletRes = await fetch(`${API_URL}/users/wallet-balance/${currentUser.userId}`);
-            const walletData = await walletRes.json();
-            console.log('Wallet check:', walletData);
-
-            if (walletData.success && walletData.balance >= 0) {
-                // Wallet exists - hide create wallet container
-                if (userCW) userCW.classList.add('hidden');
-                // For providers, still use the isWalletCreated for create wallet banner if needed, 
-                // but userWD should show if balance >= 0
-                if (userWD) userWD.classList.toggle('hidden', isProvider || !isWalletCreated);
-                if (provCW) provCW.classList.toggle('hidden', !isProvider || isWalletCreated);
-            } else {
-                // No wallet - show create wallet
-                if (userCW) userCW.classList.toggle('hidden', isProvider || isWalletCreated);
-                if (userWD) userWD.classList.toggle('hidden', isProvider || !isWalletCreated);
-                if (provCW) provCW.classList.toggle('hidden', !isProvider || isWalletCreated);
-            }
+            if (userCW) userCW.classList.toggle('hidden', isProvider || isWalletCreated);
+            if (userWD) userWD.classList.toggle('hidden', isProvider || !isWalletCreated);
+            if (provCW) provCW.classList.toggle('hidden', !isProvider || isWalletCreated);
             
             // Update Top Bar
             const nameEl = document.getElementById('displayUserName');
@@ -2172,7 +2299,10 @@
             if (pRole) pRole.textContent = isProvider ? 'Task Provider' : 'User';
             
             // Wallet Balances
-            refreshWalletBalance();
+            const wBal = document.getElementById('walletBalanceValue');
+            const pwBal = document.getElementById('provWalletBalance');
+            if (wBal) wBal.textContent = currentUser.wallet || 0;
+            if (pwBal) pwBal.textContent = currentUser.wallet || 0;
         }
         // --- END NEW DASHBOARD LOGIC ---
 
@@ -2209,16 +2339,12 @@
             const phone = document.getElementById('registerPhone').value;
             const password = document.getElementById('registerPassword').value;
             const role = selectedRole || (document.getElementById('registerRole') ? document.getElementById('registerRole').value : 'taskUser');
-            const btn = document.getElementById('registerBtn');
             const messageDiv = document.getElementById('registerMessage');
 
             if (!name || !email || !password) {
                 showMessage(messageDiv, 'Please fill all fields', 'error');
                 return;
             }
-
-            btn.disabled = true;
-            btn.textContent = 'Registering...';
 
             const digits = String(phone).replace(/\D/g, '');
             try {
@@ -2248,9 +2374,6 @@
                 showMessage(messageDiv, 'Registration successful! Verify your email to continue.', 'success');
             } catch (error) {
                 showMessage(messageDiv, 'Registration failed: ' + error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Register';
             }
         }
 
@@ -2306,30 +2429,16 @@
             }
         }
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await login();
-        });
-
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await register();
-        });
-
         async function login() {
             console.log('Login attempt started');
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            const btn = document.getElementById('loginBtn');
             const messageDiv = document.getElementById('loginMessage');
 
             if (!email || !password) {
                 showMessage(messageDiv, 'Please fill all fields', 'error');
                 return;
             }
-
-            btn.disabled = true;
-            btn.textContent = 'Logging in...';
 
             try {
                 console.log('Fetching login for:', email);
@@ -2338,10 +2447,20 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-                const data = await response.json();
+
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    throw new Error('Server returned non-JSON response. The server might be down or crashing.');
+                }
+
                 console.log('Login response received:', data);
                 
-                if (response.ok && data.success) {
+                if (response.ok) {
                     // Automatically set selectedRole to the logged-in user's role
                     selectedRole = data.role;
                     
@@ -2353,15 +2472,11 @@
                         wallet: data.wallet != null ? data.wallet : 0,
                         bankDetails: data.bankDetails || null
                     };
-
-                    // CRITICAL: Save to localStorage
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('dashboardSection').classList.remove('hidden');
                     
                     // NEW: Update dashboard header and sidebar UI
-                    await updateDashboardUI();
+                    updateDashboardUI();
                     
                     updateProfileSavedCount();
                     // Role-based UI (provider can create tasks; user cannot)
@@ -2381,20 +2496,16 @@
                     initTriFilters();
                     
                     // NEW: Refresh wallet and bank details immediately
-                    refreshWalletBalance();
+                    refreshUserWallet();
                     
                     // Default view after login
                     navigateDashboard('tasks', document.querySelector('.sidebar .nav-item'));
                     loadTasks();
                 } else {
-                    showMessage(messageDiv, data.message || 'Login failed. Please check your credentials.', 'error');
+                    showMessage(messageDiv, data.message || 'Login failed', 'error');
                 }
             } catch (error) {
-                console.error('Login error:', error);
                 showMessage(messageDiv, 'Login failed: ' + error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Login';
             }
         }
 
@@ -2544,9 +2655,9 @@
                 return;
             }
 
-            const freshBalance = Number(balRes.balance || 0);
+            const freshBalance = balRes.balance;
             if (parsedAmount > freshBalance) {
-                alert(`Insufficient wallet balance. Your current balance is ₹${freshBalance.toFixed(2)}.`);
+                alert(`Insufficient wallet balance. Your current balance is ₹${freshBalance}.`);
                 return;
             }
 
@@ -2556,12 +2667,6 @@
                 alert("Please set up your bank details first.");
                 return;
             }
-
-            console.log('Processing withdrawal with data:', { 
-                userId: currentUser.userId, 
-                amount: Number(amount),
-                bankDetails
-            });
 
             fetch(`${API_URL}/wallet/withdraw`, {
                 method: 'POST',
@@ -2582,7 +2687,7 @@
             .then(data => {
                 if (data.success) {
                     alert("Withdrawal requested successfully!");
-                    refreshWalletBalance();
+                    refreshUserWallet();
                 } else {
                     alert(data.message || "Withdrawal failed");
                 }
@@ -2644,6 +2749,7 @@
 
         async function loadTasks() {
             const tasksList = document.getElementById('tasksList');
+            if (!tasksList) return; // <-- ADDED NULL CHECK
             tasksList.innerHTML = '<div class="loading"><div class="spinner"></div>Loading tasks...</div>';
 
             try {
@@ -2699,7 +2805,12 @@
                     return true;
                 });
 
-                const taskHTML = filtered.map(task => {
+                if (filtered.length === 0) {
+                    tasksList.innerHTML = `<p style="text-align: center; color: #666;">${isProvider ? 'No tasks created yet' : 'No tasks available yet'}</p>`;
+                    return;
+                }
+
+                tasksList.innerHTML = filtered.map(task => {
                     const postedById = task && task.postedBy && (task.postedBy._id || task.postedBy);
                     const acceptedById = task && task.acceptedBy && (task.acceptedBy._id || task.acceptedBy);
                     const isOwner = userId && postedById && String(postedById) === String(userId);
@@ -2708,8 +2819,7 @@
                     // Status display label:
                     const rawStatus = (task && task.status) || 'open';
                     const overrides = getTaskOverrides();
-                    const tid = (task._id && task._id.toString ? task._id.toString() : task._id) || '';
-                    const overrideStatus = overrides[tid] && overrides[tid].status;
+                    const overrideStatus = overrides[(task._id && task._id.toString ? task._id.toString() : task._id) || ''] && overrides[(task._id && task._id.toString ? task._id.toString() : task._id) || ''].status;
                     const displayStatus = overrideStatus || rawStatus;
                     const statusClass = displayStatus;
                     const statusLabel = displayStatus;
@@ -2717,6 +2827,7 @@
                     const durationText = getTaskDuration(task);
                     const locationText = getTaskLocation(task);
                     const savedList = getSavedTasks();
+                    const tid = (task._id && task._id.toString ? task._id.toString() : task._id) || '';
                     const isSaved = savedList.some(s => String(s.taskId) === String(tid));
                     const reqCnt = getRequiredCount(task);
                     const accCnt = getAcceptedCount(task);
@@ -2741,28 +2852,6 @@
                         const list = getSubmissions();
                         return list.find(s => String(s.taskId) === String(tid) && s.status !== 'approved');
                     })();
-
-                    if (displayStatus === 'completed' || task.paymentStatus === 'paid') { 
-                        return ` 
-                            <div class="task-item" data-task-id="${tid}"> 
-                                <div class="task-header"> 
-                                    <div class="task-title">${task.title || 'Untitled Task'}</div> 
-                                    <span class="task-status status-completed">COMPLETED</span> 
-                                </div> 
-                                <div class="task-description"> 
-                                    <p>✅ Task Completed!</p> 
-                                    <p>₹${task.workerAmount || task.amount} added to your wallet</p> 
-                                    <button onclick="refreshWalletBalance()" class="btn-small" style="background:var(--primary);"> 
-                                        💰 Check Wallet 
-                                    </button> 
-                                </div> 
-                                <div class="task-footer"> 
-                                    <span class="task-reward">₹${task.amount != null ? task.amount : 0}</span> 
-                                </div> 
-                            </div> 
-                        `; 
-                    } 
-
                     return `
                     <div class="task-item" data-task-id="${tid}">
                         <div class="task-header">
@@ -2812,21 +2901,6 @@
                         </div>
                     </div>
                 `}).join('');
-
-                if (filtered.length === 0) {
-                    tasksList.innerHTML = `<p style="text-align: center; color: #666;">${isProvider ? 'No tasks created yet' : 'No tasks available yet'}</p>`;
-                    return;
-                }
-
-                // Fix line 2599 and add null check:
-                const container = document.getElementById('taskList') 
-                  || document.getElementById('task-list') 
-                  || document.getElementById('tasksContainer')
-                  || document.getElementById('tasksList'); 
-                
-                if (container) { 
-                  container.innerHTML = taskHTML; 
-                } 
 
                 // Attach event listeners to buttons
                 tasksList.querySelectorAll('button[data-action]').forEach(btn => {
@@ -3629,7 +3703,7 @@
                 });
                 const data = await response.json();
                 alert(data.message || (response.ok ? 'Task completed' : data.error));
-                await refreshWalletBalance();
+                await refreshUserWallet();
                 loadTasks();
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -3675,7 +3749,7 @@
                                 });
                                 const verifyData = await verifyRes.json();
                                 alert(verifyData.message || 'Payment verified and worker paid!');
-                                await refreshWalletBalance();
+                                await refreshUserWallet();
                                 loadProviderTasks(); // Use loadProviderTasks to refresh the provider's view
                                 if (workerId) {
                                     showRatingModal(workerId, taskId);
@@ -3718,47 +3792,33 @@
             }
         }
 
-        async function refreshWalletBalance() { 
-   try { 
-     const userId = currentUser?.userId 
-       || currentUser?._id; 
- 
-     console.log('Fetching wallet for:', userId); 
- 
-     const response = await fetch( 
-       `${API_URL}/users/wallet-balance/${userId}` 
-     ); 
-     const data = await response.json(); 
- 
-     console.log('Wallet data:', data); 
-     console.log('Balance:', data.balance); 
- 
-     const balance = Number(data.balance || 0) 
-       .toFixed(2); 
- 
-     // Update ALL possible elements 
-     [ 
-       'walletBalanceValue', 
-       'walletBalance', 
-       'wallet-balance', 
-       'provWalletBalance', 
-       'userWalletBalance', 
-       'walletAmount' 
-     ].forEach(id => { 
-       const el = document.getElementById(id); 
-       if (el) { 
-         el.textContent = '₹' + balance; 
-         console.log('Updated element:', id); 
-       } 
-     }); 
- 
-   } catch (error) { 
-     console.log('Wallet error:', error); 
-   } 
- } 
- 
- // Call immediately 
- refreshWalletBalance(); 
+        async function refreshUserWallet() {
+            if (!currentUser || !currentUser.userId) return;
+            try {
+                // Fetch from wallet specific endpoint for real-time balance
+                const res = await fetch(`${API_URL}/wallet/balance/${currentUser.userId}`);
+                const data = await res.json();
+                if (data.success) {
+                    currentUser.wallet = data.balance;
+                    const w1 = document.getElementById('walletBalance');
+                    if (w1) w1.textContent = data.balance;
+                    const w2 = document.getElementById('walletBalanceValue');
+                    if (w2) w2.textContent = data.balance;
+                    const w3 = document.getElementById('provWalletBalance');
+                    if (w3) w3.textContent = data.balance;
+                }
+
+                // Check bank details
+                const bankRes = await fetch(`${API_URL}/users/${currentUser.userId}`);
+                const bankData = await bankRes.json();
+                if (bankData.success && bankData.user) {
+                    currentUser.bankDetails = bankData.user.bankDetails;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+
+                updateDashboardUI(); // Refresh UI to show/hide "Connect Bank" or "Withdraw"
+            } catch (e) { /* ignore */ }
+        }
 
         async function loadTransactions() {
             if (!currentUser || !currentUser.userId) return;
@@ -3766,20 +3826,19 @@
             if (!listEl) return;
             listEl.innerHTML = '<div class="loading"><div class="spinner"></div>Loading transactions...</div>';
             try {
-                const res = await fetch(`${API_URL}/users/${currentUser.userId}/transactions`);
+                const res = await fetch(`${API_URL}/wallet/transactions/${currentUser.userId}`);
                 const data = await res.json();
                 if (!data.success || !data.transactions || data.transactions.length === 0) {
                     listEl.innerHTML = '<p style="color:#666; font-size: 13px;">No transactions yet.</p>';
                     return;
                 }
                 const rows = data.transactions.map(tx => {
-                    const tType = tx.transactionType || tx.type;
-                    const sign = (tType === 'credit' || tType === 'escrow_release' || tType === 'refund' || tType === 'CREDIT') ? '+' : '-';
-                    const color = (tType === 'credit' || tType === 'escrow_release' || tType === 'refund' || tType === 'CREDIT') ? '#28a745' : '#dc3545';
-                    const when = tx.date || tx.created_at ? new Date(tx.date || tx.created_at).toLocaleString() : '';
+                    const sign = tx.transactionType === 'CREDIT' ? '+' : '-';
+                    const color = tx.transactionType === 'CREDIT' ? '#28a745' : '#dc3545';
+                    const when = tx.date ? new Date(tx.date).toLocaleString() : '';
                     return `<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f2f2f2; font-size:13px;">
                                 <div>
-                                    <div style="font-weight:600; color:${color}; text-transform: capitalize;">${tType.replace('_', ' ')}</div>
+                                    <div style="font-weight:600; color:${color};">${tx.transactionType}</div>
                                     <div style="color:#777;">${when}</div>
                                 </div>
                                 <div style="font-weight:600; color:${color};">${sign}₹${tx.amount}</div>
@@ -3789,6 +3848,56 @@
             } catch (err) {
                 listEl.innerHTML = '<p style="color:#dc3545; font-size: 13px;">Failed to load transactions.</p>';
             }
+        }
+
+        async function loadWithdrawalHistory() { 
+            if (!currentUser || !currentUser.userId) return;
+            try { 
+                const res = await fetch(`${API_URL}/wallet/withdrawals/${currentUser.userId}`); 
+                const data = await res.json(); 
+                
+                const container = document.getElementById('withdrawalHistoryList'); 
+                if (!container) return; 
+                
+                if (!data.success || !data.withdrawals || data.withdrawals.length === 0) { 
+                    container.innerHTML = '<p style="color:#666; font-size: 13px;">No withdrawal requests yet.</p>'; 
+                    return; 
+                } 
+                
+                container.innerHTML = data.withdrawals.map(w => { 
+                    const date = new Date(w.requestedAt).toLocaleString(); 
+                    const amount = Number(w.amount).toFixed(2); 
+                    const statusColor = w.status === 'completed' ? '#28a745' : 
+                                       w.status === 'rejected' ? '#dc3545' : '#fd7e14'; 
+                    const statusIcon = w.status === 'completed' ? '✅' : 
+                                      w.status === 'rejected' ? '❌' : '⏳'; 
+                    
+                    return `<div style="background:white; border:1px solid #e2e8f0; border-radius:10px; 
+                                padding:14px 16px; margin-bottom:10px; display:flex; 
+                                justify-content:space-between; align-items:center;"> 
+                        <div> 
+                            <div style="font-weight:600; font-size:14px;">Withdrawal Request</div> 
+                            <div style="font-size:12px; color:#666; margin-top:3px;">${date}</div> 
+                            ${w.bankDetails?.bankName ? 
+                                `<div style="font-size:12px; color:#888; margin-top:2px;"> 
+                                    🏦 ${w.bankDetails.bankName} • ****${(w.bankDetails.accountNumber||'').slice(-4)} 
+                                </div>` : ''} 
+                            ${w.rejectionReason ? 
+                                `<div style="font-size:12px; color:#dc3545; margin-top:2px;"> 
+                                    Reason: ${w.rejectionReason} 
+                                </div>` : ''} 
+                        </div> 
+                        <div style="text-align:right;"> 
+                            <div style="font-size:18px; font-weight:700; color:#1E3A5F;">₹${amount}</div> 
+                            <div style="font-size:12px; font-weight:600; color:${statusColor}; margin-top:4px;"> 
+                                ${statusIcon} ${w.status.toUpperCase()} 
+                            </div> 
+                        </div> 
+                    </div>`; 
+                }).join(''); 
+            } catch(e) { 
+                console.error('loadWithdrawalHistory error:', e); 
+            } 
         }
 
         function switchTab(tabName) {
@@ -3805,8 +3914,9 @@
                 if (createBtn) createBtn.style.display = currentUser && currentUser.role === 'taskProvider' ? 'inline-block' : 'none';
             }
             if (tabName === 'wallet') {
-                refreshWalletBalance();
+                refreshUserWallet();
                 loadTransactions();
+                loadWithdrawalHistory();
             }
         }
 
@@ -3846,14 +3956,14 @@
                     try { data = await response.json(); } catch (_) {}
                     if (data.success === true && data.wallet != null) {
                         const newBalance = Number(data.wallet);
-                        const balanceStr = '₹' + newBalance.toFixed(2);
+                        currentUser.wallet = newBalance;
                         const provBalanceEl = document.getElementById('provWalletBalance');
-                        if (provBalanceEl) provBalanceEl.textContent = balanceStr;
+                        if (provBalanceEl) provBalanceEl.textContent = String(newBalance);
                         const balanceEl = document.getElementById('walletBalance');
-                        if (balanceEl) balanceEl.textContent = balanceStr;
+                        if (balanceEl) balanceEl.textContent = String(newBalance);
                         if (activeBtn) { activeBtn.disabled = false; activeBtn.textContent = originalText; }
                         hideProvAddMoney();
-                        alert('Money added successfully. New balance: ' + balanceStr);
+                        alert('Money added successfully. New balance: ₹' + newBalance);
                     } else {
                         if (activeBtn) { activeBtn.disabled = false; activeBtn.textContent = originalText; }
                         alert(data.message || 'Failed to add money. Please try again.');
@@ -3930,18 +4040,18 @@
                     }
                     if (data.success === true && data.wallet != null) {
                         const newBalance = Number(data.wallet);
-                        const balanceStr = '₹' + newBalance.toFixed(2);
+                        currentUser.wallet = newBalance;
                         const balanceEl = document.getElementById('walletBalance');
                         if (balanceEl) {
-                            balanceEl.textContent = balanceStr;
+                            balanceEl.textContent = String(newBalance);
                         }
                         if (activeBtn) {
                             activeBtn.disabled = false;
                             activeBtn.textContent = originalText;
                         }
                         hideAddMoney();
-                        refreshWalletBalance();
-                        alert('Money added successfully. New balance: ' + balanceStr);
+                        refreshUserWallet();
+                        alert('Money added successfully. New balance: ₹' + newBalance);
                     } else {
                         if (activeBtn) {
                             activeBtn.disabled = false;
@@ -3974,18 +4084,19 @@
         function hideAllTriContents() {
             document.querySelectorAll('.tri-tab-content').forEach(el => el.classList.add('hidden'));
         }
-        async function switchUserTriTab(name) {
+        function switchUserTriTab(name) {
             hideAllDashboardViews();
             if (name === 'filter') {
                 document.getElementById('userFilterTab').classList.remove('hidden');
                 renderFilterTasks();
             } else if (name === 'wallet') {
                 document.getElementById('userWalletTab').classList.remove('hidden');
-                refreshWalletBalance();
+                refreshUserWallet();
                 buildTxTable();
+                const balEl = document.getElementById('walletBalanceValue');
+                if (balEl) balEl.textContent = String(currentUser && currentUser.wallet != null ? currentUser.wallet : 0);
             } else if (name === 'dashboard') {
                 document.getElementById('userDashTab').classList.remove('hidden');
-                refreshWalletBalance(); // Added refreshWalletBalance() call
                 
                 const dm = document.getElementById('dashMonth');
                 if (dm && !dm.value) {
@@ -3999,6 +4110,8 @@
                 renderUserGraphs();
                 renderUserAppliedStatus();
                 notifyNewCredits();
+            } else if (name === 'legal') { 
+                document.getElementById('userLegalTab').classList.remove('hidden'); 
             }
         }
         async function renderUserAppliedStatus() {
@@ -4052,13 +4165,18 @@
                 loadProviderTasks();
             } else if (name === 'wallet') {
                 document.getElementById('provWalletTab').classList.remove('hidden');
-                refreshWalletBalance();
+                refreshUserWallet().then(()=> {
+                    const w = document.getElementById('provWalletBalance');
+                    if (w) w.textContent = String(currentUser && currentUser.wallet != null ? currentUser.wallet : 0);
+                });
                 buildProvTxTable();
                 buildProvPayments();
             } else if (name === 'dashboard') {
                 document.getElementById('provDashTab').classList.remove('hidden');
                 renderProviderMetrics();
                 renderProviderStatusReports();
+            } else if (name === 'legal') { 
+                document.getElementById('userLegalTab').classList.remove('hidden'); 
             }
         }
         // FILTER TASKS (USER)
@@ -4419,7 +4537,7 @@
         async function buildTxTable() {
             if (!currentUser) return;
             try {
-                const res = await fetch(`${API_URL}/users/${currentUser.userId}/transactions`);
+                const res = await fetch(`${API_URL}/wallet/transactions/${currentUser.userId}`);
                 const data = await res.json();
                 const body = document.getElementById('txTableBody');
                 if (!data.success || !Array.isArray(data.transactions) || data.transactions.length === 0) {
@@ -4427,11 +4545,11 @@
                     return;
                 }
                 body.innerHTML = data.transactions.map(tx => {
-                    const when = tx.created_at ? new Date(tx.created_at).toLocaleString() : '';
-                    const type = tx.type;
+                    const when = tx.date ? new Date(tx.date).toLocaleString() : '';
+                    const type = tx.transactionType;
                     const amt = `₹${Number(tx.amount || 0)}`;
                     const status = tx.status || '—';
-                    const taskName = tx.task_title || '';
+                    const taskName = tx.description || '';
                     return `<tr>
                         <td style="padding:8px 6px;">${when}</td>
                         <td style="padding:8px 6px;">${taskName}</td>
@@ -4448,7 +4566,7 @@
         async function buildProvTxTable() {
             if (!currentUser) return;
             try {
-                const res = await fetch(`${API_URL}/users/${currentUser.userId}/transactions`);
+                const res = await fetch(`${API_URL}/wallet/transactions/${currentUser.userId}`);
                 const data = await res.json();
                 const body = document.getElementById('provTxTableBody');
                 if (!data.success || !Array.isArray(data.transactions) || data.transactions.length === 0) {
@@ -4456,16 +4574,19 @@
                     return;
                 }
                 body.innerHTML = data.transactions.map(tx => {
-                    const when = tx.created_at ? new Date(tx.created_at).toLocaleString() : '';
-                    const type = tx.type;
-                    const amt = `₹${Number(tx.amount || 0)}`;
+                    const when = tx.date ? new Date(tx.date).toLocaleString() : '';
+                    const type = (tx.transactionType || tx.type || '').toUpperCase();
+                    const isDebit = ['ESCROW_HOLD', 'ESCROW_RELEASE', 'DEBIT', 'WITHDRAWAL'].includes(type);
+                    const color = isDebit ? '#dc3545' : '#28a745';
+                    const sign = isDebit ? '-' : '+';
+                    const amt = `${sign}₹${Number(tx.amount || 0)}`;
                     const status = tx.status || '—';
-                    const taskName = tx.task_id && tx.task_id.title ? tx.task_id.title : 'N/A';
+                    const taskName = tx.description || 'N/A';
                     return `<tr>
                         <td style="padding:8px 6px;">${when}</td>
                         <td style="padding:8px 6px;">${taskName}</td>
-                        <td style="padding:8px 6px;">${type}</td>
-                        <td style="padding:8px 6px;">${amt}</td>
+                        <td style="padding:8px 6px; font-weight:600; color:${color};">${type}</td>
+                        <td style="padding:8px 6px; font-weight:600; color:${color};">${amt}</td>
                         <td style="padding:8px 6px;">${status}</td>
                     </tr>`;
                 }).join('');
@@ -4507,9 +4628,9 @@
                 const m2 = document.getElementById('metricOngoing'); if (m2) m2.innerHTML = `<div style="font-size:12px;color:#6c7a89;">Ongoing</div><div style="font-size:28px;font-weight:800;">${ongoing}</div>`;
                 const m3 = document.getElementById('metricPending'); if (m3) m3.innerHTML = `<div style="font-size:12px;color:#6c7a89;">Pending Approval</div><div style="font-size:28px;font-weight:800;">${pending}</div>`;
                 
-                const tx = await (await fetch(`${API_URL}/users/${currentUser.userId}/transactions`)).json();
-                const monthlyCredits = (tx.transactions || []).filter(x => x.type === 'CREDIT' && inRange(x.created_at)).reduce((a,b)=>a + Number(b.amount||0), 0);
-                const totalCredits = (tx.transactions || []).filter(x => x.type === 'CREDIT').reduce((a,b)=>a + Number(b.amount||0), 0);
+                const tx = await (await fetch(`${API_URL}/wallet/transactions/${currentUser.userId}`)).json();
+                const monthlyCredits = (tx.transactions || []).filter(x => x.transactionType === 'CREDIT' && inRange(x.date)).reduce((a,b)=>a + Number(b.amount||0), 0);
+                const totalCredits = (tx.transactions || []).filter(x => x.transactionType === 'CREDIT').reduce((a,b)=>a + Number(b.amount||0), 0);
                 
                 const m4 = document.getElementById('metricEarnings'); 
                 if (m4) {
@@ -4561,7 +4682,7 @@
                 const dmEl = document.getElementById('dashMonth');
                 const selectedVal = dmEl && dmEl.value ? dmEl.value : null; // "YYYY-MM"
                 
-                const txRes = await fetch(`${API_URL}/users/${currentUser.userId}/transactions`);
+                const txRes = await fetch(`${API_URL}/wallet/transactions/${currentUser.userId}`);
                 const txData = await txRes.json();
                 
                 const taskRes = await fetch(`${API_URL}/tasks/all`);
@@ -4576,8 +4697,8 @@
                     const dailyCompletions = Array(daysInMonth).fill(0);
 
                     (txData.transactions || []).forEach(t => {
-                        if (t.type !== 'CREDIT') return;
-                        const d = new Date(t.created_at);
+                        if (t.transactionType !== 'CREDIT') return;
+                        const d = new Date(t.date);
                         if (d.getFullYear() === year && (d.getMonth() + 1) === month) {
                             dailyEarnings[d.getDate() - 1] += Number(t.amount || 0);
                         }
@@ -4619,8 +4740,8 @@
                     const currentYear = new Date().getFullYear();
 
                     (txData.transactions || []).forEach(t => {
-                        if (t.type !== 'CREDIT') return;
-                        const d = new Date(t.created_at);
+                        if (t.transactionType !== 'CREDIT') return;
+                        const d = new Date(t.date);
                         if (d.getFullYear() === currentYear) {
                             months[d.getMonth()] += Number(t.amount || 0);
                         }
@@ -4707,6 +4828,9 @@
                                 ${!canReview && hasAcc ? `
                                     <button class="btn-small" data-action="approve" data-id="${tid}" data-worker-id="${accId}" style="background:#10b981;">Approve Payment</button>
                                     <button class="btn-small" data-action="decline" data-id="${tid}" style="background:#ef4444;">Reject</button>
+                                ` : ''}
+                                ${(t.status === 'open' || t.status === 'funded') && !hasAcc ? ` 
+                                <button class="btn-small" data-action="cancel-task" data-id="${tid}" style="background:#dc3545;">❌ Cancel & Refund</button> 
                                 ` : ''}
                             </div>
                             <div class="apps-container" id="apps-${tid}" style="margin-top:8px;"></div>
@@ -4796,6 +4920,8 @@
                                 alert(x.message || 'Rejected');
                                 loadProviderTasks();
                             }).catch(e=> alert(e.message));
+                        } else if (action === 'cancel-task') {
+                            cancelTask(id);
                         }
                     };
                 });
@@ -4804,6 +4930,35 @@
                 el.innerHTML = '<p style="color:#dc3545;">Failed to load</p>';
             }
         }
+        async function cancelTask(taskId) { 
+            if (!confirm('Are you sure you want to cancel this task? The escrow amount will be refunded to your wallet.')) return; 
+            
+            try { 
+                const res = await fetch(`${API_URL}/admin/escrow/cancel/${taskId}`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' } 
+                }); 
+                
+                const contentType = res.headers.get('content-type'); 
+                if (!contentType?.includes('application/json')) { 
+                    const text = await res.text(); 
+                    alert('Server error: ' + text.substring(0, 100)); 
+                    return; 
+                } 
+                
+                const data = await res.json(); 
+                if (data.success) { 
+                    alert('✅ ' + data.message); 
+                    loadProviderTasks(); // Refresh task list 
+                    refreshUserWallet(); // Refresh wallet balance 
+                } else { 
+                    alert('❌ ' + data.message); 
+                } 
+            } catch(e) { 
+                alert('Failed: ' + e.message); 
+            } 
+        }
+
         async function providerCreateTask() {
             // 1. Check for bank details first
             const isWalletCreated = currentUser && currentUser.bankDetails && 
@@ -4816,41 +4971,21 @@
                 return;
             }
 
-            const title = document.getElementById('taskTitle')?. value 
-              || document.getElementById('task-title')?. value 
-              || document.getElementById('title')?.value
-              || document.getElementById('provTitle')?.value; 
-            
-            const amount = document.getElementById('taskAmount')?. value 
-              || document.getElementById('task-amount')?. value 
-              || document.getElementById('amount')?. value 
-              || document.getElementById('reward')?.value
-              || document.getElementById('provAmount')?.value; 
-            
-            const category = document.getElementById('taskCategory')?. value 
-              || document.getElementById('task-category')?. value 
-              || document.getElementById('category')?.value
-              || document.getElementById('provCategory')?.value; 
+            const title = document.getElementById('provTitle').value;
+            const category = document.getElementById('provCategory').value;
+            const skill = document.getElementById('provSkill').value;
+            const desc = document.getElementById('provDesc').value;
+            const emp = document.getElementById('provEmployees').value;
+            const wt = document.getElementById('provWorkType').value;
+            const loc = document.getElementById('provLocation').value;
+            const dur = document.getElementById('provDuration').value;
+            const amt = document.getElementById('provAmount').value;
+            const start = document.getElementById('provStart').value;
 
-            const skill = document.getElementById('provSkill')?.value || '';
-            const desc = document.getElementById('provDesc')?.value || '';
-            const emp = document.getElementById('provEmployees')?.value || '1';
-            const wt = document.getElementById('provWorkType')?.value || '';
-            const loc = document.getElementById('provLocation')?.value || '';
-            const dur = document.getElementById('provDuration')?.value || '';
-            const start = document.getElementById('provStart')?.value || '';
-
-            console.log('title:', title); 
-            console.log('amount:', amount); 
-            console.log('category:', category); 
-            
-            if (!title || !amount || !category) { 
-              alert(` Please fill: 
-                title: ${title ? '✅' : '❌'} 
-                amount: ${amount ? '✅' : '❌'} 
-                category: ${category ? '✅' : '❌'}`); 
-              return; 
-            } 
+            if (!title || !amt || !category) {
+                alert('Please fill title, reward amount and category');
+                return;
+            }
             if (!currentUser || !currentUser.userId) {
                 alert('Session expired. Please log in again.');
                 return;
@@ -4864,7 +4999,7 @@
                         title: wt === 'WFH' ? (title + ' [WFH]') : (wt === 'ONSITE' ? (title + ' [ONSITE]') : title),
                         category: category,
                         description: (desc || '') + (dur ? `\nDuration: ${dur} days` : '') + (loc ? `\nLocation: ${loc}` : '') + (skill ? `\nSkill: ${skill}` : ''),
-                        amount: Number(amount),
+                        amount: Number(amt),
                         postedBy: currentUser.userId,
                         workMode: wt,
                         workType: wt,
@@ -4938,7 +5073,9 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
+                        taskId: taskId, 
                         amount: totalAmount, 
+                        providerId: currentUser.userId,
                         userId: currentUser.userId,
                         currency: 'INR'
                     })
@@ -5026,8 +5163,8 @@
                 const created = createdArr.length;
                 const active = activeArr.length;
                 const completed = completedArr.length;
-                const tx = await (await fetch(`${API_URL}/users/${currentUser.userId}/transactions`)).json();
-                const debits = (tx.transactions || []).filter(x => x.type === 'DEBIT').reduce((a,b)=>a + Number(b.amount||0), 0);
+                const tx = await (await fetch(`${API_URL}/wallet/transactions/${currentUser.userId}`)).json();
+                const debits = (tx.transactions || []).filter(x => x.transactionType === 'DEBIT').reduce((a,b)=>a + Number(b.amount||0), 0);
                 document.getElementById('provMetricCreated').innerHTML = `<div style="font-size:12px;color:#6c7a89;">Total Tasks Created</div><div style="font-size:28px;font-weight:800;">${created}</div>`;
                 document.getElementById('provMetricActive').innerHTML = `<div style="font-size:12px;color:#6c7a89;">Active Tasks</div><div style="font-size:28px;font-weight:800;">${active}</div>`;
                 document.getElementById('provMetricCompleted').innerHTML = `<div style="font-size:12px;color:#6c7a89;">Completed (Paid)</div><div style="font-size:28px;font-weight:800;">${completed}</div>`;
@@ -5160,7 +5297,7 @@
                 if (data.success) {
                     alert('Wallet connected successfully!');
                     closeWalletModal();
-                    refreshWalletBalance();
+                    await refreshUserWallet();
                 } else {
                     alert(data.message || 'Failed to connect wallet');
                 }
@@ -5170,94 +5307,47 @@
         }
 
         function showWithdrawModal() {
-            const min = currentUser.wallet < 100 ? 1 : 10;
-            const html = `
-                <div id="withdrawModal" class="modal">
-                    <div class="modal-content">
-                        <span class="close" onclick="closeWithdrawModal()">&times;</span>
-                        <h2>Withdraw Funds</h2>
-                        <p>Enter the amount you want to withdraw.</p>
-                        <div class="form-group">
-                            <label>Amount to withdraw (₹):</label>
-                            <input id="withdrawAmount" type="number" placeholder="Enter amount">
-                        </div>
-                        <div style="font-size:12px; color:#888; margin-top:-8px; margin-bottom:16px;">
-                            Minimum: ₹${min}, Maximum: ₹${currentUser.wallet}
-                        </div>
-                        <div style="display:flex; gap:12px; margin-top:24px;">
-                            <button class="btn-small" style="flex:1;" onclick="processWithdrawal()">Withdraw</button>
-                            <button class="btn-small btn-secondary" style="flex:1;" onclick="closeWithdrawModal()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', html);
-        }
-
-        function closeWithdrawModal() {
-            const m = document.getElementById('withdrawModal');
-            if (m) m.remove();
-        }
-        async function processWithdrawal() {
-    const amountEl = document.getElementById('withdrawAmount');
-    if (!amountEl) return;
-
-    const amount = amountEl.value;
-    const min = currentUser.wallet < 100 ? 1 : 10;
-
-    if (!amount || isNaN(amount) || Number(amount) <= 0) {
-        alert('Please enter a valid amount.');
-        return;
-    }
-    
-    if (Number(amount) < min) {
-        alert(`Minimum withdrawal is ₹${min}`);
-        return;
-    }
-    if (Number(amount) > currentUser.wallet) {
-        alert('Insufficient balance');
-        return;
-    }
-
-    // Fetch bank details first
-    let bankDetails = {};
-    try {
-        const res = await fetch(`${API_URL}/wallet/details/${currentUser.userId}`);
-        const data = await res.json();
-        if (data.success && data.account) {
-            bankDetails = data.account;
-        } else {
-            alert('Bank account details not found. Please set up your bank account first.');
-            return;
-        }
-    } catch (e) {
-        alert('Error fetching bank details: ' + e.message);
-        return;
-    }
-
-    fetch(`${API_URL}/wallet/withdraw`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            userId: currentUser.userId, 
-            amount: Number(amount),
-            bankDetails: {
-                accountHolderName: bankDetails.accountHolderName,
-                accountNumber: bankDetails.bankAccountNumber,
-                ifscCode: bankDetails.ifscCode,
-                bankName: bankDetails.bankName || 'N/A',
-                branchName: bankDetails.branchName || 'N/A'
+            if (!currentUser || !currentUser.bankDetails || !currentUser.bankDetails.bankAccountNumber) {
+                alert('Please connect your bank account first in the Wallet section.');
+                switchTab('wallet');
+                return;
             }
-        })
-    }).then(r=>r.json()).then(d=>{
-        alert(d.message || (d.success ? 'Withdrawal successful' : 'Failed'));
-        closeWithdrawModal();
-        refreshWalletBalance();
-    }).catch(e=>alert(e.message));
-}
+            
+            const min = 0; // Removed ₹100 minimum withdrawal limit
+            const amount = prompt(`Enter amount to withdraw (₹):\nAvailable Balance: ₹${currentUser.wallet}`);
+            
+            if (!amount || isNaN(amount) || Number(amount) <= 0) return;
+            
+            const withdrawAmount = Number(amount);
+            if (withdrawAmount > currentUser.wallet) {
+                alert('Insufficient balance');
+                return;
+            }
 
-        
-        
+            if (!confirm(`Are you sure you want to withdraw ₹${withdrawAmount} to your bank account?`)) return;
+
+            fetch(`${API_URL}/wallet/withdraw`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    userId: currentUser.userId, 
+                    amount: withdrawAmount,
+                    bankDetails: {
+                        accountHolderName: currentUser.bankDetails.accountHolderName,
+                        accountNumber: currentUser.bankDetails.bankAccountNumber,
+                        ifscCode: currentUser.bankDetails.ifsc,
+                        bankName: currentUser.bankDetails.bankName || 'Bank'
+                    }
+                })
+            }).then(r=>r.json()).then(d=>{
+                if (d.success) {
+                    alert('Withdrawal requested successfully! It will be processed by the admin.');
+                    refreshUserWallet();
+                } else {
+                    alert(d.message || 'Withdrawal failed');
+                }
+            }).catch(e=>alert('Withdrawal failed: ' + e.message));
+        }
 
         // Initialize skillset field after login
         function initTriFilters() {}
