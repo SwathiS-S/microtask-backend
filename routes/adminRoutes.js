@@ -35,6 +35,32 @@ router.get('/users', async (req, res) => {
   }
 });
 
+router.get('/wallet-transactions', async (req, res) => {
+  try {
+    const wallets = await Wallet.find({}).populate('userId', 'name email');
+    
+    let allTransactions = [];
+    wallets.forEach(wallet => {
+      if (wallet.transactions && Array.isArray(wallet.transactions)) {
+        wallet.transactions.forEach(tx => {
+          allTransactions.push({
+            ...tx.toObject(),
+            userName: wallet.userId?.name || 'Unknown',
+            userEmail: wallet.userId?.email || '',
+            walletRole: wallet.role
+          });
+        });
+      }
+    });
+    
+    allTransactions.sort((a, b) => new Date(b.date || b.created_at) - new Date(a.date || a.created_at));
+    
+    res.json({ success: true, transactions: allTransactions });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 router.post('/users/:id/block', async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, { status: 'BLOCKED' }, { new: true }).select('-password');
