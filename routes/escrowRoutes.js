@@ -21,130 +21,82 @@ router.get('/pending', async (req, res) => {
   }
 });
 
-router.post('/release/:id', async (req, res) => { 
-   try { 
-     const { id } = req.params; 
- 
-     console.log('=== RELEASE START ==='); 
-     console.log('Param id:', id); 
- 
-     // 1. Find the escrow first
-     const escrow = await Escrow.findById(id);
-     console.log('Escrow found:', escrow?._id);
-     console.log('Escrow taskId:', escrow?.taskId);
-     console.log('Escrow userId:', escrow?.userId);
+router.post('/release/:id', async (req, res) => {
+  try {
+    const escrow = await Escrow.findById(req.params.id);
+    if (!escrow) return res.status(404).json({ success: false, message: 'Escrow not found' });
 
-     if (!escrow) {
-       console.log('Escrow not found by ID:', id);
-       return res.status(404).json({ success: false, message: 'Escrow not found' });
-     }
-     console.log('Escrow found, status:', escrow.status);
+    // Get task if exists, but don't fail if deleted
+    const task = await Task.findById(escrow.taskId);
+    const taskTitle = task?.title || 'Deleted Task';
+    const totalAmount = escrow.amount;
+    const workerAmount = totalAmount * 0.8; // 80% to worker
+    const adminCommission = totalAmount * 0.2; // 20% commission
 
-     // 2. Find the task using escrow.taskId
-     const task = await Task.findById(escrow.taskId); 
-     console.log('Task found:', task?._id, task?.title);
+    // Get worker ID from escrow or task
+    const workerId = escrow.userId || escrow.workerId || task?.acceptedBy || task?.assignedTo;
+    if (!workerId) return res.status(400).json({ success: false, message: 'Worker not found for this escrow' });
 
-     if (!task) { 
-       console.log('Task not found for escrow taskId:', escrow.taskId);
-       return res.status(404).json({ 
-         success: false, 
-         message: 'Task not found - taskId: ' + escrow.taskId 
-       }); 
-     } 
- 
-     console.log('Task found:', task.title); 
-     console.log('acceptedBy:', task.acceptedBy); 
-     console.log('amount:', task.amount); 
- 
-     // 3. Find the worker (User who should receive the payment)
-     let workerId = task.acceptedBy 
-       || task.assignedTo 
-       || task.assignedUser 
-       || task.workerId 
-       || task.selectedWorker 
-       || escrow.userId; // Fallback to escrow.userId if task fields are missing
-
-     console.log('workerId found:', workerId); 
- 
-     if (!workerId) { 
-       // Search in applications array if any
-       const acceptedApp = task.applications?.find( 
-         app => app.status === 'accepted' 
-           || app.status === 'ACCEPTED' 
-           || app.isAccepted === true 
-       ); 
- 
-       if (acceptedApp) {
-         workerId = acceptedApp.userId || acceptedApp.user || acceptedApp.workerId;
-         console.log('Worker found from application:', workerId);
-       }
-     } 
-
-     if (!workerId) {
-       return res.status(400).json({
-         success: false,
-         message: 'No worker found for this task'
-       });
-     }
-
-     // 4. Calculate worker amount 
-     const totalAmount = Number(escrow.amount || task.amount || 0); 
-     const workerAmount = Number(escrow.workerAmount || Math.round(totalAmount * 0.8)); 
- 
-     console.log('Worker amount to release:', workerAmount);
-
-     // Step 1: Credit worker wallet 
-    const workerWallet = await Wallet.findOneAndUpdate( 
-      { userId: workerId }, 
-      { 
-        $inc: { balance: Number(workerAmount) }, 
-        $push: { 
-          transactions: { 
-            transactionType: 'credit', 
-            amount: Number(workerAmount), 
-            taskId: task._id, 
-            description: `Payment ₹${workerAmount} released from escrow for task: ${task.title}`, 
-            status: 'completed', 
+    // Credit worker wallet
+    await Wallet.findOneAndUpdate(
+      { userId: workerId },
+      {
+        $inc: { balance: workerAmount },
+        $push: {
+          transactions: {
+            transactionType: 'credit',
+            amount: workerAmount,
+            taskId: escrow.taskId,
+            description: `Payment ₹${workerAmount} released from escrow for: ${taskTitle}`,
+            status: 'completed',
             date: new Date()
-          } 
-        } 
+          }
+        },
+        $setOnInsert: { role: 'user', userId: workerId }
       },
-      { new: true, upsert: true }
-    ); 
+      { upsert: true, new: true }
+    );
 
-    // Step 2: Update escrow status
-    escrow.status = 'released';
-    escrow.releasedAt = new Date();
-    await escrow.save();
-
-    // Step 3: Update task status if needed
-    if (task.status !== 'paid') {
-      task.status = 'paid';
-      await task.save();
+    // Debit provider wallet transaction history
+    if (escrow.providerId) {
+      await Wallet.findOneAndUpdate(
+        { userId: escrow.providerId },
+        {
+          $push: {
+            transactions: {
+              transactionType: 'escrow_release',
+              amount: workerAmount,
+              taskId: escrow.taskId,
+              description: `Payment ₹${workerAmount} released to worker for: ${taskTitle}`,
+              status: 'completed',
+              date: new Date()
+            }
+          }
+        }
+      );
     }
 
-    // Step 4: Notify User
-    try {
-      await Notification.create({
-        recipient: workerId,
-        title: '💰 Payment Released',
-        message: `Payment of ₹${workerAmount} has been released to your wallet for task: ${task.title}`,
-        type: 'PAYMENT_RELEASED'
-      });
-    } catch (err) {
-      console.error('Notification failed:', err);
-    }
+    // Update escrow status
+    await Escrow.findByIdAndUpdate(escrow._id, { status: 'released', releasedAt: new Date() });
 
-    res.json({ 
-      success: true, 
-      message: 'Payment released successfully to worker',
-      workerAmount,
-      workerId
+    // Sync Transaction collection
+    await Transaction.create({
+      user_id: workerId,
+      task_id: escrow.taskId,
+      taskTitle: taskTitle,
+      amount: workerAmount,
+      type: 'credit',
+      status: 'SUCCESS',
+      created_at: new Date()
     });
 
-  } catch (error) {
-    console.error('RELEASE ERROR:', error);
-    res.status(500).json({ success: false, message: error.message });
+    // Update user wallet balance in User model
+    await User.findByIdAndUpdate(workerId, { $inc: { wallet: workerAmount } });
+
+    res.json({ success: true, message: `Payment of ₹${workerAmount} released successfully!` });
+  } catch (e) {
+    console.error('Release error:', e);
+    res.status(500).json({ success: false, message: e.message });
   }
 }); 
 
