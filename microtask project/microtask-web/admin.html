@@ -308,7 +308,11 @@
         }
         container.innerHTML = data.escrows.map(esc => {
           const taskTitle = esc.taskId?.title || esc.title || 'Untitled Task';
-          const userName = esc.userId?.name || esc.userId?.email || 'N/A';
+          const workerName = esc.userId?.name ||                    // direct userId 
+                             esc.taskId?.acceptedBy?.name ||         // from task acceptedBy 
+                             esc.taskId?.assignedTo?.name ||          // from task assignedTo 
+                             (esc.taskId?.acceptedBy ? 'User-' + (esc.taskId.acceptedBy._id || esc.taskId.acceptedBy) : null) || 
+                             'Not Assigned Yet';
           const providerName = esc.providerId?.name || esc.providerId?.email || 'N/A';
           const amount = esc.amount || esc.totalAmount || esc.escrowAmount || 0;
           return `
@@ -317,7 +321,7 @@
               <div>
                 <div style="font-weight:600; font-size:16px;">${taskTitle}</div>
                 <div style="font-size:13px; color:#666; margin-top:4px;">
-                  User: ${userName}<br>
+                  User: ${workerName}<br>
                   Provider: ${providerName}<br>
                   Status: <span style="color:#d97706; font-weight:600;">${esc.status}</span>
                 </div>
@@ -484,80 +488,146 @@
     }
     async function loadRevenue() {
       try {
-        const data = await fetch(`${API_URL}/admin/analytics/revenue`, { headers: getAdminIdHeader() }).then(r => r.json());
-        const inflow = data.revenue?.inflow?.total ?? 0;
-        const outflow = data.revenue?.outflow?.total ?? 0;
-        const commission = data.revenue?.commission?.total ?? 0;
-        document.getElementById('inflowTotal').textContent = `₹ ${Number(inflow).toFixed(2)}`;
-        document.getElementById('outflowTotal').textContent = `₹ ${Number(outflow).toFixed(2)}`;
-        document.getElementById('commissionTotal').textContent = `₹ ${Number(commission).toFixed(2)}`;
-      } catch (_) {}
+        const res = await fetch(`${API_URL}/admin/revenue`, { headers: getAdminIdHeader() });
+        const data = await res.json();
+        if (!data.success) return;
+        
+        const setEl = (id, val) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = `₹ ${val}`;
+        };
+        
+        setEl('inflowTotal', data.totalInflow);
+        setEl('outflowTotal', data.totalOutflow);
+        setEl('commissionTotal', data.netCommission);
+        // If these elements exist in your HTML, they will be updated too
+        setEl('pendingWithdrawals', data.pendingWithdrawals);
+        setEl('netRevenue', data.netRevenue);
+      } catch (e) {
+        console.error('loadRevenue error:', e);
+      }
     }
     async function loadWithdrawals() {
       const tbody = document.getElementById('pendingWdTable');
+      if (!tbody) return;
       tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
       try {
-        const data = await fetch(`${API_URL}/admin/withdrawals/pending`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const res = await fetch(`${API_URL}/admin/withdrawals`, { headers: getAdminIdHeader() });
+        const data = await res.json();
+        if (!data.success) {
+          tbody.innerHTML = `<tr><td colspan="4">${data.message || 'Failed to load'}</td></tr>`;
+          return;
+        }
+        
+        const container = document.getElementById('withdrawalsList'); // For mobile/card view if exists
         const items = data.withdrawals || [];
-        tbody.innerHTML = items.map(w => `
-          <tr>
-            <td>${w.userName || '-'}</td>
-            <td>₹ ${Number(w.amount || 0).toFixed(2)}</td>
-            <td>${w.bankDetails.bankName} - ${w.bankDetails.accountNumber}</td>
-            <td><button class="btn small" onclick='showProcessModal(${JSON.stringify(w)})'>Process</button></td>
-          </tr>
-        `).join('');
+        
+        if (items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4">No withdrawal requests</td></tr>';
+          if (container) container.innerHTML = '<p>No withdrawal requests</p>';
+          return;
+        }
+        
+        // Update table view
+        tbody.innerHTML = items.map(w => {
+          const name = w.userId?.name || w.userName || 'Unknown';
+          const email = w.userId?.email || '';
+          const amount = Number(w.amount || 0).toFixed(2);
+          const date = new Date(w.requestedAt).toLocaleString();
+          const statusColor = w.status === 'completed' ? '#28a745' : 
+                             w.status === 'rejected' ? '#dc3545' : '#fd7e14';
+          
+          return `
+            <tr>
+              <td>
+                <strong>${name}</strong><br>
+                <small style="color:#666;">${email}</small>
+              </td>
+              <td>₹ ${amount}</td>
+              <td>
+                <div style="font-size:12px;">
+                  ${w.bankDetails?.bankName || 'Bank'} - ${w.bankDetails?.accountNumber || 'N/A'}<br>
+                  <small>${w.bankDetails?.ifscCode || ''}</small>
+                </div>
+              </td>
+              <td>
+                ${w.status === 'pending' ? `
+                  <button class="btn small success" onclick="approveWithdrawal('${w._id}')">Approve</button>
+                  <button class="btn small danger" onclick="rejectWithdrawal('${w._id}')">Reject</button>
+                ` : `<span style="color:${statusColor}; font-weight:600;">${w.status.toUpperCase()}</span>`}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        // Update card view if container exists
+        if (container) {
+          container.innerHTML = items.map(w => {
+            const name = w.userId?.name || w.userName || 'Unknown';
+            const email = w.userId?.email || '';
+            const amount = Number(w.amount).toFixed(2);
+            const date = new Date(w.requestedAt).toLocaleString();
+            const statusColor = w.status === 'completed' ? '#28a745' : 
+                               w.status === 'rejected' ? '#dc3545' : '#fd7e14';
+            
+            return `<div style="background:white; border-radius:10px; padding:16px; margin-bottom:12px; border:1px solid #e2e8f0;"> 
+                <div style="display:flex; justify-content:space-between; align-items:center;"> 
+                    <div> 
+                        <strong>${name}</strong> (${email})<br> 
+                        <span style="color:#666; font-size:13px;">${date}</span><br> 
+                        <span style="color:${statusColor}; font-weight:600;">${w.status.toUpperCase()}</span> 
+                        ${w.bankDetails ? `<br><small>Bank: ${w.bankDetails.bankName || ''} | AC: ${w.bankDetails.accountNumber || ''}</small>` : ''} 
+                    </div> 
+                    <div style="text-align:right;"> 
+                        <strong style="font-size:20px;">₹${amount}</strong> 
+                        ${w.status === 'pending' ? ` 
+                        <br> 
+                        <button onclick="approveWithdrawal('${w._id}')" 
+                            style="margin-top:8px; padding:5px 12px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; margin-right:6px;"> 
+                            Approve 
+                        </button> 
+                        <button onclick="rejectWithdrawal('${w._id}')" 
+                            style="padding:5px 12px; background:#dc3545; color:white; border:none; border-radius:5px; cursor:pointer;"> 
+                            Reject 
+                        </button>` : ''} 
+                    </div> 
+                </div> 
+            </div>`;
+          }).join('');
+        }
       } catch (e) {
         tbody.innerHTML = `<tr><td colspan="4">${e.message}</td></tr>`;
       }
     }
 
-    function showProcessModal(withdrawal) {
-      const modal = document.createElement('div');
-      modal.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">
-          <div class="panel" style="width: 400px;">
-            <div class="panel-header">Process Withdrawal</div>
-            <div class="panel-body">
-              <div>User: ${withdrawal.userName}</div>
-              <div>Amount: ₹${withdrawal.amount}</div>
-              <hr>
-              <div>Account Holder: ${withdrawal.bankDetails.accountHolderName}</div>
-              <div>Account Number: ${withdrawal.bankDetails.accountNumber}</div>
-              <div>IFSC Code: ${withdrawal.bankDetails.ifscCode}</div>
-              <div>Bank: ${withdrawal.bankDetails.bankName}</div>
-              <hr>
-              <input type="text" id="transactionRef" placeholder="Transaction Reference (UTR)" style="width: 100%; margin-bottom: 8px;">
-              <input type="text" id="remarks" placeholder="Remarks" style="width: 100%;">
-            </div>
-            <div class="panel-footer" style="padding: 14px 18px; display: flex; justify-content: flex-end; gap: 8px;">
-              <button class="btn alt" onclick="this.parentElement.parentElement.parentElement.remove()">Cancel</button>
-              <button class="btn danger" onclick="rejectWithdrawal('${withdrawal._id}', this.parentElement.parentElement.parentElement)">Reject</button>
-              <button class="btn success" onclick="completeWithdrawal('${withdrawal._id}', this.parentElement.parentElement.parentElement)">Mark as Completed</button>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
+    async function approveWithdrawal(id) {
+      if (!confirm('Approve this withdrawal?')) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, { 
+          method: 'POST',
+          headers: getAdminIdHeader()
+        });
+        const data = await res.json();
+        alert(data.message || 'Done');
+        loadWithdrawals();
+        loadRevenue();
+        refreshMetrics();
+      } catch (e) {
+        alert(e.message);
+      }
     }
 
-    async function completeWithdrawal(id, modal) {
-      const transactionReference = modal.querySelector('#transactionRef').value;
-      const remarks = modal.querySelector('#remarks').value;
-      if (!transactionReference) {
-        alert('Transaction Reference is required');
-        return;
-      }
+    async function rejectWithdrawal(id) {
+      if (!confirm('Reject and refund this withdrawal?')) return;
       try {
-        const r = await fetch(`${API_URL}/admin/withdrawals/complete/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
-          body: JSON.stringify({ adminId: adminUser.userId, transactionReference, remarks })
+        const res = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, { 
+          method: 'POST',
+          headers: getAdminIdHeader()
         });
-        const d = await r.json();
-        alert(d.message || (r.ok ? 'Withdrawal completed' : 'Failed'));
-        modal.remove();
+        const data = await res.json();
+        alert(data.message || 'Done');
         loadWithdrawals();
+        loadRevenue();
         refreshMetrics();
       } catch (e) {
         alert(e.message);

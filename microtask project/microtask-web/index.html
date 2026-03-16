@@ -3653,8 +3653,17 @@
                     if (w2) w2.textContent = data.balance;
                     const w3 = document.getElementById('provWalletBalance');
                     if (w3) w3.textContent = data.balance;
-                    updateDashboardUI(); // Refresh UI to show/hide "Create Wallet"
                 }
+
+                // Check bank details
+                const bankRes = await fetch(`${API_URL}/users/profile/${currentUser.userId}`);
+                const bankData = await bankRes.json();
+                if (bankData.success && bankData.user) {
+                    currentUser.bankDetails = bankData.user.bankDetails;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+
+                updateDashboardUI(); // Refresh UI to show/hide "Connect Bank" or "Withdraw"
             } catch (e) { /* ignore */ }
         }
 
@@ -5046,7 +5055,7 @@
                 if (data.success) {
                     alert('Wallet connected successfully!');
                     closeWalletModal();
-                    refreshUserWallet();
+                    await refreshUserWallet();
                 } else {
                     alert(data.message || 'Failed to connect wallet');
                 }
@@ -5062,16 +5071,12 @@
                 return;
             }
             
-            const min = 100; // Standard minimum withdrawal
-            const amount = prompt(`Enter amount to withdraw (₹):\nAvailable Balance: ₹${currentUser.wallet}\nMinimum: ₹${min}`);
+            const min = 0; // Removed ₹100 minimum withdrawal limit
+            const amount = prompt(`Enter amount to withdraw (₹):\nAvailable Balance: ₹${currentUser.wallet}`);
             
             if (!amount || isNaN(amount) || Number(amount) <= 0) return;
             
             const withdrawAmount = Number(amount);
-            if (withdrawAmount < min) {
-                alert(`Minimum withdrawal is ₹${min}`);
-                return;
-            }
             if (withdrawAmount > currentUser.wallet) {
                 alert('Insufficient balance');
                 return;
