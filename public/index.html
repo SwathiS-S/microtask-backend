@@ -1159,6 +1159,11 @@
         .hero-cta { display:flex; gap:14px; }
         .info-panel { background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:22px; }
         .info-tiles { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+        .info-tile { background:#1E3A5F; border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px; transition: background 0.3s ease; }
+        .info-tile:hover { background: #2C5282; }
+        .info-tile-title { font-weight:700; color: #C9A84C; }
+        .info-tile-desc { color: rgba(255,255,255,0.8); font-size:12px; }
+        .info-tile-icon { width:24px; height:24px; color:#C9A84C; }
         @media (max-width: 900px) {
             .hero-wrap { padding: 24px; }
             .hero-grid { grid-template-columns: 1fr; gap:20px; }
@@ -1525,32 +1530,32 @@
                             Connect with nearby people for quick help. Post small tasks, accept work, and get paid safely.
                         </div>
                         <div class="info-tiles">
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#9bb5ff;"><use href="#icon-pin"/></svg>
+                            <div class="info-tile">
+                                <svg class="icon info-tile-icon"><use href="#icon-pin"/></svg>
                                 <div>
-                                    <div style="font-weight:700;">Local & Nearby</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Find help around your area</div>
+                                    <div class="info-tile-title">Local & Nearby</div>
+                                    <div class="info-tile-desc">Find help around your area</div>
                                 </div>
                             </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#ffd27f;"><use href="#icon-briefcase"/></svg>
+                            <div class="info-tile">
+                                <svg class="icon info-tile-icon"><use href="#icon-briefcase"/></svg>
                                 <div>
-                                    <div style="font-weight:700;">Post Simple Tasks</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Household, delivery, errands</div>
+                                    <div class="info-tile-title">Post Simple Tasks</div>
+                                    <div class="info-tile-desc">Household, delivery, errands</div>
                                 </div>
                             </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#7fffb0;"><use href="#icon-wallet"/></svg>
+                            <div class="info-tile">
+                                <svg class="icon info-tile-icon"><use href="#icon-wallet"/></svg>
                                 <div>
-                                    <div style="font-weight:700;">Secure Payouts</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Razorpay wallet & bank</div>
+                                    <div class="info-tile-title">Secure Payouts</div>
+                                    <div class="info-tile-desc">Razorpay wallet & bank</div>
                                 </div>
                             </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#9bd2ff;"><use href="#icon-list"/></svg>
+                            <div class="info-tile">
+                                <svg class="icon info-tile-icon"><use href="#icon-list"/></svg>
                                 <div>
-                                    <div style="font-weight:700;">Easy Management</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Track tasks and approvals</div>
+                                    <div class="info-tile-title">Easy Management</div>
+                                    <div class="info-tile-desc">Track tasks and approvals</div>
                                 </div>
                             </div>
                         </div>
