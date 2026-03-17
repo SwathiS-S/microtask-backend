@@ -90,22 +90,22 @@ class _FundTaskScreenState extends State<FundTaskScreen> {
       });
 
       if (orderRes != null && orderRes['success']) {
-        var options = {
-          'key': 'rzp_live_SSMM7fQBlGlwlq', 
-          'amount': (total * 100).toInt(),
-          'name': 'TaskNest',
-          'description': 'Funding Task: ${widget.task['title']}',
-          'order_id': orderRes['order']['id'],
-          'prefill': {
-            'contact': UserService.userPhone ?? '',
-            'email': UserService.userEmail ?? '',
-          },
-          'external': {
-            'wallets': ['paytm']
-          }
-        };
-        _razorpay.open(options);
-      } else {
+          var options = {
+            'key': 'rzp_test_SNzqJbQGrxxv81', 
+            'amount': (total * 100).toInt(),
+            'name': 'TaskNest',
+            'description': 'Funding Task: ${widget.task['title']}',
+            'order_id': orderRes['order']['id'],
+            'prefill': {
+              'contact': UserService.userPhone ?? '',
+              'email': UserService.userEmail ?? '',
+            },
+            'external': {
+              'wallets': ['paytm']
+            }
+          };
+          _razorpay.open(options);
+        } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to create order: ${orderRes?['message']}')),
         );

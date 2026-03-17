@@ -91,7 +91,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
 
       if (orderRes['success']) {
         var options = {
-          'key': 'rzp_live_SSMM7fQBlGlwlq',
+          'key': 'rzp_test_SNzqJbQGrxxv81',
           'amount': amount * 100,
           'name': 'TaskNest',
           'order_id': orderId,
