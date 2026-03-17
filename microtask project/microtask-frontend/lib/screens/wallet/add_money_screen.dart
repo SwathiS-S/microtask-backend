@@ -91,10 +91,10 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
 
       if (orderRes['success']) {
         var options = {
-          'key': 'rzp_test_SNzqJbQGrxxv81',
+          'key': 'rzp_live_SSMM7fQBlGlwlq',
           'amount': amount * 100,
           'name': 'TaskNest',
-          'order_id': orderRes['order']['id'],
+          'order_id': orderId,
           'description': 'Add Money to Wallet',
           'prefill': {
             'contact': UserService.userPhone ?? '',

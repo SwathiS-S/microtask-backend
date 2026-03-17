@@ -91,7 +91,7 @@ class _FundTaskScreenState extends State<FundTaskScreen> {
 
       if (orderRes != null && orderRes['success']) {
         var options = {
-          'key': 'rzp_test_YOUR_KEY_HERE', // This should be in backend ideally
+          'key': 'rzp_live_SSMM7fQBlGlwlq', 
           'amount': (total * 100).toInt(),
           'name': 'TaskNest',
           'description': 'Funding Task: ${widget.task['title']}',
