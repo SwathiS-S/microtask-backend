@@ -1788,82 +1788,138 @@
 
     <!-- Auth Forms (Moved outside container to remove white frame) -->
     <div id="authSection" class="hidden">
-        <div class="auth-split">
-            <div class="auth-left">
-                <div class="auth-card">
-                    <div id="loginForm">
-                        <div class="logo">
-                            <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px;"><use href="#logo-new"/></svg>Task<span style="color: var(--primary);">Nest</span></h1>
-                            <p>Complete micro tasks & earn rewards</p>
-                        </div>
-                        <div id="loginMessage"></div>
-                        <div class="form-group">
-                            <label for="loginEmail">Email</label>
-                            <input type="email" id="loginEmail" placeholder="your@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" placeholder="Enter password">
-                        </div>
-                        <button onclick="login()">Login</button>
-                        <div class="auth-toggle">
-                            Don't have an account? <a onclick="toggleForms()">Register</a>
-                        </div>
-                    </div>
-                    <div id="registerForm" class="hidden">
-                        <div class="logo">
-                            <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px;"><use href="#logo-new"/></svg>Task<span style="color: var(--primary);">Nest</span></h1>
-                            <p>Join our platform & start earning</p>
-                        </div>
-                        <div id="registerMessage"></div>
-                        <div class="form-group">
-                            <label for="registerName">Full Name</label>
-                            <input type="text" id="registerName" placeholder="Your name">
-                        </div>
-                        <div class="form-group">
-                            <label for="registerEmail">Email</label>
-                            <input type="email" id="registerEmail" placeholder="your@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPhone">Phone Number</label>
-                            <input type="tel" id="registerPhone" placeholder="Enter phone number">
-                        </div>
-                        <div id="otpBlock" class="form-group hidden">
-                            <label for="registerOtp">One-Time Password</label>
-                            <input type="text" id="registerOtp" placeholder="Enter OTP">
-                            <div id="otpStatus" class="small" style="margin-top:6px;color:#666;">Resend in 60s</div>
-                            <div style="display:flex; gap:8px; margin-top:8px;">
-                                <button id="verifyOtpBtn" class="btn-small" onclick="verifyEmail()">Verify Email</button>
-                                <button id="resendOtpBtn" class="btn-small" onclick="resendOtp()" disabled>Resend OTP</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Password</label>
-                            <input type="password" id="registerPassword" placeholder="Create password">
-                        </div>
-                        <div class="form-group" style="display:none;">
-                            <label for="registerRole">User Type</label>
-                            <select id="registerRole">
-                                <option value="taskUser">User</option>
-                                <option value="taskProvider">Task Provider</option>
-                            </select>
-                        </div>
-                        <button onclick="register()">Register</button>
-                        <div class="auth-toggle">
-                            Already have an account? <a onclick="toggleForms()">Login</a>
-                        </div>
-                    </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; min-height:100vh; width:100%;"> 
+ 
+            <!-- LEFT: Login/Register Form --> 
+            <div style="background:white; padding:3rem 2.5rem; display:flex; flex-direction:column; justify-content:center;"> 
+              
+              <!-- Logo --> 
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:2.5rem;"> 
+                <div style="width:36px; height:36px; background:#1E3A5F; border-radius:9px; display:flex; align-items:center; justify-content:center;"> 
+                  <div style="width:16px; height:16px; border:2.5px solid #C9A84C; border-radius:4px;"></div> 
+                </div> 
+                <span style="font-size:20px; font-weight:700; color:#1E3A5F;">Task<span style="color:#C9A84C;">Nest</span></span> 
+              </div> 
+          
+              <!-- LOGIN FORM -->
+              <div id="loginForm">
+                <div style="margin-bottom:1.8rem;"> 
+                  <div style="font-size:26px; font-weight:700; color:#1E3A5F; margin-bottom:6px;">Welcome back</div> 
+                  <div style="font-size:14px; color:#5a6a7a;">Sign in to your TaskNest account</div> 
+                </div> 
+                
+                <div id="loginMessage"></div>
+                
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Email</label> 
+                  <input type="email" id="loginEmail" placeholder="your@email.com" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
+                </div> 
+          
+                <div style="margin-bottom:20px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Password</label> 
+                  <input type="password" id="loginPassword" placeholder="Enter password" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
+                </div> 
+          
+                <button onclick="login()" style="width:100%; background:#C9A84C; color:white; padding:13px; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">Login</button>
+          
+                <div style="margin-top:16px; font-size:13px; color:#5a6a7a; text-align:center;"> 
+                  Don't have an account? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:600; cursor:pointer;">Register</a> 
+                </div> 
+              </div>
+
+              <!-- REGISTER FORM -->
+              <div id="registerForm" class="hidden">
+                <div style="margin-bottom:1.8rem;"> 
+                  <div style="font-size:26px; font-weight:700; color:#1E3A5F; margin-bottom:6px;">Create account</div> 
+                  <div style="font-size:14px; color:#5a6a7a;">Join our platform and start earning</div> 
+                </div> 
+                
+                <div id="registerMessage"></div>
+                
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Full Name</label> 
+                  <input type="text" id="registerName" placeholder="Your name" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
                 </div>
-            </div>
-            <div class="auth-right">
-                <div class="illustration-container">
-                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" alt="Task Management Illustration" class="illustration-img">
-                    <h2 class="illustration-text">
-                        Find tasks and <br><span>earn rewards.</span>
-                    </h2>
+
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Email</label> 
+                  <input type="email" id="registerEmail" placeholder="your@email.com" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
                 </div>
-            </div>
-        </div>
+
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Phone Number</label> 
+                  <input type="tel" id="registerPhone" placeholder="Enter phone number" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
+                </div>
+
+                <div id="otpBlock" class="hidden" style="margin-bottom:14px;">
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">One-Time Password</label>
+                  <input type="text" id="registerOtp" placeholder="Enter OTP" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;">
+                  <div id="otpStatus" style="font-size:11px; color:#5a6a7a; margin-top:6px;">Resend in 60s</div>
+                  <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button id="verifyOtpBtn" onclick="verifyEmail()" style="flex:1; background:#1E3A5F; color:white; padding:8px; border:none; border-radius:6px; font-size:13px; cursor:pointer;">Verify Email</button>
+                    <button id="resendOtpBtn" onclick="resendOtp()" disabled style="flex:1; background:#f3f4f6; color:#5a6a7a; padding:8px; border:none; border-radius:6px; font-size:13px; cursor:pointer;">Resend OTP</button>
+                  </div>
+                </div>
+
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Password</label> 
+                  <input type="password" id="registerPassword" placeholder="Create password" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
+                </div>
+
+                <div style="display:none;">
+                  <select id="registerRole">
+                    <option value="taskUser">User</option>
+                    <option value="taskProvider">Task Provider</option>
+                  </select>
+                </div>
+
+                <button onclick="register()" style="width:100%; background:#C9A84C; color:white; padding:13px; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">Register</button>
+          
+                <div style="margin-top:16px; font-size:13px; color:#5a6a7a; text-align:center;"> 
+                  Already have an account? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:600; cursor:pointer;">Login</a> 
+                </div>
+              </div>
+          
+            </div> 
+          
+            <!-- RIGHT: Navy panel with image overlay --> 
+            <div style="background:#1E3A5F; position:relative; display:flex; flex-direction:column; justify-content:flex-end; padding:2.5rem; min-height:100vh; overflow:hidden;"> 
+              
+              <!-- Background image --> 
+              <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" 
+                style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.25;" 
+                alt="TaskNest"/> 
+              
+              <!-- Navy overlay --> 
+              <div style="position:absolute; inset:0; background:#1E3A5F; opacity:0.6;"></div> 
+              
+              <!-- Content over image --> 
+              <div style="position:relative; z-index:2;"> 
+                <div style="width:40px; height:3px; background:#C9A84C; margin-bottom:16px; border-radius:2px;"></div> 
+                <div style="font-size:28px; font-weight:700; color:white; line-height:1.3; margin-bottom:12px;"> 
+                  Find tasks and<br><span style="color:#C9A84C;">earn rewards.</span> 
+                </div> 
+                <div style="font-size:13px; color:rgba(255,255,255,0.65); line-height:1.7; margin-bottom:2rem;"> 
+                  Secure escrow payments powered by Razorpay. Work with full confidence on every task. 
+                </div> 
+                <div style="display:flex; flex-direction:column; gap:10px;"> 
+                  <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,0.1);"> 
+                    <div style="width:8px; height:8px; background:#C9A84C; border-radius:50%; flex-shrink:0;"></div> 
+                    <span style="font-size:13px; color:rgba(255,255,255,0.8);">Razorpay secured payments</span> 
+                  </div> 
+                  <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,0.1);"> 
+                    <div style="width:8px; height:8px; background:#C9A84C; border-radius:50%; flex-shrink:0;"></div> 
+                    <span style="font-size:13px; color:rgba(255,255,255,0.8);">Workers earn 80% per task</span> 
+                  </div> 
+                  <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,0.1);"> 
+                    <div style="width:8px; height:8px; background:#C9A84C; border-radius:50%; flex-shrink:0;"></div> 
+                    <span style="font-size:13px; color:rgba(255,255,255,0.8);">Free to join, no hidden fees</span> 
+                  </div> 
+                </div> 
+              </div> 
+            </div> 
+          
+          </div>
     </div>
 
     <!-- Dashboard (Modern SaaS Layout) -->
