@@ -38,7 +38,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Future<void> _markAsRead(String id) async {
     try {
-      await ApiService.patch('/notifications/$id/read', {});
+      await ApiService.post('/notifications/$id/read', {});
       _fetchNotifications();
     } catch (e) {
       debugPrint('Error marking as read: $e');
@@ -47,7 +47,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Future<void> _markAllAsRead() async {
     try {
-      await ApiService.patch('/notifications/read-all/${UserService.userId}', {});
+      await ApiService.post('/notifications/read-all/${UserService.userId}', {});
       _fetchNotifications();
     } catch (e) {
       debugPrint('Error marking all as read: $e');

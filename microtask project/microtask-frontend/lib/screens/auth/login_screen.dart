@@ -95,6 +95,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Check if login was successful
       if (response['success'] == true || response['token'] != null || response['message'] == 'Login successful') {
+        print('=== LOGIN DEBUG ===');
+        print('userId from response: ${response['userId']}');
         // Store user data with role
         UserService.setUser(
           userId: response['userId']?.toString() ?? 'USR-${DateTime.now().millisecondsSinceEpoch}',

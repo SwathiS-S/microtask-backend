@@ -79,6 +79,8 @@ class Task {
         return TaskStatus.submitted;
       case 'reviewed':
         return TaskStatus.reviewed;
+      case 'pending_release':
+      case 'paid':
       case 'completed':
         return TaskStatus.completed;
       case 'disputed':

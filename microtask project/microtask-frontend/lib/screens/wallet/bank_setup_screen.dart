@@ -91,7 +91,7 @@ class _BankSetupScreenState extends State<BankSetupScreen> {
       body: _isSaved 
         ? Center(
             child: Column(
-              mainAxisAlignment: MainValue.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.check_circle, color: Colors.green, size: 80),
                 const SizedBox(height: 16),

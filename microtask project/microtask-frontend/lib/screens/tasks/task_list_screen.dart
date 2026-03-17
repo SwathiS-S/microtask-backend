@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../models/task_model.dart';
 import '../../services/user_service.dart';
 import '../../services/api_service.dart';
 import '../../widgets/top_actions.dart';
@@ -304,7 +305,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => TaskDetailScreen(task: Task.fromJson(task['raw'])),
+                                builder: (_) => TaskDetailScreen(task: Task.fromJson(task)),
                               ),
                             );
                           },

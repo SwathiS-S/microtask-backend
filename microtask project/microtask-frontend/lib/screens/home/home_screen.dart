@@ -3,11 +3,10 @@ import '../../models/task_model.dart';
 import '../../services/user_service.dart';
 import '../../services/api_service.dart';
 import '../wallet/bank_setup_screen.dart';
-
-import '../models/task_model.dart';
-import '../screens/create_task_screen.dart';
-import '../screens/task_detail_screen.dart';
+import '../tasks/create_task_screen.dart';
+import '../tasks/task_detail_screen.dart';
 import '../notifications/notification_screen.dart';
+import '../wallet/fund_task_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,8 +14,6 @@ class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
-
-import '../wallet/fund_task_screen.dart';
 
 class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _draftTasks = [];
@@ -75,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _activeTasks = allTasks.where((t) => 
             ['funded', 'open', 'assigned', 'in_progress', 'submitted', 'reviewed'].contains(t['status'])
           ).toList();
-          _completedTasks = allTasks.where((t) => t['status'] == 'completed').toList();
+          _completedTasks = allTasks.where((t) => ['completed', 'pending_release', 'paid'].contains(t['status'])).toList();
           _disputedTasks = allTasks.where((t) => ['disputed', 'resolved'].contains(t['status'])).toList();
           _expiredTasks = allTasks.where((t) => t['status'] == 'expired').toList();
         });
@@ -116,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // 4. Completed Tasks
         _earnerCompletedTasks = allRes.where((t) {
           return (t['acceptedBy'] is Map ? t['acceptedBy']['_id'] : t['acceptedBy']) == UserService.userId &&
-                 t['status'] == 'completed';
+                 ['completed', 'pending_release', 'paid'].contains(t['status']);
         }).toList();
 
         // 5. Rejected Applications
@@ -863,23 +860,114 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildEarnerActiveAction(dynamic task) {
+    if (task['status'] == 'in_progress') {
+      return Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => _handleSubmitUpdate(task),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Update Status', style: TextStyle(fontSize: 10)),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => _handleUploadWork(task),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Upload Work', style: TextStyle(fontSize: 10)),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => _viewTaskDetails(task),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A5F),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('View Details', style: TextStyle(fontSize: 10)),
+            ),
+          ),
+        ],
+      );
+    }
+
     String label = 'View Details';
     if (task['status'] == 'assigned') label = 'Start Task';
-    else if (task['status'] == 'in_progress') label = 'Submit Work';
     else if (task['status'] == 'submitted') label = 'Work Submitted ✅';
     else if (task['status'] == 'reviewed') label = 'Under Review ⏳';
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () async {
-          final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(task))));
-          if (result == true) _loadEarnerDashboard();
-        },
+        onPressed: () => _viewTaskDetails(task),
         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E3A5F), foregroundColor: Colors.white),
         child: Text(label),
       ),
     );
+  }
+
+  void _viewTaskDetails(dynamic taskData) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(taskData))),
+    );
+    if (result == true) _loadEarnerDashboard();
+  }
+
+  void _handleSubmitUpdate(dynamic taskData) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Submit Status Update'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'What did you work on today?'),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              if (controller.text.isEmpty) return;
+              final res = await ApiService.post('/tasks/${taskData['_id']}/status-update', {
+                'userId': UserService.userId,
+                'text': controller.text,
+              });
+              if (res['success']) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Update submitted!')));
+              }
+            },
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleUploadWork(dynamic taskData) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TaskDetailScreen(task: Task.fromJson(taskData))),
+    );
+    if (result == true) _loadEarnerDashboard();
+    // For simplicity, we navigate to details where upload logic already exists
+    // and is more robust (file picking, etc.)
   }
 
   Widget _buildEarnerCompletedAction(dynamic task) {
@@ -943,47 +1031,109 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
 
-  Widget _buildTransactionItem(Map<String, dynamic> transaction) {
+  Widget _buildTransactionItem(Map<String, dynamic> tx) {
+    // ✅ FIX: read transactionType first, fallback to type
+    final type = (tx['transactionType'] ?? tx['type'] ?? '').toString().toLowerCase();
+    final amount = ((tx['amount'] ?? 0) as num).toDouble();
+    final status = (tx['status'] ?? 'completed').toString();
+    final description = tx['description'] ?? tx['taskTitle'] ?? 'Transaction';
+
+    Color color;
+    String sign;
+    IconData icon;
+
+    switch (type) {
+      case 'credit':
+      case 'refund':
+      case 'escrow_release':
+        color = Colors.green;
+        sign = '+';
+        icon = Icons.add_circle_outline;
+        break;
+      case 'debit':
+      case 'withdrawal':
+      case 'withdrawal_completed':
+        color = Colors.red;
+        sign = '-';
+        icon = Icons.remove_circle_outline;
+        break;
+      case 'escrow_hold':
+        color = Colors.orange;
+        sign = '-';
+        icon = Icons.lock_clock;
+        break;
+      default:
+        color = Colors.grey;
+        sign = '';
+        icon = Icons.payment;
+    }
+
+    // Format date
+    String dateStr = '';
+    if (tx['date'] != null) {
+      try {
+        final dt = DateTime.parse(tx['date'].toString()).toLocal();
+        dateStr =
+            '${dt.day}/${dt.month}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      } catch (_) {}
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)],
-      ),
+          color: Colors.white, borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)]),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: (transaction['color'] as Color).withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                child: Icon(transaction['icon'] as IconData, color: transaction['color'] as Color, size: 24),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(transaction['title'] as String, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
-                  const SizedBox(height: 4),
-                  Text('Posted by ${transaction['posted_by']}', style: const TextStyle(fontSize: 13, color: Colors.black54)),
-                ],
-              ),
-            ],
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
           ),
-          Text(transaction['amount'] as String, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: transaction['color'] as Color)),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(description,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 14)),
+                if (tx['taskTitle'] != null && tx['taskTitle'] != '')
+                  Text(tx['taskTitle'],
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                if (dateStr.isNotEmpty)
+                  Text(dateStr,
+                      style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                Container(
+                  margin: const EdgeInsets.only(top: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(status.toUpperCase(),
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: color,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ),
+          Text('$sign₹${amount.toStringAsFixed(0)}',
+              style: TextStyle(
+                  color: color, fontWeight: FontWeight.bold, fontSize: 16)),
         ],
       ),
     );
   }
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
+
+
+

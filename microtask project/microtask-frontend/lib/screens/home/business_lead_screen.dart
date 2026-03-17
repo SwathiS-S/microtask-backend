@@ -44,7 +44,7 @@ class _BusinessLeadScreenState extends State<BusinessLeadScreen> {
           // Pending reviews are tasks submitted but not yet approved/paid
           pendingReviews = allTasks.where((t) => 
             t.createdBy == UserService.userId && 
-            (t.status == TaskStatus.submitted || (t.workType == WorkType.onsite && t.status == TaskStatus.accepted))
+            (t.status == TaskStatus.submitted || (t.workType == WorkType.onsite && t.status == TaskStatus.assigned))
           ).toList();
           
           // Active tasks are open tasks posted by this user
@@ -514,7 +514,7 @@ class _BusinessLeadScreenState extends State<BusinessLeadScreen> {
   }
 
   Widget _buildSubmissionCard(Task task) {
-    bool isApproved = approvedTaskIds.contains(task.id) || task.status == TaskStatus.approved || task.status == TaskStatus.paid;
+    bool isApproved = approvedTaskIds.contains(task.id) || task.status == TaskStatus.completed;
 
     return GestureDetector(
       onTap: () {

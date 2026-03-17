@@ -44,6 +44,10 @@ class _WalletScreenState extends State<WalletScreen> {
 
       // Load Transactions
       final txRes = await ApiService.get('/wallet/transactions/${UserService.userId}');
+      print('=== WALLET DEBUG ==='); 
+      print('userId: ${UserService.userId}'); 
+      print('txRes: $txRes'); 
+      print('transactions count: ${(txRes?["transactions"] as List?)?.length}'); 
       if (txRes != null && txRes is Map && txRes['success'] == true) {
         final List txns = txRes['transactions'] ?? [];
         setState(() {

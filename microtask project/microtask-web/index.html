@@ -6,17 +6,17 @@
     <title>TaskNest - Microtask Platform</title>
     <style>
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --bg-dark: #0b0b0e;
-            --sidebar-bg: #141418;
-            --content-bg: #f3f4f6;
-            --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --text-light: #ffffff;
-            --border: #e5e7eb;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --primary: #1E3A5F;
+            --primary-dark: #152C45;
+            --bg-dark: #FAF8F3;
+            --sidebar-bg: #1E3A5F;
+            --content-bg: #FAF8F3;
+            --card-bg: #FFFFFF;
+            --text-main: #1a1a2e;
+            --text-muted: #64748b;
+            --text-light: #FAF8F3;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
         /* Dashboard Layout */
@@ -30,7 +30,7 @@
 
         .sidebar {
             width: 260px;
-            background: var(--sidebar-bg);
+            background: #1A2035;
             display: flex;
             flex-direction: column;
             padding: 30px 20px;
@@ -60,17 +60,18 @@
             align-items: center;
             gap: 15px;
             padding: 14px 20px;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #8e8e93;
+            color: rgba(255,255,255,0.45);
             font-weight: 600;
             text-decoration: none;
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            background: linear-gradient(135deg, rgba(232,194,122,0.18), rgba(201,154,58,0.1));
+            color: #E8C27A;
+            border: 1px solid rgba(232,194,122,0.2);
         }
 
         .nav-item.active {
@@ -97,7 +98,7 @@
         .add-task-btn {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: #C9A84C;
             border: none;
             border-radius: 12px;
             color: #fff;
@@ -107,7 +108,7 @@
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(201, 168, 76, 0.3);
         }
 
         .main-content-wrapper {
@@ -134,10 +135,10 @@
         .search-container input {
             width: 100%;
             padding: 12px 20px 12px 45px;
-            background: #1c1c21;
-            border: 1px solid #2c2c34;
+            background: #ffffff;
+            border: 1px solid var(--border);
             border-radius: 12px;
-            color: #fff;
+            color: var(--text-main);
             font-size: 15px;
         }
 
@@ -398,6 +399,217 @@
                 height: 100px !important;
                 margin: 0 auto !important;
             }
+
+            /* Responsive Landing Page */
+            #landingPage nav {
+                padding: 14px 16px !important;
+            }
+            #landingPage nav > div {
+                gap: 12px !important;
+            }
+            #landingPage nav a {
+                font-size: 12px !important;
+            }
+            #landingPage .hero-content {
+                padding: 3rem 1rem !important;
+            }
+            #landingPage .hero-title {
+                font-size: 28px !important;
+            }
+            #landingPage .hero-buttons {
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+            #landingPage .hero-buttons button {
+                width: 100% !important;
+                max-width: 280px !important;
+            }
+            #landingPage #about > div:last-child {
+                grid-template-columns: 1fr !important;
+            }
+            #landingPage #how-it-works-grid,
+            #landingPage #worker-how-grid,
+            #landingPage #features-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+            }
+            #landingPage #why-tasknest-grid > div {
+                padding: 15px !important;
+            }
+            #landingPage #contact div:last-child {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+
+            /* Responsive Auth Split Screen */
+            #authSection > div {
+                grid-template-columns: 1fr !important;
+            }
+            #authSection > div > div:last-child {
+                display: none !important; /* Hide navy panel on mobile */
+            }
+            #authSection > div > div:first-child {
+                padding: 2rem 1.5rem !important;
+            }
+        }
+
+        /* Updated Find Tasks Styles */
+        #userFilterTab h2 {
+            font-size: 28px;
+            font-weight: 600 !important;
+            color: #1A2035 !important;
+            font-family: Georgia, serif !important;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        #userFilterTab p {
+            font-size: 13px;
+            color: rgba(26,32,53,0.42) !important;
+            font-weight: 300 !important;
+            margin-bottom: 30px;
+        }
+        .search-wrapper-premium {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 0 14px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .search-wrapper-premium input {
+            border: none !important;
+            outline: none !important;
+            font-size: 13px !important;
+            color: #1A2035 !important;
+            background: transparent !important;
+            font-family: inherit !important;
+            width: 100%;
+        }
+        .category-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: rgba(26,32,53,0.38);
+            margin-bottom: 16px;
+            display: block;
+        }
+        .category-card-premium {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 18px 10px 14px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .category-card-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .category-card-premium.active {
+            background: #FFFDF7;
+            border: 1.5px solid #E8C27A;
+        }
+        .category-icon-wrapper-premium {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: #F5F3EE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .category-card-premium.active .category-icon-wrapper-premium {
+            background: rgba(232,194,122,0.15);
+        }
+        .category-icon-wrapper-premium svg {
+            width: 20px;
+            height: 20px;
+            stroke: rgba(26,32,53,0.45);
+            fill: none;
+            stroke-width: 2;
+        }
+        .category-card-premium.active .category-icon-wrapper-premium svg {
+            stroke: #C99A3A;
+        }
+        .category-label-premium {
+            font-size: 11px;
+            font-weight: 500;
+            color: #1A2035;
+            text-align: center;
+            line-height: 1.3;
+        }
+        .task-card-premium {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(0,0,0,0.07);
+            border-left: 3px solid #E8C27A;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-card-premium:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .task-title-premium {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1A2035;
+        }
+        .task-meta-premium {
+            font-size: 11px;
+            color: rgba(26,32,53,0.4);
+            margin-top: 4px;
+        }
+        .task-pay-premium {
+            font-size: 18px;
+            font-weight: 400;
+            color: #1A2035;
+            font-family: Georgia, serif;
+        }
+        .tag-premium {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .tag-new {
+            background: rgba(232,194,122,0.15);
+            color: #A07820;
+        }
+        .tag-hot {
+            background: rgba(220,70,70,0.1);
+            color: #A03030;
+        }
+        .btn-premium {
+            background: #1A2035;
+            color: #E8C27A;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .btn-premium:hover {
+            background: #2C3550;
         }
 
         * {
@@ -779,6 +991,37 @@
             opacity: 0.99;
             animation: fadeUp .26s ease-out both;
         }
+
+        .btn-small {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #1E3A5F;
+            color: #fff;
+        }
+
+        .btn-small:hover {
+            background: #2C3550;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
         .task-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 12px 28px rgba(2,6,23,0.09);
@@ -1153,12 +1396,17 @@
             background-repeat: no-repeat;
             background-position: center;
         }
-        .hero-wrap { width:100vw; min-height:100vh; min-height:100svh; min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#0b0b0e; color:#fff; padding:40px; position:relative; overflow:hidden; }
+        .hero-wrap { width:100vw; min-height:100vh; min-height:100svh; min-height:100dvh; display:flex; align-items:center; justify-content:center; background:#FAF8F3; color:#1a1a2e; padding:40px; position:relative; overflow:hidden; }
         .hero-grid { max-width:1200px; width:100%; display:grid; grid-template-columns: 1fr; gap:32px; align-items:center; }
-        .hero-title { font-size:64px; font-weight:800; letter-spacing:.2px; margin:0 0 12px; }
+        .hero-title { font-size:64px; font-weight:800; letter-spacing:.2px; margin:0 0 12px; color: #1E3A5F; }
         .hero-cta { display:flex; gap:14px; }
-        .info-panel { background:#101217; border:1px solid #ffffff12; border-radius:20px; padding:22px; }
+        .info-panel { background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:22px; }
         .info-tiles { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+        .info-tile { background:#1E3A5F; border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px; transition: background 0.3s ease; }
+        .info-tile:hover { background: #2C5282; }
+        .info-tile-title { font-weight:700; color: #C9A84C; }
+        .info-tile-desc { color: rgba(255,255,255,0.9); font-size:12px; }
+        .info-tile-icon { width:24px; height:24px; color:#C9A84C; }
         @media (max-width: 900px) {
             .hero-wrap { padding: 24px; }
             .hero-grid { grid-template-columns: 1fr; gap:20px; }
@@ -1172,8 +1420,53 @@
         }
         /* Updated Auth Styles */
         /* Updated Auth Styles */
+        /* Landing Page Styles */
+        #landingPage {
+            background: #FAF8F3;
+            min-height: 100vh;
+            width: 100%;
+        }
+        .landing-nav-link {
+            font-size: 13px;
+            color: #5a6a7a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .landing-nav-link:hover {
+            color: #1E3A5F;
+        }
+        .landing-btn-primary {
+            font-size: 15px;
+            padding: 14px 36px;
+            background: #C9A84C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .landing-btn-primary:hover {
+            background: #B39540;
+            transform: translateY(-2px);
+        }
+        .landing-btn-secondary {
+            font-size: 15px;
+            padding: 14px 36px;
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .landing-btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
+
         #authSection {
-            background-color: #050505;
+            background-color: #FAF8F3;
             min-height: 100vh;
             width: 100%;
             display: flex;
@@ -1185,7 +1478,7 @@
             min-height: 100vh;
             display: grid;
             grid-template-columns: 1fr 1.2fr;
-            background: #0f0f12;
+            background: #ffffff;
             overflow: hidden;
             box-shadow: none;
             margin: 0;
@@ -1195,7 +1488,7 @@
             flex-direction: column;
             justify-content: center;
             padding: 60px;
-            background: #141418;
+            background: #ffffff;
         }
         .auth-card {
             width: 100%;
@@ -1207,14 +1500,14 @@
         .auth-card .logo h1 {
             font-size: 28px;
             font-weight: 800;
-            color: #fff;
+            color: #1E3A5F;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
         .auth-card .logo p {
-            color: #8e8e93;
+            color: #64748b;
             font-size: 16px;
             margin-bottom: 40px;
         }
@@ -1222,7 +1515,7 @@
             display: block;
             font-size: 14px;
             font-weight: 600;
-            color: #5c5c63;
+            color: #64748b;
             margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -1230,24 +1523,24 @@
         .auth-card input {
             width: 100%;
             padding: 16px;
-            background: #1c1c21;
-            border: 1px solid #2c2c34;
+            background: #FAF8F3;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
-            color: #fff;
+            color: #1a1a2e;
             font-size: 16px;
             margin-bottom: 24px;
             transition: all 0.3s ease;
         }
         .auth-card input:focus {
-            border-color: #3b82f6;
-            background: #25252b;
+            border-color: #C9A84C;
+            background: #ffffff;
             outline: none;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.1);
         }
         .auth-card button {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #C9A84C, #E8C87A);
             color: #fff;
             border: none;
             border-radius: 12px;
@@ -1256,20 +1549,20 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 10px 15px -3px rgba(201, 168, 76, 0.2);
         }
         .auth-card button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            box-shadow: 0 20px 25px -5px rgba(201, 168, 76, 0.3);
+            background: linear-gradient(135deg, #E8C87A, #C9A84C);
         }
         .auth-toggle {
             margin-top: 32px;
-            color: #5c5c63;
+            color: #64748b;
             font-size: 15px;
         }
         .auth-toggle a {
-            color: #3b82f6;
+            color: #1E3A5F;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
@@ -1280,7 +1573,7 @@
         }
         .auth-right {
             position: relative;
-            background: #0a0a0c;
+            background: #1E3A5F;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1506,138 +1799,370 @@
             <path d="M3 12h18M3 6h18M3 18h18"/>
         </symbol>
     </svg>
-    <div id="landingSection" class="landing" style="width:100%; padding:0;">
-        <div class="hero-wrap">
-            <div class="hero-grid">
-                <div>
-                    <div style="display:inline-block; padding:6px 12px; border:1px solid #ffffff22; border-radius:999px; font-size:12px; margin-bottom:14px;">Task<span style="color: var(--primary);">Nest</span></div>
-                    <div class="hero-title">Find a Task • Post a Task</div>
-                    <div style="color:#cfd2d9; margin:0 0 20px;">Quick local tasks for everyone</div>
-                    <div class="hero-cta">
-                        <button class="cta" style="background:#fff; color:#0b0b0e;" onclick="chooseRole('taskUser')">Find a Task</button>
-                        <button class="cta" style="background:#1f2937; color:#fff; border:1px solid #ffffff33;" onclick="chooseRole('taskProvider')">Post a Task</button>
-                    </div>
-                </div>
-                <div>
-                    <div class="info-panel">
-                        <div style="font-weight:700; margin-bottom:10px;">About the app</div>
-                        <div style="color:#cfd2d9; font-size:14px; line-height:1.6; margin-bottom:14px;">
-                            Connect with nearby people for quick help. Post small tasks, accept work, and get paid safely.
-                        </div>
-                        <div class="info-tiles">
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#9bb5ff;"><use href="#icon-pin"/></svg>
-                                <div>
-                                    <div style="font-weight:700;">Local & Nearby</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Find help around your area</div>
-                                </div>
-                            </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#ffd27f;"><use href="#icon-briefcase"/></svg>
-                                <div>
-                                    <div style="font-weight:700;">Post Simple Tasks</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Household, delivery, errands</div>
-                                </div>
-                            </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#7fffb0;"><use href="#icon-wallet"/></svg>
-                                <div>
-                                    <div style="font-weight:700;">Secure Payouts</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Razorpay wallet & bank</div>
-                                </div>
-                            </div>
-                            <div style="background:#0d0f14; border:1px solid #ffffff10; border-radius:14px; padding:16px; display:flex; align-items:center; gap:10px;">
-                                <svg class="icon" style="width:24px; height:24px; color:#9bd2ff;"><use href="#icon-list"/></svg>
-                                <div>
-                                    <div style="font-weight:700;">Easy Management</div>
-                                    <div style="color:#9aa3b2; font-size:12px;">Track tasks and approvals</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- TASKNEST LANDING PAGE --> 
+    <div id="landingPage"> 
+     
+      <!-- NAVBAR --> 
+      <nav style="background:#FAF8F3; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e2e8f0; position:sticky; top:0; z-index:100;"> 
+        <span style="font-size:20px; font-weight:600; color:#1E3A5F; letter-spacing:-0.5px;">Task<span style="color:#C9A84C;">Nest</span></span> 
+        <div style="display:flex; gap:24px; align-items:center;"> 
+          <a href="#about" class="landing-nav-link">About</a> 
+          <a href="#how-it-works" class="landing-nav-link">How it works</a> 
+          <a href="#contact" class="landing-nav-link">Contact</a> 
+        </div> 
+      </nav> 
+     
+      <!-- HERO --> 
+      <div class="hero-content" style="background:#1E3A5F; padding:4rem 2rem; text-align:center;"> 
+        <div style="display:inline-block; background:rgba(201,168,76,0.2); border:1px solid rgba(201,168,76,0.4); color:#E8C87A; font-size:11px; padding:4px 16px; border-radius:20px; margin-bottom:18px; letter-spacing:1.5px;">NOW LIVE IN INDIA</div> 
+        <div class="hero-title" style="font-size:36px; font-weight:700; color:white; line-height:1.2; margin-bottom:14px;"> 
+          Find tasks.<br>Post tasks.<br><span style="color:#C9A84C;">Get paid safely.</span> 
+        </div> 
+        <p style="font-size:14px; color:rgba(255,255,255,0.65); margin-bottom:2.5rem; max-width:480px; margin-left:auto; margin-right:auto; line-height:1.7;"> 
+          TaskNest connects local task providers with skilled workers. Every payment is secured through Razorpay escrow — money releases only when work is approved. 
+        </p> 
+        <div class="hero-buttons" style="display:flex; gap:16px; justify-content:center; margin-bottom:2.5rem; flex-wrap:wrap;"> 
+          <button onclick="showFindTask()" 
+            style="font-size:15px; padding:14px 48px; background:#C9A84C; color:white; 
+                   border:none; border-radius:8px; font-weight:600; cursor:pointer; 
+                   min-width:180px; max-width:220px;"> 
+            Find a Task 
+          </button> 
+          <button onclick="showPostTask()" 
+            style="font-size:15px; padding:14px 48px; background:transparent; color:white; 
+                   border:2px solid rgba(255,255,255,0.5); border-radius:8px; cursor:pointer; 
+                   min-width:180px; max-width:220px;"> 
+            Post a Task 
+          </button> 
+        </div> 
+        <div style="display:flex; justify-content:center; gap:2rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.12); flex-wrap:wrap;"> 
+          <div style="display:flex; align-items:center; gap:8px;"> 
+            <div style="width:7px; height:7px; background:#C9A84C; border-radius:50%;"></div> 
+            <span style="font-size:12px; color:rgba(255,255,255,0.6);">Razorpay secured</span> 
+          </div> 
+          <div style="display:flex; align-items:center; gap:8px;"> 
+            <div style="width:7px; height:7px; background:#C9A84C; border-radius:50%;"></div> 
+            <span style="font-size:12px; color:rgba(255,255,255,0.6);">80% earnings to worker</span> 
+          </div> 
+          <div style="display:flex; align-items:center; gap:8px;"> 
+            <div style="width:7px; height:7px; background:#C9A84C; border-radius:50%;"></div> 
+            <span style="font-size:12px; color:rgba(255,255,255,0.6);">Free to join</span> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- ABOUT --> 
+      <div id="about" style="background:white; padding:3rem 2rem; border-bottom:1px solid #e2e8f0;"> 
+        <div style="text-align:center; margin-bottom:2rem;"> 
+          <div style="font-size:11px; font-weight:600; color:#C9A84C; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">About TaskNest</div> 
+          <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:10px;">What is TaskNest?</div> 
+          <p style="font-size:14px; color:#5a6a7a; max-width:560px; margin:0 auto; line-height:1.8;"> 
+            TaskNest is a freelance marketplace where anyone can post small local tasks — household work, delivery, editing, and more — and skilled workers can apply, complete, and earn. All payments are handled securely through Razorpay escrow so both sides are always protected. 
+          </p> 
+        </div> 
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:640px; margin:0 auto;"> 
+          <div style="background:#FAF8F3; border-radius:12px; padding:20px; display:flex; gap:14px; align-items:flex-start;"> 
+            <div style="width:40px; height:40px; background:#1E3A5F; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center;"> 
+              <div style="width:16px; height:16px; border:2px solid #C9A84C; border-radius:50%;"></div> 
+            </div> 
+            <div> 
+              <div style="font-size:14px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">For Task Providers</div> 
+              <div style="font-size:12px; color:#5a6a7a; line-height:1.6;">Post tasks, set budget, pay via escrow and get work done safely</div> 
+            </div> 
+          </div> 
+          <div style="background:#FAF8F3; border-radius:12px; padding:20px; display:flex; gap:14px; align-items:flex-start;"> 
+            <div style="width:40px; height:40px; background:#C9A84C; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center;"> 
+              <div style="width:16px; height:12px; border:2px solid white; border-radius:3px;"></div> 
+            </div> 
+            <div> 
+              <div style="font-size:14px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">For Workers</div> 
+              <div style="font-size:12px; color:#5a6a7a; line-height:1.6;">Browse tasks, apply, complete work and earn 80% of every payment</div> 
+            </div> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- HOW IT WORKS - PROVIDERS --> 
+      <div id="how-it-works" style="background:#FAF8F3; padding:3rem 2rem; border-bottom:1px solid #e2e8f0;"> 
+        <div style="text-align:center; margin-bottom:2rem;"> 
+          <div style="font-size:11px; font-weight:600; color:#C9A84C; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">How it works</div> 
+          <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:4px;">For Task Providers</div> 
+          <div style="font-size:13px; color:#5a6a7a;">Post a task and get it done safely</div> 
+        </div> 
+        <div id="features-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#C9A84C;">1</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Register free</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Create your account in minutes</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#C9A84C;">2</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Post a task</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Describe the work and set your budget</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#C9A84C;">3</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Pick a worker</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Review applications and accept the best</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#C9A84C;">4</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Approve and pay</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Approve work, escrow releases to worker</div> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- HOW IT WORKS - WORKERS --> 
+      <div style="background:white; padding:3rem 2rem; border-bottom:1px solid #e2e8f0;"> 
+        <div style="text-align:center; margin-bottom:2rem;"> 
+          <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:4px;">For Workers</div> 
+          <div style="font-size:13px; color:#5a6a7a;">Browse tasks and start earning today</div> 
+        </div> 
+        <div id="how-it-works-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+          <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
+            <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#1E3A5F;">1</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Register free</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Sign up as a worker for free</div> 
+          </div> 
+          <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
+            <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#1E3A5F;">2</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Browse tasks</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Find tasks that match your skills</div> 
+          </div> 
+          <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
+            <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#1E3A5F;">3</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Complete work</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Apply, get accepted and do the task</div> 
+          </div> 
+          <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
+            <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#1E3A5F;">4</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Get paid</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Earn 80% once provider approves</div> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- WHY TASKNEST --> 
+      <div style="background:#FAF8F3; padding:3rem 2rem; border-bottom:1px solid #e2e8f0;"> 
+        <div style="text-align:center; margin-bottom:2rem;"> 
+          <div style="font-size:11px; font-weight:600; color:#C9A84C; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Why TaskNest</div> 
+          <div style="font-size:24px; font-weight:700; color:#1E3A5F;">Built for trust and fairness</div> 
+        </div> 
+        <div id="worker-how-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
+            <div style="width:40px; height:40px; background:rgba(201,168,76,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;"> 
+              <svg style="width:20px; height:20px; color:#C9A84C;"><use href="#icon-shield"/></svg> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Escrow Safety</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Money held safely until work is approved</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
+            <div style="width:40px; height:40px; background:rgba(201,168,76,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;"> 
+              <svg style="width:20px; height:20px; color:#C9A84C;"><use href="#icon-wallet"/></svg> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Fair Earnings</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Workers keep 80% of every payment</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
+            <div style="width:40px; height:40px; background:rgba(201,168,76,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;"> 
+              <svg style="width:20px; height:20px; color:#C9A84C;"><use href="#icon-star"/></svg> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Free to Join</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">No hidden fees, start earning today</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
+            <div style="width:40px; height:40px; background:rgba(201,168,76,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;"> 
+              <svg style="width:20px; height:20px; color:#C9A84C;"><use href="#icon-rotate-ccw"/></svg> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Refund Policy</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Cancel before work starts, get full refund</div> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- FOOTER CTA --> 
+      <div id="contact" style="background:#1E3A5F; padding:2.5rem 2rem; text-align:center;"> 
+        <div style="font-size:22px; font-weight:700; color:white; margin-bottom:8px;">Start today — it is completely free</div> 
+        <div style="font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:1.5rem;">No registration fee. No hidden charges. Just work and earn.</div> 
+        <div style="display:flex; gap:16px; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;"> 
+          <button onclick="showFindTask()" 
+            style="font-size:14px; padding:12px 48px; background:#C9A84C; color:white; 
+                   border:none; border-radius:8px; font-weight:600; cursor:pointer; 
+                   min-width:160px; max-width:200px;"> 
+            Find a Task 
+          </button> 
+          <button onclick="showPostTask()" 
+            style="font-size:14px; padding:12px 48px; background:transparent; color:white; 
+                   border:2px solid rgba(255,255,255,0.4); border-radius:8px; cursor:pointer; 
+                   min-width:160px; max-width:200px;"> 
+            Post a Task 
+          </button> 
+        </div> 
+        <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem; display:flex; justify-content:center; gap:2rem; flex-wrap:wrap;"> 
+          <span style="font-size:11px; color:rgba(255,255,255,0.35);">© 2026 TaskNest</span> 
+          <span style="font-size:11px; color:rgba(255,255,255,0.35);">India</span> 
+          <a href="https://swathis-s.github.io/-tasknest-policies#terms" target="_blank" style="font-size:11px; color:rgba(201,168,76,0.7); text-decoration:none;">Terms & Conditions</a> 
+          <a href="https://swathis-s.github.io/-tasknest-policies#privacy" target="_blank" style="font-size:11px; color:rgba(201,168,76,0.7); text-decoration:none;">Privacy Policy</a> 
+          <a href="https://swathis-s.github.io/-tasknest-policies#contact" target="_blank" style="font-size:11px; color:rgba(201,168,76,0.7); text-decoration:none;">Contact Us</a> 
+          <span style="font-size:11px; color:rgba(255,255,255,0.35);">teamtasknest@gmail.com</span> 
+        </div> 
+      </div> 
+     
+    </div> 
+    <!-- END TASKNEST LANDING PAGE --> 
+
 
     <!-- Auth Forms (Moved outside container to remove white frame) -->
     <div id="authSection" class="hidden">
-        <div class="auth-split">
-            <div class="auth-left">
-                <div class="auth-card">
-                    <div id="loginForm">
-                        <div class="logo">
-                            <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px;"><use href="#logo-new"/></svg>Task<span style="color: var(--primary);">Nest</span></h1>
-                            <p>Complete micro tasks & earn rewards</p>
-                        </div>
-                        <div id="loginMessage"></div>
-                        <div class="form-group">
-                            <label for="loginEmail">Email</label>
-                            <input type="email" id="loginEmail" placeholder="your@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" placeholder="Enter password">
-                        </div>
-                        <button onclick="login()">Login</button>
-                        <div class="auth-toggle">
-                            Don't have an account? <a onclick="toggleForms()">Register</a>
-                        </div>
-                    </div>
-                    <div id="registerForm" class="hidden">
-                        <div class="logo">
-                            <h1><svg class="icon" style="width: 32px; height: 32px; margin-right: 8px;"><use href="#logo-new"/></svg>Task<span style="color: var(--primary);">Nest</span></h1>
-                            <p>Join our platform & start earning</p>
-                        </div>
-                        <div id="registerMessage"></div>
-                        <div class="form-group">
-                            <label for="registerName">Full Name</label>
-                            <input type="text" id="registerName" placeholder="Your name">
-                        </div>
-                        <div class="form-group">
-                            <label for="registerEmail">Email</label>
-                            <input type="email" id="registerEmail" placeholder="your@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPhone">Phone Number</label>
-                            <input type="tel" id="registerPhone" placeholder="Enter phone number">
-                        </div>
-                        <div id="otpBlock" class="form-group hidden">
-                            <label for="registerOtp">One-Time Password</label>
-                            <input type="text" id="registerOtp" placeholder="Enter OTP">
-                            <div id="otpStatus" class="small" style="margin-top:6px;color:#666;">Resend in 60s</div>
-                            <div style="display:flex; gap:8px; margin-top:8px;">
-                                <button id="verifyOtpBtn" class="btn-small" onclick="verifyEmail()">Verify Email</button>
-                                <button id="resendOtpBtn" class="btn-small" onclick="resendOtp()" disabled>Resend OTP</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Password</label>
-                            <input type="password" id="registerPassword" placeholder="Create password">
-                        </div>
-                        <div class="form-group" style="display:none;">
-                            <label for="registerRole">User Type</label>
-                            <select id="registerRole">
-                                <option value="taskUser">User</option>
-                                <option value="taskProvider">Task Provider</option>
-                            </select>
-                        </div>
-                        <button onclick="register()">Register</button>
-                        <div class="auth-toggle">
-                            Already have an account? <a onclick="toggleForms()">Login</a>
-                        </div>
-                    </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; min-height:100vh; width:100%;"> 
+ 
+            <!-- LEFT: Login/Register Form --> 
+            <div style="background:white; padding:3rem 2.5rem; display:flex; flex-direction:column; justify-content:center;"> 
+              
+              <!-- Logo --> 
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:2.5rem;"> 
+                <div style="width:36px; height:36px; background:#1E3A5F; border-radius:9px; display:flex; align-items:center; justify-content:center;"> 
+                  <div style="width:16px; height:16px; border:2.5px solid #C9A84C; border-radius:4px;"></div> 
+                </div> 
+                <span style="font-size:20px; font-weight:700; color:#1E3A5F;">Task<span style="color:#C9A84C;">Nest</span></span> 
+              </div> 
+          
+              <!-- LOGIN FORM -->
+              <div id="loginForm">
+                <div style="margin-bottom:1.8rem;"> 
+                  <div style="font-size:26px; font-weight:700; color:#1E3A5F; margin-bottom:6px;">Welcome back</div> 
+                  <div style="font-size:14px; color:#5a6a7a;">Sign in to your TaskNest account</div> 
+                </div> 
+                
+                <div id="loginMessage"></div>
+                
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Email</label> 
+                  <input type="email" id="loginEmail" placeholder="your@email.com" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
+                </div> 
+          
+                <div style="margin-bottom:20px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Password</label> 
+                  <input type="password" id="loginPassword" placeholder="Enter password" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
+                </div> 
+          
+                <button onclick="login()" style="width:100%; background:#C9A84C; color:white; padding:13px; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">Login</button>
+          
+                <div style="margin-top:16px; font-size:13px; color:#5a6a7a; text-align:center;"> 
+                  Don't have an account? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:600; cursor:pointer;">Register</a> 
+                </div> 
+              </div>
+
+              <!-- REGISTER FORM -->
+              <div id="registerForm" class="hidden">
+                <div style="margin-bottom:1.8rem;"> 
+                  <div style="font-size:26px; font-weight:700; color:#1E3A5F; margin-bottom:6px;">Create account</div> 
+                  <div style="font-size:14px; color:#5a6a7a;">Join our platform and start earning</div> 
+                </div> 
+                
+                <div id="registerMessage"></div>
+                
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Full Name</label> 
+                  <input type="text" id="registerName" placeholder="Your name" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
                 </div>
-            </div>
-            <div class="auth-right">
-                <div class="illustration-container">
-                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" alt="Task Management Illustration" class="illustration-img">
-                    <h2 class="illustration-text">
-                        Find tasks and <br><span>earn rewards.</span>
-                    </h2>
+
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Email</label> 
+                  <input type="email" id="registerEmail" placeholder="your@email.com" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
                 </div>
-            </div>
-        </div>
+
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Phone Number</label> 
+                  <input type="tel" id="registerPhone" placeholder="Enter phone number" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
+                </div>
+
+                <div id="otpBlock" class="hidden" style="margin-bottom:14px;">
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">One-Time Password</label>
+                  <input type="text" id="registerOtp" placeholder="Enter OTP" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;">
+                  <div id="otpStatus" style="font-size:11px; color:#5a6a7a; margin-top:6px;">Resend in 60s</div>
+                  <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button id="verifyOtpBtn" onclick="verifyEmail()" style="flex:1; background:#1E3A5F; color:white; padding:8px; border:none; border-radius:6px; font-size:13px; cursor:pointer;">Verify Email</button>
+                    <button id="resendOtpBtn" onclick="resendOtp()" disabled style="flex:1; background:#f3f4f6; color:#5a6a7a; padding:8px; border:none; border-radius:6px; font-size:13px; cursor:pointer;">Resend OTP</button>
+                  </div>
+                </div>
+
+                <div style="margin-bottom:14px;"> 
+                  <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Password</label> 
+                  <input type="password" id="registerPassword" placeholder="Create password" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px;"> 
+                </div>
+
+                <div style="display:none;">
+                  <select id="registerRole">
+                    <option value="taskUser">User</option>
+                    <option value="taskProvider">Task Provider</option>
+                  </select>
+                </div>
+
+                <button onclick="register()" style="width:100%; background:#C9A84C; color:white; padding:13px; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">Register</button>
+          
+                <div style="margin-top:16px; font-size:13px; color:#5a6a7a; text-align:center;"> 
+                  Already have an account? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:600; cursor:pointer;">Login</a> 
+                </div>
+              </div>
+          
+            </div> 
+          
+            <!-- RIGHT: Navy panel with image overlay --> 
+            <div style="background:#1E3A5F; position:relative; display:flex; flex-direction:column; justify-content:flex-end; padding:2.5rem; min-height:100vh; overflow:hidden;"> 
+              
+              <!-- Background image --> 
+              <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" 
+                style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.25;" 
+                alt="TaskNest"/> 
+              
+              <!-- Navy overlay --> 
+              <div style="position:absolute; inset:0; background:#1E3A5F; opacity:0.6;"></div> 
+              
+              <!-- Content over image --> 
+              <div style="position:relative; z-index:2;"> 
+                <div style="width:40px; height:3px; background:#C9A84C; margin-bottom:16px; border-radius:2px;"></div> 
+                <div style="font-size:28px; font-weight:700; color:white; line-height:1.3; margin-bottom:12px;"> 
+                  Find tasks and<br><span style="color:#C9A84C;">earn rewards.</span> 
+                </div> 
+                <div style="font-size:13px; color:rgba(255,255,255,0.65); line-height:1.7; margin-bottom:2rem;"> 
+                  Secure escrow payments powered by Razorpay. Work with full confidence on every task. 
+                </div> 
+                <div style="display:flex; flex-direction:column; gap:10px;"> 
+                  <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,0.1);"> 
+                    <div style="width:8px; height:8px; background:#C9A84C; border-radius:50%; flex-shrink:0;"></div> 
+                    <span style="font-size:13px; color:rgba(255,255,255,0.8);">Razorpay secured payments</span> 
+                  </div> 
+                  <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,0.1);"> 
+                    <div style="width:8px; height:8px; background:#C9A84C; border-radius:50%; flex-shrink:0;"></div> 
+                    <span style="font-size:13px; color:rgba(255,255,255,0.8);">Workers earn 80% per task</span> 
+                  </div> 
+                  <div style="background:rgba(255,255,255,0.1); border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,0.1);"> 
+                    <div style="width:8px; height:8px; background:#C9A84C; border-radius:50%; flex-shrink:0;"></div> 
+                    <span style="font-size:13px; color:rgba(255,255,255,0.8);">Free to join, no hidden fees</span> 
+                  </div> 
+                </div> 
+              </div> 
+            </div> 
+          
+          </div>
     </div>
 
     <!-- Dashboard (Modern SaaS Layout) -->
@@ -1667,45 +2192,48 @@
                 </a>
             </nav>
             <div class="sidebar-footer">
-                <div style="margin-top: 20px;">
-                    <button class="logout-btn-new" onclick="logout()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <svg class="icon" style="width: 18px; height: 18px;"><use href="#icon-logout"/></svg>
-                        <span>Logout</span>
-                    </button>
-                </div>
+                <!-- Moved Logout to Top Bar -->
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="main-content-wrapper">
-            <header class="top-bar">
+        <main class="main-content-wrapper" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+            <header class="top-bar" style="background: #FAF8F3; border-bottom: 2px solid #C9A84C; height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-weight: 800; font-size: 18px; color: #fff; letter-spacing: -0.5px;">Dashboard</span>
+                    <span style="font-size: 20px; font-weight: 800; color: #1E3A5F; letter-spacing: -1px;">Task<span style="color: #C9A84C;">Nest</span></span>
                 </div>
-                <div class="user-actions">
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px;">
-                        <span id="displayUserName" style="font-weight: 700; color: #fff; font-size: 15px;">User Name</span>
-                        <span id="displayUserRole" style="font-size: 12px; color: #8e8e93;">User Role</span>
+                <div class="user-actions" style="display: flex; align-items: center; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 5px 16px 5px 5px; box-shadow: 0 1px 4px rgba(30,58,95,0.07);">
+                        <div class="avatar" id="userAvatar" style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #C9A84C, #E8C87A); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #1E3A5F;">TN</div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                            <span id="displayUserName" style="font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.2;">User Name</span>
+                            <span id="displayUserRole" style="font-size: 10px; color: #C9A84C; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">User Role</span>
+                        </div>
                     </div>
-                    <div class="avatar" id="userAvatar" style="width: 42px; height: 42px; font-size: 16px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800;">TN</div>
+                    <button onclick="logout()" style="display: flex; align-items: center; gap: 6px; background: #dc3545; color: #ffffff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                        <svg class="icon" style="width: 16px; height: 16px; fill: currentColor;"><use href="#icon-logout"/></svg>
+                        <span>Logout</span>
+                    </button>
                 </div>
             </header>
 
-            <div class="content-area">
+            <div class="content-area" style="flex: 1; padding: 40px; overflow-y: auto;">
                 <!-- WORKER VIEWS -->
-                <div id="userFilterTab" class="tri-tab-content hidden">
+                <div id="userFilterTab" class="tri-tab-content hidden" style="background: #F5F3EE; min-height: 100%; padding: 40px; border-radius: 32px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
                         <div>
                             <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Find Tasks</h2>
                             <p style="color: #6b7280;">Browse and apply for microtasks in your area.</p>
                         </div>
                     </div>
-                    <div class="card-soft" style="padding:24px; background: #fff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;">
-                        <h4 style="margin:0 0 16px 0; font-size: 18px; font-weight: 700;">Popular Categories</h4>
-                        <div id="categoryChips" class="chips" style="flex-wrap:wrap; gap: 10px;"></div>
-                        <div style="display:grid; grid-template-columns: 1fr auto; gap:12px; margin-top:24px;">
-                            <input id="simpleSearchInput" class="search-input" style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 14px 20px; border-radius: 12px;" placeholder="Search by title, skill, or location..." oninput="syncAndSearch(this.value)"/>
-                            <button class="btn-small" style="padding: 0 24px; height: 100%;" onclick="renderFilterTasks()">Search</button>
+                    <div style="margin-top: 24px;">
+                        <span class="category-section-label">Popular Categories</span>
+                        <div id="categoryChips" class="chips" style="flex-wrap:wrap; gap: 10px; margin-bottom: 24px;"></div>
+                        
+                        <div class="search-wrapper-premium">
+                            <svg style="width:18px; height:18px; color:rgba(26,32,53,0.4);"><use href="#icon-search"/></svg>
+                            <input id="simpleSearchInput" placeholder="Search tasks by title, skill, or location..." oninput="syncAndSearch(this.value)"/>
+                            <button class="btn-premium" style="padding: 0 20px; height: 32px; border-radius: 6px;" onclick="renderFilterTasks()">Search</button>
                         </div>
                     </div>
                     <div id="filterTasksList" class="task-grid-new" style="margin-top:32px;"></div>
@@ -1732,8 +2260,9 @@
                         <button class="btn-small" style="background:#f59e0b; border-radius:12px;" onclick="showCreateWalletModal()">Connect Bank</button>
                     </div>
                     <!-- Withdrawal Button for User (Hidden if no wallet) -->
-                    <div id="userWithdrawalContainer" class="hidden" style="margin-top:24px;">
-                        <button class="btn-small" style="width:100%; padding:14px; background:#22c55e;" onclick="showWithdrawModal()">Withdraw to Bank</button>
+                    <div id="userWithdrawalContainer" class="hidden" style="margin-top:24px; display: flex; flex-direction: column; gap: 12px;">
+                        <button class="btn-small" style="width:100%; padding:14px; background:#22c55e; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;" onclick="showWithdrawModal()">Withdraw to Bank</button>
+                        <button class="btn-small" style="width:100%; padding:14px; background:#3b82f6; color: #ffffff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);" onclick="showEditBankModal()">Change or Edit Bank Details</button>
                     </div>
                     <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;">
                         <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Transaction History</h4>
@@ -4233,11 +4762,11 @@
             
             // Render "All Categories" as a special card first
             let html = `
-                <div class="category-card ${!selectedCategory ? 'active' : ''}" onclick="setCategory(null)">
-                    <div class="category-icon-wrapper">
+                <div class="category-card-premium ${!selectedCategory ? 'active' : ''}" onclick="setCategory(null)">
+                    <div class="category-icon-wrapper-premium">
                         <svg><use href="#cat-all"/></svg>
                     </div>
-                    <div class="category-label">All Categories</div>
+                    <div class="category-label-premium">All Categories</div>
                 </div>`;
             
             // Always show all categories from categoryLabels
@@ -4246,11 +4775,11 @@
                 const label = categoryLabels[cat];
                 const iconId = categoryIcons[cat] || 'cat-all';
                 html += `
-                    <div class="category-card ${isActive ? 'active' : ''}" onclick="setCategory('${cat}')">
-                        <div class="category-icon-wrapper">
+                    <div class="category-card-premium ${isActive ? 'active' : ''}" onclick="setCategory('${cat}')">
+                        <div class="category-icon-wrapper-premium">
                             <svg><use href="#${iconId}"/></svg>
                         </div>
-                        <div class="category-label">${label}</div>
+                        <div class="category-label-premium">${label}</div>
                     </div>`;
             });
             
@@ -4335,21 +4864,29 @@
                     // Correctly reflect the status class for the badge
                     const statusClass = badge.toLowerCase();
                     
-                    return `<div class="task-item" data-task-id="${t._id}">
-                        <div class="task-header">
-                            <div class="task-title">${t.title || 'Task'}</div>
-                            <span class="task-status status-${statusClass}">${badge}</span>
+                    const isNew = t.createdAt && (Date.now() - new Date(t.createdAt).getTime() < 24 * 60 * 60 * 1000);
+                    const isHot = accCnt > 5;
+
+                    return `<div class="task-card-premium" data-task-id="${t._id}">
+                        <div style="flex: 1;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div class="task-title-premium">${t.title || 'Task'}</div>
+                                ${isNew ? `<span class="tag-premium tag-new">NEW</span>` : ''}
+                                ${isHot ? `<span class="tag-premium tag-hot">HOT</span>` : ''}
+                            </div>
+                            <div class="task-meta-premium">
+                                <span>${skill || 'General'}</span> • 
+                                <span>${place}</span> • 
+                                <span>${dur || 'Flexible'}</span> • 
+                                <span>Slots: ${slotsLeft}/${reqCnt}</span>
+                            </div>
                         </div>
-                        <div class="task-description">
-                            <div><strong>Skill:</strong> ${skill || '—'}</div>
-                            <div><strong>Location:</strong> ${place}</div>
-                            <div><strong>Duration:</strong> ${dur}</div>
-                            <div><strong>Amount:</strong> ₹${amt}</div>
-                            <div><span class="slot-pill">Slots Left: ${slotsLeft}/${reqCnt}</span></div>
-                        </div>
-                        <div style="display:flex; gap:8px; margin-top:16px;">
-                            <button class="btn-small btn-secondary" data-action="detail" data-id="${t._id}">View Details</button>
-                            ${canApply ? `<button class="btn-small" data-action="apply" data-id="${t._id}">Apply</button>` : (isApplied ? `<button class="btn-small btn-applied" disabled>Applied</button>` : (slotsLeft === 0 ? `<button class="btn-small btn-full" disabled>Fully Booked</button>` : `<button class="btn-small" disabled>Not Open</button>`))}
+                        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                            <div class="task-pay-premium">₹${amt}</div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn-premium" style="background:transparent; color:#1A2035; border:1px solid rgba(0,0,0,0.1);" data-action="detail" data-id="${t._id}">Details</button>
+                                ${canApply ? `<button class="btn-premium" data-action="apply" data-id="${t._id}">Apply</button>` : (isApplied ? `<button class="btn-premium" style="opacity:0.6; cursor:not-allowed;" disabled>Applied</button>` : (slotsLeft === 0 ? `<button class="btn-premium" style="opacity:0.6; cursor:not-allowed;" disabled>Full</button>` : `<button class="btn-premium" style="opacity:0.6; cursor:not-allowed;" disabled>Closed</button>`))}
+                            </div>
                         </div>
                     </div>`;
                 }).join('');
@@ -4648,32 +5185,46 @@
                         const tid = String(t._id);
                         const status = String(t.status).toUpperCase();
                         return `<div class="task-item">
-                            <div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-open">${status}</span></div>
+                            <div class="task-header">
+                                <div class="task-title">${t.title || 'Task'}</div>
+                                <span class="badge" style="background:#EAF1FF; color:#1E3A5F; border:1px solid #C9A84C;">${status}</span>
+                            </div>
                             <div class="task-description">${t.description || ''}</div>
-                            <div style="display:flex; gap:8px; margin-top:8px;">
-                                <button class="btn-small" data-action="status" data-id="${tid}">Daily Status</button>
+                            <div style="display:flex; gap:12px; margin-top:16px;">
+                                <button class="btn-small" data-action="detail" data-id="${tid}" style="background:#ffffff; color:#1E3A5F; border:1px solid #e2e8f0;">View Details</button>
+                                <button class="btn-small" data-action="status" data-id="${tid}" style="background:#1E3A5F; color:#ffffff;">Update Status</button>
                             </div>
                         </div>`;
                     }).join('') : '<p style="color:#666;">No ongoing tasks for this period.</p>';
+                    
                     // Re-attach listeners for ongoingTasks
-                }
-                if (completedEl) {
-                    completedEl.innerHTML = completedTasks.length ? completedTasks.map(t => {
-                        return `<div class="task-item"><div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-open">Paid</span></div><div class="task-description">${t.description || ''}</div></div>`;
-                    }).join('') : '<p style="color:#666;">No completed tasks for this period.</p>';
-                }
-                
-                // Event delegation for ongoing list buttons
-                if (ongoingEl) {
-                    ongoingEl.querySelectorAll('button[data-action="status"]').forEach(b => {
+                    ongoingEl.querySelectorAll('button[data-action]').forEach(b => {
                         b.onclick = function() {
                             const id = this.getAttribute('data-id');
+                            const action = this.getAttribute('data-action');
                             const t = ongoingTasks.find(x => String(x._id) === String(id));
                             if (!t) return;
-                            taskDetailObj = t;
-                            openStatusModal();
+                            
+                            if (action === 'status') {
+                                taskDetailObj = t;
+                                openStatusModal();
+                            } else if (action === 'detail') {
+                                openTaskDetail(t);
+                            }
                         };
                     });
+                }
+                
+                if (completedEl) {
+                    completedEl.innerHTML = completedTasks.length ? completedTasks.map(t => {
+                        return `<div class="task-item">
+                            <div class="task-header">
+                                <div class="task-title">${t.title || 'Task'}</div>
+                                <span class="badge" style="background:#d1e7dd; color:#0f5132; border:1px solid #0f5132;">Paid</span>
+                            </div>
+                            <div class="task-description">${t.description || ''}</div>
+                        </div>`;
+                    }).join('') : '<p style="color:#666;">No completed tasks for this period.</p>';
                 }
             } catch (_) {}
         }
@@ -4829,6 +5380,9 @@
                                     <button class="btn-small" data-action="approve" data-id="${tid}" data-worker-id="${accId}" style="background:#10b981;">Approve Payment</button>
                                     <button class="btn-small" data-action="decline" data-id="${tid}" style="background:#ef4444;">Reject</button>
                                 ` : ''}
+                                ${(t.status === 'open' || t.status === 'funded') && !hasAcc ? ` 
+                                <button class="btn-small" data-action="cancel-task" data-id="${tid}" style="background:#dc3545;">❌ Cancel & Refund</button> 
+                                ` : ''}
                             </div>
                             <div class="apps-container" id="apps-${tid}" style="margin-top:8px;"></div>
                         </div>`;
@@ -4917,6 +5471,8 @@
                                 alert(x.message || 'Rejected');
                                 loadProviderTasks();
                             }).catch(e=> alert(e.message));
+                        } else if (action === 'cancel-task') {
+                            cancelTask(id);
                         }
                     };
                 });
@@ -4925,6 +5481,35 @@
                 el.innerHTML = '<p style="color:#dc3545;">Failed to load</p>';
             }
         }
+        async function cancelTask(taskId) { 
+            if (!confirm('Are you sure you want to cancel this task? The escrow amount will be refunded to your wallet.')) return; 
+            
+            try { 
+                const res = await fetch(`${API_URL}/admin/escrow/cancel/${taskId}`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' } 
+                }); 
+                
+                const contentType = res.headers.get('content-type'); 
+                if (!contentType?.includes('application/json')) { 
+                    const text = await res.text(); 
+                    alert('Server error: ' + text.substring(0, 100)); 
+                    return; 
+                } 
+                
+                const data = await res.json(); 
+                if (data.success) { 
+                    alert('✅ ' + data.message); 
+                    loadProviderTasks(); // Refresh task list 
+                    refreshUserWallet(); // Refresh wallet balance 
+                } else { 
+                    alert('❌ ' + data.message); 
+                } 
+            } catch(e) { 
+                alert('Failed: ' + e.message); 
+            } 
+        }
+
         async function providerCreateTask() {
             // 1. Check for bank details first
             const isWalletCreated = currentUser && currentUser.bankDetails && 
@@ -5236,6 +5821,33 @@
             if (m) m.remove();
         }
 
+        function showEditBankModal() {
+            if (!currentUser || !currentUser.bankDetails) {
+                showCreateWalletModal();
+                return;
+            }
+            
+            const b = currentUser.bankDetails;
+            const html = `
+                <div id="walletModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:10000;">
+                    <div class="card-soft" style="width:400px; padding:32px; background:#fff; border-radius:24px;">
+                        <h3 style="margin:0 0 16px 0;">Update Bank Details</h3>
+                        <p style="font-size:14px; color:#666; margin-bottom:20px;">Update your bank or UPI details for payouts.</p>
+                        <div class="form-group"><label>Account Holder Name</label><input id="walletHolderName" type="text" value="${b.accountHolderName || ''}"></div>
+                        <div class="form-group"><label>Bank Account Number</label><input id="walletAccNo" type="text" value="${b.bankAccountNumber || ''}" placeholder="Enter account number"></div>
+                        <div class="form-group"><label>IFSC Code</label><input id="walletIfsc" type="text" value="${b.ifsc || ''}" placeholder="Enter IFSC"></div>
+                        <div style="text-align:center; margin:16px 0; color:#999; font-size:12px;">— OR —</div>
+                        <div class="form-group"><label>UPI ID (Optional)</label><input id="walletUpi" type="text" value="${b.upiId || ''}" placeholder="e.g. user@upi"></div>
+                        <div style="display:flex; gap:12px; margin-top:24px;">
+                            <button class="btn-small" style="flex:1;" onclick="saveWalletDetails()">Update Details</button>
+                            <button class="btn-small btn-secondary" style="flex:1;" onclick="closeWalletModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
         async function saveWalletDetails() {
             const name = document.getElementById('walletHolderName').value;
             const acc = document.getElementById('walletAccNo').value;
@@ -5317,6 +5929,28 @@
 
         // Initialize skillset field after login
         function initTriFilters() {}
+
+        function showFindTask() {
+            // Hide landing, show login with taskUser role pre-selected
+            const landing = document.getElementById('landingPage');
+            const auth = document.getElementById('authSection');
+            if (landing) landing.classList.add('hidden');
+            if (auth) {
+                auth.classList.remove('hidden');
+                chooseRole('taskUser');
+            }
+        }
+
+        function showPostTask() {
+            // Hide landing, show login with taskProvider role pre-selected
+            const landing = document.getElementById('landingPage');
+            const auth = document.getElementById('authSection');
+            if (landing) landing.classList.add('hidden');
+            if (auth) {
+                auth.classList.remove('hidden');
+                chooseRole('taskProvider');
+            }
+        }
 
         function markWorkAsViewed(taskId) {
             if (!window.viewedWork) {

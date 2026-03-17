@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../config.dart';
 
 class ApiService {
-  static final String baseUrl = Config.baseUrl;
+  static final String baseUrl = "https://microtask-backend-bc7z.onrender.com/api";
 
   static Future<Map<String, dynamic>> post(String endpoint, Map data) async { 
     try { 

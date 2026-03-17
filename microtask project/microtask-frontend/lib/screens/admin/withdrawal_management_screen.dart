@@ -67,7 +67,7 @@ class _AdminWithdrawalManagementScreenState extends State<AdminWithdrawalManagem
 
     setState(() => _isLoading = true);
     try {
-      final res = await ApiService.put('/admin/withdrawals/$id', {
+      final res = await ApiService.post('/admin/withdrawals/$id', {
         'status': status,
         'remarks': remarksController.text,
       });
@@ -101,7 +101,7 @@ class _AdminWithdrawalManagementScreenState extends State<AdminWithdrawalManagem
                 final status = w['status'];
 
                 return Card(
-                  margin: const EdgeInsets.bottom(16),
+                  margin: const EdgeInsets.only(bottom: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
