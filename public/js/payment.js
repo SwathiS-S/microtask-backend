@@ -46,6 +46,14 @@ async function approveWork(taskId, btn) {
 
 async function payEscrow(taskId, totalAmount) {
     try {
+        // 0. Get Razorpay Key from backend
+        const configRes = await fetch(`${API_URL}/payments/razorpay/config`);
+        const configData = await configRes.json();
+        if (!configRes.ok || !configData.success) {
+            alert('Razorpay configuration error: ' + (configData.message || 'Unknown error'));
+            return;
+        }
+
         const orderRes = await fetch(`${API_URL}/payments/razorpay/create-order`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -63,7 +71,7 @@ async function payEscrow(taskId, totalAmount) {
         }
 
         const options = {
-            "key": "rzp_test_SNzqJbQGrxxv81", // TEST KEY
+            "key": configData.key, 
             "amount": orderData.order.amount,
             "currency": "INR",
             "name": "Microtask Platform",

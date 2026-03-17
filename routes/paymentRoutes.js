@@ -8,6 +8,12 @@ const Escrow = require('../models/Escrow');
 const Wallet = require('../models/Wallet');
 const { getClient, verifySignature } = require('../services/razorpay');
 
+router.get('/razorpay/config', (req, res) => {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  if (!keyId) return res.status(500).json({ success: false, message: 'Razorpay not configured' });
+  res.json({ success: true, key: keyId });
+});
+
 router.post('/razorpay/create-order', async (req, res) => {
   try {
     const { amount, userId, currency, receipt, notes } = req.body || {};

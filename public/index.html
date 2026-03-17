@@ -4260,6 +4260,15 @@
             }
             if (btn) { btn.disabled = true; btn.textContent = 'Approving...'; }
             try {
+                // 0. Get Razorpay Key from backend
+                const configRes = await fetch(`${API_URL}/payments/razorpay/config`);
+                const configData = await configRes.json();
+                if (!configRes.ok || !configData.success) {
+                    alert('Razorpay configuration error: ' + (configData.message || 'Unknown error'));
+                    if (btn) { btn.disabled = false; btn.textContent = 'Approve'; }
+                    return;
+                }
+
                 const payload = { taskId: String(taskId), approvedBy: String(currentUser.userId) };
                 const response = await fetch(`${API_URL}/tasks/approve`, {
                     method: 'POST',
@@ -4271,7 +4280,7 @@
                 if (response.ok && data.success && data.order) {
                     // Start Razorpay Checkout
                     const options = {
-                        "key": "rzp_test_SNzqJbQGrxxv81", // TEST KEY
+                        "key": configData.key, 
                         "amount": data.order.amount,
                         "currency": "INR",
                         "name": "TaskNest",
@@ -5669,6 +5678,14 @@
 
         async function payEscrow(taskId, totalAmount) {
             try {
+                // 0. Get Razorpay Key from backend
+                const configRes = await fetch(`${API_URL}/payments/razorpay/config`);
+                const configData = await configRes.json();
+                if (!configRes.ok || !configData.success) {
+                    alert('Razorpay configuration error: ' + (configData.message || 'Unknown error'));
+                    return;
+                }
+
                 // 1. Create Order on Backend
                 const orderRes = await fetch(`${API_URL}/payments/razorpay/create-order`, {
                     method: 'POST',
@@ -5690,7 +5707,7 @@
 
                 // 2. Open Razorpay
                 const options = {
-                    "key": "rzp_test_SNzqJbQGrxxv81", // TEST KEY
+                    "key": configData.key, 
                     "amount": orderData.order.amount,
                     "currency": "INR",
                     "name": "TaskNest",
