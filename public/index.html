@@ -398,6 +398,58 @@
                 height: 100px !important;
                 margin: 0 auto !important;
             }
+
+            /* Responsive Landing Page */
+            #landingPage nav {
+                padding: 14px 16px !important;
+            }
+            #landingPage nav > div {
+                gap: 12px !important;
+            }
+            #landingPage nav a {
+                font-size: 12px !important;
+            }
+            #landingPage .hero-content {
+                padding: 3rem 1rem !important;
+            }
+            #landingPage .hero-title {
+                font-size: 28px !important;
+            }
+            #landingPage .hero-buttons {
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+            #landingPage .hero-buttons button {
+                width: 100% !important;
+                max-width: 280px !important;
+            }
+            #landingPage #about > div:last-child {
+                grid-template-columns: 1fr !important;
+            }
+            #landingPage #how-it-works-grid,
+            #landingPage #worker-how-grid,
+            #landingPage #features-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
+            }
+            #landingPage #why-tasknest-grid > div {
+                padding: 15px !important;
+            }
+            #landingPage #contact div:last-child {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+
+            /* Responsive Auth Split Screen */
+            #authSection > div {
+                grid-template-columns: 1fr !important;
+            }
+            #authSection > div > div:last-child {
+                display: none !important; /* Hide navy panel on mobile */
+            }
+            #authSection > div > div:first-child {
+                padding: 2rem 1.5rem !important;
+            }
         }
 
         * {
@@ -1563,22 +1615,22 @@
       <nav style="background:#FAF8F3; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e2e8f0; position:sticky; top:0; z-index:100;"> 
         <span style="font-size:20px; font-weight:600; color:#1E3A5F; letter-spacing:-0.5px;">Task<span style="color:#C9A84C;">Nest</span></span> 
         <div style="display:flex; gap:24px; align-items:center;"> 
-          <a href="#about" style="font-size:13px; color:#5a6a7a; text-decoration:none;">About</a> 
-          <a href="#how-it-works" style="font-size:13px; color:#5a6a7a; text-decoration:none;">How it works</a> 
-          <a href="#contact" style="font-size:13px; color:#5a6a7a; text-decoration:none;">Contact</a> 
+          <a href="#about" class="landing-nav-link">About</a> 
+          <a href="#how-it-works" class="landing-nav-link">How it works</a> 
+          <a href="#contact" class="landing-nav-link">Contact</a> 
         </div> 
       </nav> 
      
       <!-- HERO --> 
-      <div style="background:#1E3A5F; padding:4rem 2rem; text-align:center;"> 
+      <div class="hero-content" style="background:#1E3A5F; padding:4rem 2rem; text-align:center;"> 
         <div style="display:inline-block; background:rgba(201,168,76,0.2); border:1px solid rgba(201,168,76,0.4); color:#E8C87A; font-size:11px; padding:4px 16px; border-radius:20px; margin-bottom:18px; letter-spacing:1.5px;">NOW LIVE IN INDIA</div> 
-        <div style="font-size:36px; font-weight:700; color:white; line-height:1.2; margin-bottom:14px;"> 
+        <div class="hero-title" style="font-size:36px; font-weight:700; color:white; line-height:1.2; margin-bottom:14px;"> 
           Find tasks.<br>Post tasks.<br><span style="color:#C9A84C;">Get paid safely.</span> 
         </div> 
         <p style="font-size:14px; color:rgba(255,255,255,0.65); margin-bottom:2.5rem; max-width:480px; margin-left:auto; margin-right:auto; line-height:1.7;"> 
           TaskNest connects local task providers with skilled workers. Every payment is secured through Razorpay escrow — money releases only when work is approved. 
         </p> 
-        <div style="display:flex; gap:16px; justify-content:center; margin-bottom:2.5rem; flex-wrap:wrap;"> 
+        <div class="hero-buttons" style="display:flex; gap:16px; justify-content:center; margin-bottom:2.5rem; flex-wrap:wrap;"> 
           <button onclick="showFindTask()" 
             style="font-size:15px; padding:14px 48px; background:#C9A84C; color:white; 
                    border:none; border-radius:8px; font-weight:600; cursor:pointer; 
@@ -1646,7 +1698,7 @@
           <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:4px;">For Task Providers</div> 
           <div style="font-size:13px; color:#5a6a7a;">Post a task and get it done safely</div> 
         </div> 
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+        <div id="features-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
           <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
             <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
               <span style="font-size:15px; font-weight:700; color:#C9A84C;">1</span> 
@@ -1684,7 +1736,7 @@
           <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:4px;">For Workers</div> 
           <div style="font-size:13px; color:#5a6a7a;">Browse tasks and start earning today</div> 
         </div> 
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+        <div id="how-it-works-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
           <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
             <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
               <span style="font-size:15px; font-weight:700; color:#1E3A5F;">1</span> 
@@ -1722,7 +1774,7 @@
           <div style="font-size:11px; font-weight:600; color:#C9A84C; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Why TaskNest</div> 
           <div style="font-size:24px; font-weight:700; color:#1E3A5F;">Built for trust and fairness</div> 
         </div> 
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+        <div id="worker-how-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
           <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
             <div style="width:40px; height:40px; background:rgba(201,168,76,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;"> 
               <svg style="width:20px; height:20px; color:#C9A84C;"><use href="#icon-shield"/></svg> 
