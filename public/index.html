@@ -1177,6 +1177,51 @@
         }
         /* Updated Auth Styles */
         /* Updated Auth Styles */
+        /* Landing Page Styles */
+        #landingPage {
+            background: #FAF8F3;
+            min-height: 100vh;
+            width: 100%;
+        }
+        .landing-nav-link {
+            font-size: 13px;
+            color: #5a6a7a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .landing-nav-link:hover {
+            color: #1E3A5F;
+        }
+        .landing-btn-primary {
+            font-size: 15px;
+            padding: 14px 36px;
+            background: #C9A84C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .landing-btn-primary:hover {
+            background: #B39540;
+            transform: translateY(-2px);
+        }
+        .landing-btn-secondary {
+            font-size: 15px;
+            padding: 14px 36px;
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .landing-btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
+
         #authSection {
             background-color: #FAF8F3;
             min-height: 100vh;
@@ -1511,59 +1556,207 @@
             <path d="M3 12h18M3 6h18M3 18h18"/>
         </symbol>
     </svg>
-    <div id="landingSection" class="landing" style="width:100%; padding:0;">
-        <div class="hero-wrap">
-            <div class="hero-grid">
-                <div>
-                    <div style="display:inline-block; padding:6px 12px; border:1px solid #1E3A5F22; border-radius:999px; font-size:12px; margin-bottom:14px; color:#1E3A5F;">Task<span style="color: var(--primary);">Nest</span></div>
-                    <div class="hero-title">Find a Task • Post a Task</div>
-                    <div style="color:#5a6a7a; margin:0 0 20px;">Quick local tasks for everyone</div>
-                    <div class="hero-cta">
-                        <button class="cta" style="background:#1E3A5F; color:#fff;" onclick="chooseRole('taskUser')">Find a Task</button>
-                        <button class="cta" style="background:#fff; color:#1E3A5F; border:1px solid #1E3A5F;" onclick="chooseRole('taskProvider')">Post a Task</button>
-                    </div>
-                </div>
-                <div>
-                    <div class="info-panel">
-                        <div style="font-weight:700; margin-bottom:10px; color:#1E3A5F;">About the app</div>
-                        <div style="color:#5a6a7a; font-size:14px; line-height:1.6; margin-bottom:14px;">
-                            Connect with nearby people for quick help. Post small tasks, accept work, and get paid safely.
-                        </div>
-                        <div class="info-tiles">
-                            <div class="info-tile">
-                                <svg class="icon info-tile-icon"><use href="#icon-pin"/></svg>
-                                <div>
-                                    <div class="info-tile-title">Local & Nearby</div>
-                                    <div class="info-tile-desc">Find help around your area</div>
-                                </div>
-                            </div>
-                            <div class="info-tile">
-                                <svg class="icon info-tile-icon"><use href="#icon-briefcase"/></svg>
-                                <div>
-                                    <div class="info-tile-title">Post Simple Tasks</div>
-                                    <div class="info-tile-desc">Household, delivery, errands</div>
-                                </div>
-                            </div>
-                            <div class="info-tile">
-                                <svg class="icon info-tile-icon"><use href="#icon-wallet"/></svg>
-                                <div>
-                                    <div class="info-tile-title">Secure Payouts</div>
-                                    <div class="info-tile-desc">Razorpay wallet & bank</div>
-                                </div>
-                            </div>
-                            <div class="info-tile">
-                                <svg class="icon info-tile-icon"><use href="#icon-list"/></svg>
-                                <div>
-                                    <div class="info-tile-title">Easy Management</div>
-                                    <div class="info-tile-desc">Track tasks and approvals</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- TASKNEST LANDING PAGE --> 
+    <div id="landingPage"> 
+     
+      <!-- NAVBAR --> 
+      <nav style="background:#FAF8F3; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e2e8f0; position:sticky; top:0; z-index:100;"> 
+        <span style="font-size:20px; font-weight:600; color:#1E3A5F; letter-spacing:-0.5px;">Task<span style="color:#C9A84C;">Nest</span></span> 
+        <div style="display:flex; gap:24px; align-items:center;"> 
+          <a href="#about" style="font-size:13px; color:#5a6a7a; text-decoration:none;">About</a> 
+          <a href="#how-it-works" style="font-size:13px; color:#5a6a7a; text-decoration:none;">How it works</a> 
+          <a href="#contact" style="font-size:13px; color:#5a6a7a; text-decoration:none;">Contact</a> 
+        </div> 
+      </nav> 
+     
+      <!-- HERO --> 
+      <div style="background:#1E3A5F; padding:4rem 2rem; text-align:center;"> 
+        <div style="display:inline-block; background:rgba(201,168,76,0.2); border:1px solid rgba(201,168,76,0.4); color:#E8C87A; font-size:11px; padding:4px 16px; border-radius:20px; margin-bottom:18px; letter-spacing:1.5px;">NOW LIVE IN INDIA</div> 
+        <div style="font-size:36px; font-weight:700; color:white; line-height:1.2; margin-bottom:14px;"> 
+          Find tasks.<br>Post tasks.<br><span style="color:#C9A84C;">Get paid safely.</span> 
+        </div> 
+        <p style="font-size:14px; color:rgba(255,255,255,0.65); margin-bottom:2.5rem; max-width:480px; margin-left:auto; margin-right:auto; line-height:1.7;"> 
+          TaskNest connects local task providers with skilled workers. Every payment is secured through Razorpay escrow — money releases only when work is approved. 
+        </p> 
+        <div style="display:flex; gap:16px; justify-content:center; margin-bottom:2.5rem; flex-wrap:wrap;"> 
+          <button onclick="showFindTask()" style="font-size:15px; padding:14px 36px; background:#C9A84C; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Find a Task</button> 
+          <button onclick="showPostTask()" style="font-size:15px; padding:14px 36px; background:transparent; color:white; border:2px solid rgba(255,255,255,0.4); border-radius:8px; cursor:pointer;">Post a Task</button> 
+        </div> 
+        <div style="display:flex; justify-content:center; gap:2rem; padding-top:1.5rem; border-top:1px solid rgba(255,255,255,0.12); flex-wrap:wrap;"> 
+          <div style="display:flex; align-items:center; gap:8px;"> 
+            <div style="width:7px; height:7px; background:#C9A84C; border-radius:50%;"></div> 
+            <span style="font-size:12px; color:rgba(255,255,255,0.6);">Razorpay secured</span> 
+          </div> 
+          <div style="display:flex; align-items:center; gap:8px;"> 
+            <div style="width:7px; height:7px; background:#C9A84C; border-radius:50%;"></div> 
+            <span style="font-size:12px; color:rgba(255,255,255,0.6);">80% earnings to worker</span> 
+          </div> 
+          <div style="display:flex; align-items:center; gap:8px;"> 
+            <div style="width:7px; height:7px; background:#C9A84C; border-radius:50%;"></div> 
+            <span style="font-size:12px; color:rgba(255,255,255,0.6);">Free to join</span> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- ABOUT --> 
+      <div id="about" style="background:white; padding:3rem 2rem; border-bottom:1px solid #e2e8f0;"> 
+        <div style="text-align:center; margin-bottom:2rem;"> 
+          <div style="font-size:11px; font-weight:600; color:#C9A84C; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">About TaskNest</div> 
+          <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:10px;">What is TaskNest?</div> 
+          <p style="font-size:14px; color:#5a6a7a; max-width:560px; margin:0 auto; line-height:1.8;"> 
+            TaskNest is a freelance marketplace where anyone can post small local tasks — household work, delivery, editing, and more — and skilled workers can apply, complete, and earn. All payments are handled securely through Razorpay escrow so both sides are always protected. 
+          </p> 
+        </div> 
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:640px; margin:0 auto;"> 
+          <div style="background:#FAF8F3; border-radius:12px; padding:20px; display:flex; gap:14px; align-items:flex-start;"> 
+            <div style="width:40px; height:40px; background:#1E3A5F; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center;"> 
+              <div style="width:16px; height:16px; border:2px solid #C9A84C; border-radius:50%;"></div> 
+            </div> 
+            <div> 
+              <div style="font-size:14px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">For Task Providers</div> 
+              <div style="font-size:12px; color:#5a6a7a; line-height:1.6;">Post tasks, set budget, pay via escrow and get work done safely</div> 
+            </div> 
+          </div> 
+          <div style="background:#FAF8F3; border-radius:12px; padding:20px; display:flex; gap:14px; align-items:flex-start;"> 
+            <div style="width:40px; height:40px; background:#C9A84C; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center;"> 
+              <div style="width:16px; height:12px; border:2px solid white; border-radius:3px;"></div> 
+            </div> 
+            <div> 
+              <div style="font-size:14px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">For Workers</div> 
+              <div style="font-size:12px; color:#5a6a7a; line-height:1.6;">Browse tasks, apply, complete work and earn 80% of every payment</div> 
+            </div> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- HOW IT WORKS - PROVIDERS --> 
+      <div id="how-it-works" style="background:#FAF8F3; padding:3rem 2rem; border-bottom:1px solid #e2e8f0;"> 
+        <div style="text-align:center; margin-bottom:2rem;"> 
+          <div style="font-size:11px; font-weight:600; color:#C9A84C; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">How it works</div> 
+          <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:4px;">For Task Providers</div> 
+          <div style="font-size:13px; color:#5a6a7a;">Post a task and get it done safely</div> 
+        </div> 
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#C9A84C;">1</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Register free</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Create your account in minutes</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#C9A84C;">2</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Post a task</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Describe the work and set your budget</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#C9A84C;">3</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Pick a worker</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Review applications and accept the best</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #C9A84C;"> 
+            <div style="width:36px; height:36px; background:rgba(201,168,76,0.12); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#C9A84C;">4</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Approve and pay</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Approve work, escrow releases to worker</div> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- HOW IT WORKS - WORKERS --> 
+      <div style="background:white; padding:3rem 2rem; border-bottom:1px solid #e2e8f0;"> 
+        <div style="text-align:center; margin-bottom:2rem;"> 
+          <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:4px;">For Workers</div> 
+          <div style="font-size:13px; color:#5a6a7a;">Browse tasks and start earning today</div> 
+        </div> 
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+          <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
+            <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#1E3A5F;">1</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Register free</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Sign up as a worker for free</div> 
+          </div> 
+          <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
+            <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#1E3A5F;">2</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Browse tasks</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Find tasks that match your skills</div> 
+          </div> 
+          <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
+            <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#1E3A5F;">3</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Complete work</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Apply, get accepted and do the task</div> 
+          </div> 
+          <div style="background:#FAF8F3; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center; border-top:3px solid #1E3A5F;"> 
+            <div style="width:36px; height:36px; background:rgba(30,58,95,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;"> 
+              <span style="font-size:15px; font-weight:700; color:#1E3A5F;">4</span> 
+            </div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Get paid</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Earn 80% once provider approves</div> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- WHY TASKNEST --> 
+      <div style="background:#FAF8F3; padding:3rem 2rem; border-bottom:1px solid #e2e8f0;"> 
+        <div style="text-align:center; margin-bottom:2rem;"> 
+          <div style="font-size:11px; font-weight:600; color:#C9A84C; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Why TaskNest</div> 
+          <div style="font-size:24px; font-weight:700; color:#1E3A5F;">Built for trust and fairness</div> 
+        </div> 
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:900px; margin:0 auto;"> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
+            <div style="font-size:28px; color:#C9A84C; margin-bottom:10px;">&#128274;</div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Escrow Safety</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Money held safely until work is approved</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
+            <div style="font-size:28px; color:#C9A84C; margin-bottom:10px;">&#128176;</div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Fair Earnings</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Workers keep 80% of every payment</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
+            <div style="font-size:28px; color:#C9A84C; margin-bottom:10px;">&#127381;</div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Free to Join</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">No hidden fees, start earning today</div> 
+          </div> 
+          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:20px; text-align:center;"> 
+            <div style="font-size:28px; color:#C9A84C; margin-bottom:10px;">&#128257;</div> 
+            <div style="font-size:13px; font-weight:600; color:#1E3A5F; margin-bottom:6px;">Refund Policy</div> 
+            <div style="font-size:11px; color:#5a6a7a; line-height:1.5;">Cancel before work starts, get full refund</div> 
+          </div> 
+        </div> 
+      </div> 
+     
+      <!-- FOOTER CTA --> 
+      <div id="contact" style="background:#1E3A5F; padding:2.5rem 2rem; text-align:center;"> 
+        <div style="font-size:22px; font-weight:700; color:white; margin-bottom:8px;">Start today — it is completely free</div> 
+        <div style="font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:1.5rem;">No registration fee. No hidden charges. Just work and earn.</div> 
+        <div style="display:flex; gap:14px; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;"> 
+          <button onclick="showFindTask()" style="font-size:14px; padding:12px 32px; background:#C9A84C; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Find a Task</button> 
+          <button onclick="showPostTask()" style="font-size:14px; padding:12px 32px; background:transparent; color:white; border:2px solid rgba(255,255,255,0.4); border-radius:8px; cursor:pointer;">Post a Task</button> 
+        </div> 
+        <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem; display:flex; justify-content:center; gap:2rem; flex-wrap:wrap;"> 
+          <span style="font-size:11px; color:rgba(255,255,255,0.35);">© 2026 TaskNest</span> 
+          <span style="font-size:11px; color:rgba(255,255,255,0.35);">India</span> 
+          <a href="https://swathis-s.github.io/-tasknest-policies#terms" target="_blank" style="font-size:11px; color:rgba(201,168,76,0.7); text-decoration:none;">Terms & Conditions</a> 
+          <a href="https://swathis-s.github.io/-tasknest-policies#privacy" target="_blank" style="font-size:11px; color:rgba(201,168,76,0.7); text-decoration:none;">Privacy Policy</a> 
+          <a href="https://swathis-s.github.io/-tasknest-policies#contact" target="_blank" style="font-size:11px; color:rgba(201,168,76,0.7); text-decoration:none;">Contact Us</a> 
+          <span style="font-size:11px; color:rgba(255,255,255,0.35);">teamtasknest@gmail.com</span> 
+        </div> 
+      </div> 
+     
+    </div> 
+    <!-- END TASKNEST LANDING PAGE --> 
+
 
     <!-- Auth Forms (Moved outside container to remove white frame) -->
     <div id="authSection" class="hidden">
@@ -5356,6 +5549,28 @@
 
         // Initialize skillset field after login
         function initTriFilters() {}
+
+        function showFindTask() {
+            // Hide landing, show login with taskUser role pre-selected
+            const landing = document.getElementById('landingPage');
+            const auth = document.getElementById('authSection');
+            if (landing) landing.classList.add('hidden');
+            if (auth) {
+                auth.classList.remove('hidden');
+                chooseRole('taskUser');
+            }
+        }
+
+        function showPostTask() {
+            // Hide landing, show login with taskProvider role pre-selected
+            const landing = document.getElementById('landingPage');
+            const auth = document.getElementById('authSection');
+            if (landing) landing.classList.add('hidden');
+            if (auth) {
+                auth.classList.remove('hidden');
+                chooseRole('taskProvider');
+            }
+        }
 
         function markWorkAsViewed(taskId) {
             if (!window.viewedWork) {
