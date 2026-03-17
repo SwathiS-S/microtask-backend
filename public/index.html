@@ -21,11 +21,14 @@
 
         /* Dashboard Layout */
         .dashboard-layout {
-            display: flex;
+            display: none; /* Hidden by default until login */
             width: 100vw;
             height: 100vh;
             background: var(--bg-dark);
             overflow: hidden;
+        }
+        .dashboard-layout.active {
+            display: flex;
         }
 
         .sidebar {
@@ -990,6 +993,37 @@
             transition: transform .2s ease, box-shadow .2s ease, opacity .3s ease;
             opacity: 0.99;
             animation: fadeUp .26s ease-out both;
+        }
+
+        .btn-small {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #1E3A5F;
+            color: #fff;
+        }
+
+        .btn-small:hover {
+            background: #2C3550;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            color: #1f2937;
         }
         .task-item:hover {
             transform: translateY(-2px);
@@ -2135,7 +2169,7 @@
     </div>
 
     <!-- Dashboard (Modern SaaS Layout) -->
-    <div id="dashboardSection" class="dashboard-layout hidden">
+    <div id="dashboardSection" class="dashboard-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
@@ -2676,13 +2710,16 @@
                     currentUser = JSON.parse(stored);
                     
                     // Show dashboard, hide landing/auth
-                    const landing = document.getElementById('landingSection');
+                    const landing = document.getElementById('landingPage');
                     const auth = document.getElementById('authSection');
                     const dashboard = document.getElementById('dashboardSection');
                     
                     if (landing) landing.classList.add('hidden');
                     if (auth) auth.classList.add('hidden');
-                    if (dashboard) dashboard.classList.remove('hidden');
+                    if (dashboard) {
+                        dashboard.classList.remove('hidden');
+                        dashboard.classList.add('active');
+                    }
 
                     updateDashboardUI();
                     
@@ -3011,17 +3048,22 @@
             localStorage.removeItem('currentUser');
             currentUser = null;
             
-            const landing = document.getElementById('landingSection');
+            const landing = document.getElementById('landingPage');
             const dashboard = document.getElementById('dashboardSection');
             const auth = document.getElementById('authSection');
             
             if (landing) landing.classList.remove('hidden');
-            if (dashboard) dashboard.classList.add('hidden');
+            if (dashboard) {
+                dashboard.classList.add('hidden');
+                dashboard.classList.remove('active');
+            }
             if (auth) auth.classList.add('hidden');
             
             // Reset fields
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
+            const emailEl = document.getElementById('loginEmail');
+            const passEl = document.getElementById('loginPassword');
+            if (emailEl) emailEl.value = '';
+            if (passEl) passEl.value = '';
         }
 
         function openDrawer() {
@@ -3479,9 +3521,12 @@
             const req = getRequiredCount(t);
             const acc = getAcceptedCount(t);
             const pay = computePaymentStatus(t);
+            
+            // Map released/paid statuses to COMPLETED
+            if (st === 'PAID' || st === 'PENDING_RELEASE' || st === 'RELEASED') return 'COMPLETED';
+            
             if (st === 'COMPLETED' && pay === 'PAID') return 'CLOSED';
-            if (acc >= req) return 'FULL';
-            if (st === 'PAID') return 'CLOSED';
+            if (acc >= req && st === 'OPEN') return 'FULL';
             if (st === 'OPEN' || st === 'ACCEPTED' || st === 'INPROGRESS' || st === 'SUBMITTED' || st === 'COMPLETED' || st === 'CLOSED' || st === 'FULL') return st;
             return 'OPEN';
         }
@@ -4626,7 +4671,8 @@
                 });
                 const applied = appliedRaw.filter(x => {
                     const st = String(x.task.status || '').toUpperCase();
-                    return st !== 'PAID' && st !== 'COMPLETED';
+                    // Include released tasks as they are effectively completed but might be in applied list
+                    return st !== 'PAID' && st !== 'COMPLETED' && st !== 'PENDING_RELEASE' && st !== 'RELEASED';
                 });
                 if (!applied.length) {
                     list.innerHTML = '<p style="color:#666;">No applications yet.</p>';
@@ -4901,6 +4947,8 @@
                 </div>`;
             const acceptedBy = String(task.acceptedBy && task.acceptedBy._id || task.acceptedBy || '');
             const isMineAccepted = currentUser && String(acceptedBy) === String(currentUser.userId);
+            
+            // Fix: Ensure buttons are visible if task is mine, regardless of display style
             if (statusBtn) statusBtn.style.display = isMineAccepted ? 'inline-block' : 'none';
             
             // deadline info and final upload button - Only for WFH tasks
@@ -4913,6 +4961,9 @@
                 const now = new Date();
                 const remainingDays = (deadline && now <= deadline) ? Math.max(0, Math.ceil((deadline - now) / (24*60*60*1000))) : 0;
                 
+                const taskStatus = String(task.status || '').toUpperCase();
+                const isCompleted = ['PAID', 'COMPLETED', 'PENDING_RELEASE', 'RELEASED'].includes(taskStatus);
+
                 dlInfo.innerHTML = `
                     <div style="margin-top:10px; padding:10px; border:1px dashed #ccc; border-radius:8px;">
                       <div><strong>Approved Date:</strong> ${approvedAt ? approvedAt.toLocaleString() : '—'}</div>
@@ -4927,7 +4978,7 @@
                 
                 if (body) body.appendChild(dlInfo);
                 
-                const canUpload = deadline && now <= deadline && !(task.finalFile && task.finalFile.path) && String(task.finalStatus||'') !== 'SUBMITTED';
+                const canUpload = deadline && now <= deadline && !(task.finalFile && task.finalFile.path) && String(task.finalStatus||'') !== 'SUBMITTED' && !isCompleted;
                 const uploadBtn = document.getElementById('finalUploadBtn');
                 const submitBtn = document.getElementById('finalSubmitBtn');
                 const fileNameEl = document.getElementById('finalFileName');
@@ -5122,8 +5173,14 @@
                     } catch (_) { return true; }
                 };
 
-                const completedTasks = mine.filter(t => String(t.status).toLowerCase() === 'paid' && inRange(t.updatedAt || t.createdAt));
-                const ongoingTasks = mine.filter(t => ['inprogress','accepted'].includes(String(t.status).toLowerCase()) && inRange(t.updatedAt || t.createdAt));
+                const completedTasks = mine.filter(t => {
+                    const st = String(t.status).toLowerCase();
+                    return (st === 'paid' || st === 'completed' || st === 'pending_release' || st === 'released') && inRange(t.updatedAt || t.createdAt);
+                });
+                const ongoingTasks = mine.filter(t => {
+                    const st = String(t.status).toLowerCase();
+                    return (st === 'inprogress' || st === 'accepted' || st === 'in_progress') && inRange(t.updatedAt || t.createdAt);
+                });
                 const submittedTasks = mine.filter(t => String(t.status).toLowerCase() === 'submitted' && inRange(t.updatedAt || t.createdAt));
 
                 const completed = completedTasks.length;
@@ -5154,32 +5211,57 @@
                         const tid = String(t._id);
                         const status = String(t.status).toUpperCase();
                         return `<div class="task-item">
-                            <div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-open">${status}</span></div>
+                            <div class="task-header">
+                                <div class="task-title">${t.title || 'Task'}</div>
+                                <span class="badge" style="background:#EAF1FF; color:#1E3A5F; border:1px solid #C9A84C;">${status}</span>
+                            </div>
                             <div class="task-description">${t.description || ''}</div>
-                            <div style="display:flex; gap:8px; margin-top:8px;">
-                                <button class="btn-small" data-action="status" data-id="${tid}">Daily Status</button>
+                            <div style="display:flex; gap:12px; margin-top:16px;">
+                                <button class="btn-small" data-action="detail" data-id="${tid}" style="background:#ffffff; color:#1E3A5F; border:1px solid #e2e8f0;">View Details</button>
+                                <button class="btn-small" data-action="status" data-id="${tid}" style="background:#1E3A5F; color:#ffffff;">Update Status</button>
                             </div>
                         </div>`;
                     }).join('') : '<p style="color:#666;">No ongoing tasks for this period.</p>';
+                    
                     // Re-attach listeners for ongoingTasks
-                }
-                if (completedEl) {
-                    completedEl.innerHTML = completedTasks.length ? completedTasks.map(t => {
-                        return `<div class="task-item"><div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-open">Paid</span></div><div class="task-description">${t.description || ''}</div></div>`;
-                    }).join('') : '<p style="color:#666;">No completed tasks for this period.</p>';
-                }
-                
-                // Event delegation for ongoing list buttons
-                if (ongoingEl) {
-                    ongoingEl.querySelectorAll('button[data-action="status"]').forEach(b => {
+                    ongoingEl.querySelectorAll('button[data-action]').forEach(b => {
                         b.onclick = function() {
                             const id = this.getAttribute('data-id');
+                            const action = this.getAttribute('data-action');
                             const t = ongoingTasks.find(x => String(x._id) === String(id));
                             if (!t) return;
-                            taskDetailObj = t;
-                            openStatusModal();
+                            
+                            if (action === 'status') {
+                                taskDetailObj = t;
+                                openStatusModal();
+                            } else if (action === 'detail') {
+                                openTaskDetail(t);
+                            }
                         };
                     });
+                }
+                
+                if (completedEl) {
+                    completedEl.innerHTML = completedTasks.length ? completedTasks.map(t => {
+                        let badgeText = 'Completed';
+                        let badgeColor = '#0f5132';
+                        let badgeBg = '#d1e7dd';
+                        
+                        const st = String(t.status).toLowerCase();
+                        if (st === 'paid') {
+                            badgeText = 'Paid';
+                        } else if (st === 'pending_release' || st === 'released') {
+                            badgeText = 'Released';
+                        }
+
+                        return `<div class="task-item">
+                            <div class="task-header">
+                                <div class="task-title">${t.title || 'Task'}</div>
+                                <span class="badge" style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeColor};">${badgeText}</span>
+                            </div>
+                            <div class="task-description">${t.description || ''}</div>
+                        </div>`;
+                    }).join('') : '<p style="color:#666;">No completed tasks for this period.</p>';
                 }
             } catch (_) {}
         }
@@ -5211,7 +5293,8 @@
                     });
 
                     mine.forEach(t => {
-                        if (String(t.status).toLowerCase() !== 'paid') return;
+                        const st = String(t.status).toLowerCase();
+                        if (st !== 'paid' && st !== 'completed' && st !== 'pending_release' && st !== 'released') return;
                         const d = new Date(t.updatedAt || t.createdAt);
                         if (d.getFullYear() === year && (d.getMonth() + 1) === month) {
                             dailyCompletions[d.getDate() - 1] += 1;
@@ -5254,7 +5337,8 @@
                     });
 
                     mine.forEach(t => {
-                        if (String(t.status).toLowerCase() !== 'paid') return;
+                        const st = String(t.status).toLowerCase();
+                        if (st !== 'paid' && st !== 'completed' && st !== 'pending_release' && st !== 'released') return;
                         const d = new Date(t.updatedAt || t.createdAt);
                         if (d.getFullYear() === currentYear) {
                             mCompletions[d.getMonth()] += 1;
@@ -5307,8 +5391,14 @@
                 const el = document.getElementById('provTasksList');
                 const paidEl = document.getElementById('provPaidTasksList');
 
-                const openTasks = mine.filter(t => String(t.status).toLowerCase() !== 'paid');
-                const paidTasks = mine.filter(t => String(t.status).toLowerCase() === 'paid');
+                const openTasks = mine.filter(t => {
+                    const st = String(t.status).toLowerCase();
+                    return st !== 'paid' && st !== 'completed' && st !== 'pending_release' && st !== 'released';
+                });
+                const paidTasks = mine.filter(t => {
+                    const st = String(t.status).toLowerCase();
+                    return st === 'paid' || st === 'completed' || st === 'pending_release' || st === 'released';
+                });
 
                 if (!openTasks.length) { el.innerHTML = '<p style="color:#666;">No open tasks match the filter.</p>'; }
                 else {
@@ -5347,8 +5437,13 @@
                 if (!paidTasks.length) { paidEl.innerHTML = '<p style="color:#666;">No paid tasks match the filter.</p>'; }
                 else {
                     paidEl.innerHTML = paidTasks.map(t => {
+                        const st = String(t.status).toLowerCase();
+                        let badgeText = 'Paid';
+                        if (st === 'pending_release' || st === 'released') badgeText = 'Released';
+                        else if (st === 'completed') badgeText = 'Completed';
+
                         return `<div class="task-item">
-                            <div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-completed">Paid</span></div>
+                            <div class="task-header"><div class="task-title">${t.title || 'Task'}</div><span class="task-status status-completed">${badgeText}</span></div>
                             <div class="task-description">${t.description || ''}</div>
                         </div>`;
                     }).join('');
