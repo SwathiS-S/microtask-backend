@@ -30,7 +30,7 @@
 
         .sidebar {
             width: 260px;
-            background: var(--sidebar-bg);
+            background: #1A2035;
             display: flex;
             flex-direction: column;
             padding: 30px 20px;
@@ -60,17 +60,18 @@
             align-items: center;
             gap: 15px;
             padding: 14px 20px;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #8e8e93;
+            color: rgba(255,255,255,0.45);
             font-weight: 600;
             text-decoration: none;
         }
 
         .nav-item:hover, .nav-item.active {
-            background: rgba(201, 168, 76, 0.15);
-            color: #C9A84C;
+            background: linear-gradient(135deg, rgba(232,194,122,0.18), rgba(201,154,58,0.1));
+            color: #E8C27A;
+            border: 1px solid rgba(232,194,122,0.2);
         }
 
         .nav-item.active {
@@ -450,6 +451,165 @@
             #authSection > div > div:first-child {
                 padding: 2rem 1.5rem !important;
             }
+        }
+
+        /* Updated Find Tasks Styles */
+        #userFilterTab h2 {
+            font-size: 28px;
+            font-weight: 600 !important;
+            color: #1A2035 !important;
+            font-family: Georgia, serif !important;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        #userFilterTab p {
+            font-size: 13px;
+            color: rgba(26,32,53,0.42) !important;
+            font-weight: 300 !important;
+            margin-bottom: 30px;
+        }
+        .search-wrapper-premium {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 0 14px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .search-wrapper-premium input {
+            border: none !important;
+            outline: none !important;
+            font-size: 13px !important;
+            color: #1A2035 !important;
+            background: transparent !important;
+            font-family: inherit !important;
+            width: 100%;
+        }
+        .category-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: rgba(26,32,53,0.38);
+            margin-bottom: 16px;
+            display: block;
+        }
+        .category-card-premium {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 18px 10px 14px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .category-card-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .category-card-premium.active {
+            background: #FFFDF7;
+            border: 1.5px solid #E8C27A;
+        }
+        .category-icon-wrapper-premium {
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: #F5F3EE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .category-card-premium.active .category-icon-wrapper-premium {
+            background: rgba(232,194,122,0.15);
+        }
+        .category-icon-wrapper-premium svg {
+            width: 20px;
+            height: 20px;
+            stroke: rgba(26,32,53,0.45);
+            fill: none;
+            stroke-width: 2;
+        }
+        .category-card-premium.active .category-icon-wrapper-premium svg {
+            stroke: #C99A3A;
+        }
+        .category-label-premium {
+            font-size: 11px;
+            font-weight: 500;
+            color: #1A2035;
+            text-align: center;
+            line-height: 1.3;
+        }
+        .task-card-premium {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(0,0,0,0.07);
+            border-left: 3px solid #E8C27A;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-card-premium:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .task-title-premium {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1A2035;
+        }
+        .task-meta-premium {
+            font-size: 11px;
+            color: rgba(26,32,53,0.4);
+            margin-top: 4px;
+        }
+        .task-pay-premium {
+            font-size: 18px;
+            font-weight: 400;
+            color: #1A2035;
+            font-family: Georgia, serif;
+        }
+        .tag-premium {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .tag-new {
+            background: rgba(232,194,122,0.15);
+            color: #A07820;
+        }
+        .tag-hot {
+            background: rgba(220,70,70,0.1);
+            color: #A03030;
+        }
+        .btn-premium {
+            background: #1A2035;
+            color: #E8C27A;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .btn-premium:hover {
+            background: #2C3550;
         }
 
         * {
@@ -2001,12 +2161,7 @@
                 </a>
             </nav>
             <div class="sidebar-footer">
-                <div style="margin-top: 20px;">
-                    <button class="logout-btn-new" onclick="logout()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <svg class="icon" style="width: 18px; height: 18px;"><use href="#icon-logout"/></svg>
-                        <span>Logout</span>
-                    </button>
-                </div>
+                <!-- Moved Logout to Top Bar -->
             </div>
         </aside>
 
@@ -2018,28 +2173,34 @@
                 </div>
                 <div class="user-actions">
                     <div style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 15px;">
-                        <span id="displayUserName" style="font-weight: 700; color: #fff; font-size: 15px;">User Name</span>
-                        <span id="displayUserRole" style="font-size: 12px; color: #8e8e93;">User Role</span>
+                        <span id="displayUserName" style="font-weight: 700; color: #1E3A5F; font-size: 15px;">User Name</span>
+                        <span id="displayUserRole" style="font-size: 12px; color: #5a6a7a;">User Role</span>
                     </div>
-                    <div class="avatar" id="userAvatar" style="width: 42px; height: 42px; font-size: 16px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800;">TN</div>
+                    <div class="avatar" id="userAvatar" style="width: 42px; height: 42px; font-size: 16px; border-radius: 12px; background: #C9A84C; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; margin-right: 15px;">TN</div>
+                    <button onclick="logout()" style="background: rgba(220,60,60,0.1); border: 1px solid rgba(220,60,60,0.18); color: #E07070; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <svg class="icon" style="width: 16px; height: 16px;"><use href="#icon-logout"/></svg>
+                        <span>Logout</span>
+                    </button>
                 </div>
             </header>
 
             <div class="content-area">
                 <!-- WORKER VIEWS -->
-                <div id="userFilterTab" class="tri-tab-content hidden">
+                <div id="userFilterTab" class="tri-tab-content hidden" style="background: #F5F3EE; min-height: 100%; padding: 40px; border-radius: 32px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
                         <div>
                             <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Find Tasks</h2>
                             <p style="color: #6b7280;">Browse and apply for microtasks in your area.</p>
                         </div>
                     </div>
-                    <div class="card-soft" style="padding:24px; background: #fff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;">
-                        <h4 style="margin:0 0 16px 0; font-size: 18px; font-weight: 700;">Popular Categories</h4>
-                        <div id="categoryChips" class="chips" style="flex-wrap:wrap; gap: 10px;"></div>
-                        <div style="display:grid; grid-template-columns: 1fr auto; gap:12px; margin-top:24px;">
-                            <input id="simpleSearchInput" class="search-input" style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 14px 20px; border-radius: 12px;" placeholder="Search by title, skill, or location..." oninput="syncAndSearch(this.value)"/>
-                            <button class="btn-small" style="padding: 0 24px; height: 100%;" onclick="renderFilterTasks()">Search</button>
+                    <div style="margin-top: 24px;">
+                        <span class="category-section-label">Popular Categories</span>
+                        <div id="categoryChips" class="chips" style="flex-wrap:wrap; gap: 10px; margin-bottom: 24px;"></div>
+                        
+                        <div class="search-wrapper-premium">
+                            <svg style="width:18px; height:18px; color:rgba(26,32,53,0.4);"><use href="#icon-search"/></svg>
+                            <input id="simpleSearchInput" placeholder="Search tasks by title, skill, or location..." oninput="syncAndSearch(this.value)"/>
+                            <button class="btn-premium" style="padding: 0 20px; height: 32px; border-radius: 6px;" onclick="renderFilterTasks()">Search</button>
                         </div>
                     </div>
                     <div id="filterTasksList" class="task-grid-new" style="margin-top:32px;"></div>
@@ -4567,11 +4728,11 @@
             
             // Render "All Categories" as a special card first
             let html = `
-                <div class="category-card ${!selectedCategory ? 'active' : ''}" onclick="setCategory(null)">
-                    <div class="category-icon-wrapper">
+                <div class="category-card-premium ${!selectedCategory ? 'active' : ''}" onclick="setCategory(null)">
+                    <div class="category-icon-wrapper-premium">
                         <svg><use href="#cat-all"/></svg>
                     </div>
-                    <div class="category-label">All Categories</div>
+                    <div class="category-label-premium">All Categories</div>
                 </div>`;
             
             // Always show all categories from categoryLabels
@@ -4580,11 +4741,11 @@
                 const label = categoryLabels[cat];
                 const iconId = categoryIcons[cat] || 'cat-all';
                 html += `
-                    <div class="category-card ${isActive ? 'active' : ''}" onclick="setCategory('${cat}')">
-                        <div class="category-icon-wrapper">
+                    <div class="category-card-premium ${isActive ? 'active' : ''}" onclick="setCategory('${cat}')">
+                        <div class="category-icon-wrapper-premium">
                             <svg><use href="#${iconId}"/></svg>
                         </div>
-                        <div class="category-label">${label}</div>
+                        <div class="category-label-premium">${label}</div>
                     </div>`;
             });
             
@@ -4669,21 +4830,29 @@
                     // Correctly reflect the status class for the badge
                     const statusClass = badge.toLowerCase();
                     
-                    return `<div class="task-item" data-task-id="${t._id}">
-                        <div class="task-header">
-                            <div class="task-title">${t.title || 'Task'}</div>
-                            <span class="task-status status-${statusClass}">${badge}</span>
+                    const isNew = t.createdAt && (Date.now() - new Date(t.createdAt).getTime() < 24 * 60 * 60 * 1000);
+                    const isHot = accCnt > 5;
+
+                    return `<div class="task-card-premium" data-task-id="${t._id}">
+                        <div style="flex: 1;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div class="task-title-premium">${t.title || 'Task'}</div>
+                                ${isNew ? `<span class="tag-premium tag-new">NEW</span>` : ''}
+                                ${isHot ? `<span class="tag-premium tag-hot">HOT</span>` : ''}
+                            </div>
+                            <div class="task-meta-premium">
+                                <span>${skill || 'General'}</span> • 
+                                <span>${place}</span> • 
+                                <span>${dur || 'Flexible'}</span> • 
+                                <span>Slots: ${slotsLeft}/${reqCnt}</span>
+                            </div>
                         </div>
-                        <div class="task-description">
-                            <div><strong>Skill:</strong> ${skill || '—'}</div>
-                            <div><strong>Location:</strong> ${place}</div>
-                            <div><strong>Duration:</strong> ${dur}</div>
-                            <div><strong>Amount:</strong> ₹${amt}</div>
-                            <div><span class="slot-pill">Slots Left: ${slotsLeft}/${reqCnt}</span></div>
-                        </div>
-                        <div style="display:flex; gap:8px; margin-top:16px;">
-                            <button class="btn-small btn-secondary" data-action="detail" data-id="${t._id}">View Details</button>
-                            ${canApply ? `<button class="btn-small" data-action="apply" data-id="${t._id}">Apply</button>` : (isApplied ? `<button class="btn-small btn-applied" disabled>Applied</button>` : (slotsLeft === 0 ? `<button class="btn-small btn-full" disabled>Fully Booked</button>` : `<button class="btn-small" disabled>Not Open</button>`))}
+                        <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                            <div class="task-pay-premium">₹${amt}</div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn-premium" style="background:transparent; color:#1A2035; border:1px solid rgba(0,0,0,0.1);" data-action="detail" data-id="${t._id}">Details</button>
+                                ${canApply ? `<button class="btn-premium" data-action="apply" data-id="${t._id}">Apply</button>` : (isApplied ? `<button class="btn-premium" style="opacity:0.6; cursor:not-allowed;" disabled>Applied</button>` : (slotsLeft === 0 ? `<button class="btn-premium" style="opacity:0.6; cursor:not-allowed;" disabled>Full</button>` : `<button class="btn-premium" style="opacity:0.6; cursor:not-allowed;" disabled>Closed</button>`))}
+                            </div>
                         </div>
                     </div>`;
                 }).join('');
