@@ -63,7 +63,7 @@ async function payEscrow(taskId, totalAmount) {
         }
 
         const options = {
-            "key": "rzp_test_SNzqJbQGrxxv81", // TEST KEY
+            "key": "rzp_live_SSMM7fQBlGlwlq", // LIVE KEY
             "amount": orderData.order.amount,
             "currency": "INR",
             "name": "Microtask Platform",
