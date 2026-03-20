@@ -2370,17 +2370,6 @@
                         </div>
                         <div style="margin-top:24px;"><button class="add-task-btn" style="width: auto; padding: 14px 40px;" onclick="providerCreateTask()">Post Task Now</button></div>
                     </div>
-                    <div class="card-soft" style="padding:32px; margin-top:32px; background: #fff; border-radius: 24px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
-                            <h4 style="margin:0; font-size: 20px; font-weight: 700;">Your Created Tasks</h4>
-                            <div style="display:flex; gap:12px; align-items:center;">
-                                <div class="form-group" style="margin:0;"><label style="font-size:12px;">From</label><input id="manageTasksFrom" type="date" style="padding:8px;"></div>
-                                <div class="form-group" style="margin:0;"><label style="font-size:12px;">To</label><input id="manageTasksTo" type="date" style="padding:8px;"></div>
-                                <button class="btn-small" style="padding: 8px 16px; margin-top: 18px;" onclick="loadProviderTasks()">Filter</button>
-                            </div>
-                        </div>
-                        <div id="provTasksList" class="task-grid-new"></div>
-                    </div>
                 </div>
 
                 <div id="provWalletTab" class="tri-tab-content hidden">
@@ -2440,36 +2429,72 @@
                     </div>
                 </div>
 
-                <div id="provDashTab" class="tri-tab-content hidden">
-                    <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Provider Dashboard</h2>
-                    <p style="color: #6b7280; margin-bottom: 30px;">Overview of your task metrics and reports.</p>
-                    <div class="card-soft" style="padding:24px; margin-bottom:24px; background: #fff; border-radius: 20px;">
-                        <h4 style="margin:0 0 16px 0; font-size: 18px;">Filter by Date</h4>
-                        <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end;">
-                            <div class="form-group" style="margin:0;"><label>From</label><input id="provStartDate" type="date"></div>
-                            <div class="form-group" style="margin:0;"><label>To</label><input id="provEndDate" type="date"></div>
-                            <button class="btn-small" style="padding: 12px 24px;" onclick="renderProviderMetrics()">Apply Filter</button>
-                        </div>
-                    </div>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:20px;">
-                            <div id="provMetricCreated"></div>
-                            <div id="provListCreated" style="margin-top:16px; max-height: 200px; overflow:auto;"></div>
-                        </div>
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:20px;">
-                            <div id="provMetricActive"></div>
-                            <div id="provListActive" style="margin-top:16px; max-height: 200px; overflow:auto;"></div>
-                        </div>
-                        <div class="card-soft" style="padding:24px; background:#fff; border-radius:20px;">
-                            <div id="provMetricCompleted"></div>
-                            <div id="provListCompleted" style="margin-top:16px; max-height: 200px; overflow:auto;"></div>
-                        </div>
-                        <div class="card-soft" id="provMetricSpent" style="padding:24px; background:#fff; border-radius:20px;"></div>
-                    </div>
-                    <div class="card-soft" style="padding:32px; margin-top:24px; background:#fff; border-radius:24px;">
-                        <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Daily Status Reports</h4>
-                        <div id="provStatusReports"></div>
-                    </div>
+                <div id="provDashTab" class="tri-tab-content hidden"> 
+                  <div style="padding:1.5rem;"> 
+                    
+                    <!-- Page header --> 
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.2rem;"> 
+                      <div> 
+                        <div style="font-size:20px; font-weight:700; color:#1E3A5F;">Your Created Tasks</div> 
+                        <div style="font-size:12px; color:#5a6a7a; margin-top:3px;">Review, approve or reject worker submissions</div> 
+                      </div> 
+                    </div> 
+                
+                    <!-- Category filter pills --> 
+                    <div style="background:white; border:0.5px solid #e2e8f0; border-radius:10px; padding:12px 16px; margin-bottom:10px; overflow-x:auto; white-space:nowrap;"> 
+                      <span style="font-size:11px; font-weight:600; color:#5a6a7a; margin-right:10px; vertical-align:middle;">Category:</span> 
+                      <span onclick="filterDashCategory(this,'all')" style="display:inline-block; background:#1E3A5F; color:white; font-size:11px; font-weight:600; padding:5px 14px; border-radius:20px; margin-right:6px; cursor:pointer;">All</span> 
+                      <span onclick="filterDashCategory(this,'Cooking & Catering')" style="display:inline-block; background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:5px 14px; border-radius:20px; margin-right:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Cooking & Catering</span> 
+                      <span onclick="filterDashCategory(this,'Delivery & Pickup')" style="display:inline-block; background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:5px 14px; border-radius:20px; margin-right:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Delivery & Pickup</span> 
+                      <span onclick="filterDashCategory(this,'Errands')" style="display:inline-block; background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:5px 14px; border-radius:20px; margin-right:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Errands</span> 
+                      <span onclick="filterDashCategory(this,'Gardening')" style="display:inline-block; background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:5px 14px; border-radius:20px; margin-right:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Gardening</span> 
+                      <span onclick="filterDashCategory(this,'Handyman & Repairs')" style="display:inline-block; background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:5px 14px; border-radius:20px; margin-right:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Handyman & Repairs</span> 
+                      <span onclick="filterDashCategory(this,'Home Cleaning')" style="display:inline-block; background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:5px 14px; border-radius:20px; margin-right:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Home Cleaning</span> 
+                      <span onclick="filterDashCategory(this,'Pet Care')" style="display:inline-block; background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:5px 14px; border-radius:20px; margin-right:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Pet Care</span> 
+                      <span onclick="filterDashCategory(this,'Photography/Video')" style="display:inline-block; background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:5px 14px; border-radius:20px; border:0.5px solid #e2e8f0; cursor:pointer;">Photography/Video</span> 
+                    </div> 
+                
+                    <!-- Search + Status + Date filter bar --> 
+                    <div style="background:white; border:0.5px solid #e2e8f0; border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:10px; margin-bottom:1rem; flex-wrap:wrap;"> 
+                      <input id="dashTaskSearch" oninput="filterDashTasks()" placeholder="Search your tasks..." 
+                        style="flex:1; min-width:160px; background:#f8f9fa; border:0.5px solid #e2e8f0; border-radius:7px; padding:7px 12px; font-size:12px; color:#333; outline:none;"> 
+                      <div style="display:flex; gap:5px; flex-shrink:0;"> 
+                        <div onclick="filterDashStatus(this,'all')" style="background:#1E3A5F; color:white; font-size:11px; font-weight:600; padding:6px 12px; border-radius:6px; cursor:pointer;">All</div> 
+                        <div onclick="filterDashStatus(this,'open')" style="background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:6px 12px; border-radius:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Open</div> 
+                        <div onclick="filterDashStatus(this,'assigned')" style="background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:6px 12px; border-radius:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Assigned</div> 
+                        <div onclick="filterDashStatus(this,'submitted')" style="background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:6px 12px; border-radius:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Submitted</div> 
+                        <div onclick="filterDashStatus(this,'completed')" style="background:#f8f9fa; color:#5a6a7a; font-size:11px; padding:6px 12px; border-radius:6px; border:0.5px solid #e2e8f0; cursor:pointer;">Completed</div> 
+                      </div> 
+                      <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;"> 
+                        <input type="date" id="dashFromDate" onchange="filterDashTasks()" style="background:#f8f9fa; border:0.5px solid #e2e8f0; border-radius:6px; padding:6px 8px; font-size:11px; color:#5a6a7a;"> 
+                        <span style="font-size:11px; color:#5a6a7a;">to</span> 
+                        <input type="date" id="dashToDate" onchange="filterDashTasks()" style="background:#f8f9fa; border:0.5px solid #e2e8f0; border-radius:6px; padding:6px 8px; font-size:11px; color:#5a6a7a;"> 
+                      </div> 
+                    </div> 
+                
+                    <!-- Table --> 
+                    <div style="background:white; border-radius:12px; border:0.5px solid #e2e8f0; overflow:hidden;"> 
+                      <!-- Table header --> 
+                      <div style="display:grid; grid-template-columns:2.2fr 0.9fr 0.9fr 0.7fr 0.9fr 2fr; background:#1E3A5F; padding:11px 18px; gap:8px;"> 
+                        <span style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:1px;">TASK NAME</span> 
+                        <span style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:1px;">CATEGORY</span> 
+                        <span style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:1px;">LOCATION</span> 
+                        <span style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:1px;">AMOUNT</span> 
+                        <span style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:1px;">STATUS</span> 
+                        <span style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:1px;">ACTIONS</span> 
+                      </div> 
+                      <!-- Table body --> 
+                      <div id="dashTasksTableBody"> 
+                        <div style="padding:32px; text-align:center; color:#5a6a7a; font-size:13px;">Loading tasks...</div> 
+                      </div> 
+                      <!-- Table footer --> 
+                      <div style="padding:10px 18px; background:#f8f9fa; border-top:0.5px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;"> 
+                        <span id="dashTaskCount" style="font-size:11px; color:#5a6a7a;">Loading...</span> 
+                        <div id="dashPagination" style="display:flex; gap:4px;"></div> 
+                      </div> 
+                    </div> 
+                
+                  </div> 
                 </div>
 
                 <!-- Legal & Policies Tab --> 
@@ -4724,10 +4749,9 @@
                 });
                 buildProvTxTable();
                 buildProvPayments();
-            } else if (name === 'dashboard') {
-                document.getElementById('provDashTab').classList.remove('hidden');
-                renderProviderMetrics();
-                renderProviderStatusReports();
+            } else if (name === 'dashboard') { 
+                document.getElementById('provDashTab').classList.remove('hidden'); 
+                loadDashboardTasks(); // ← replace renderProviderMetrics() and renderProviderStatusReports() 
             } else if (name === 'legal') { 
                 document.getElementById('userLegalTab').classList.remove('hidden'); 
             }
@@ -5559,7 +5583,7 @@
                 const data = await res.json(); 
                 if (data.success) { 
                     alert('✅ ' + data.message); 
-                    loadProviderTasks(); // Refresh task list 
+                    loadDashboardTasks(); // Refresh task list 
                     refreshUserWallet(); // Refresh wallet balance 
                 } else { 
                     alert('❌ ' + data.message); 
@@ -5567,6 +5591,303 @@
             } catch(e) { 
                 alert('Failed: ' + e.message); 
             } 
+        }
+
+        // Dashboard task table state 
+        let dashAllTasks = []; 
+        let dashFilteredTasks = []; 
+        let dashCurrentPage = 1; 
+        const dashPageSize = 10; 
+        let dashCategoryFilter = 'all'; 
+        let dashStatusFilter = 'all'; 
+        
+        async function loadDashboardTasks() { 
+          try { 
+            const res = await fetch(`${API_URL}/tasks/provider/${currentUser.userId}`); 
+            const data = await res.json(); 
+            dashAllTasks = data.success ? data.tasks : []; 
+            dashFilteredTasks = [...dashAllTasks]; 
+            dashCurrentPage = 1; 
+            renderDashTable(); 
+          } catch(e) { 
+            document.getElementById('dashTasksTableBody').innerHTML = 
+              '<div style="padding:32px; text-align:center; color:#dc3545;">Failed to load tasks</div>'; 
+          } 
+        } 
+        
+        function filterDashCategory(el, category) { 
+          dashCategoryFilter = category; 
+          // Update pill styles 
+          el.closest('div').querySelectorAll('span[onclick]').forEach(s => { 
+            s.style.background = '#f8f9fa'; 
+            s.style.color = '#5a6a7a'; 
+            s.style.fontWeight = '400'; 
+          }); 
+          el.style.background = '#1E3A5F'; 
+          el.style.color = 'white'; 
+          el.style.fontWeight = '600'; 
+          filterDashTasks(); 
+        } 
+        
+        function filterDashStatus(el, status) { 
+          dashStatusFilter = status; 
+          // Update tab styles 
+          el.parentElement.querySelectorAll('div[onclick]').forEach(d => { 
+            d.style.background = '#f8f9fa'; 
+            d.style.color = '#5a6a7a'; 
+            d.style.fontWeight = '400'; 
+          }); 
+          el.style.background = '#1E3A5F'; 
+          el.style.color = 'white'; 
+          el.style.fontWeight = '600'; 
+          filterDashTasks(); 
+        } 
+        
+        function filterDashTasks() { 
+          const search = (document.getElementById('dashTaskSearch')?.value || '').toLowerCase(); 
+          const fromDate = document.getElementById('dashFromDate')?.value ? new Date(document.getElementById('dashFromDate').value) : null; 
+          const toDate = document.getElementById('dashToDate')?.value ? new Date(document.getElementById('dashToDate').value) : null; 
+          if (toDate) toDate.setHours(23,59,59,999); 
+        
+          dashFilteredTasks = dashAllTasks.filter(t => { 
+            const status = (t.status || '').toLowerCase(); 
+            const category = (t.category || '').toLowerCase(); 
+            const title = (t.title || '').toLowerCase(); 
+            const dt = new Date(t.createdAt); 
+        
+            if (search && !title.includes(search)) return false; 
+            if (dashCategoryFilter !== 'all' && !category.includes(dashCategoryFilter.toLowerCase())) return false; 
+            if (dashStatusFilter !== 'all' && status !== dashStatusFilter) return false; 
+            if (fromDate && dt < fromDate) return false; 
+            if (toDate && dt > toDate) return false; 
+            return true; 
+          }); 
+        
+          dashCurrentPage = 1; 
+          renderDashTable(); 
+        } 
+        
+        function renderDashTable() { 
+          const tbody = document.getElementById('dashTasksTableBody'); 
+          const countEl = document.getElementById('dashTaskCount'); 
+          
+          if (!dashFilteredTasks.length) { 
+            tbody.innerHTML = '<div style="padding:32px; text-align:center; color:#5a6a7a; font-size:13px;">No tasks found</div>'; 
+            if (countEl) countEl.textContent = '0 tasks'; 
+            return; 
+          } 
+        
+          const start = (dashCurrentPage - 1) * dashPageSize; 
+          const pageItems = dashFilteredTasks.slice(start, start + dashPageSize); 
+          
+          if (countEl) countEl.textContent = `Showing ${start + 1}–${Math.min(start + dashPageSize, dashFilteredTasks.length)} of ${dashFilteredTasks.length} tasks`; 
+        
+          tbody.innerHTML = pageItems.map((t, i) => { 
+            const tid = String(t._id); 
+            const status = (t.status || '').toLowerCase(); 
+            const accId = String(t.acceptedBy?._id || t.acceptedBy || ''); 
+            const hasAcc = !!accId; 
+            const hasFinal = t.finalFile?.path; 
+            const finalLink = hasFinal ? (API_URL + t.finalFile.path) : null; 
+            const isSubmitted = status === 'submitted'; 
+            const isCompleted = status === 'completed' || status === 'paid' || status === 'released'; 
+            const isCancelled = status === 'cancelled'; 
+            const appCount = t.applications?.length || 0; 
+            const workerName = t.acceptedBy?.name || t.acceptedBy?.email || 'Worker'; 
+            const isWorkViewed = window.viewedWork && window.viewedWork[tid]; 
+            const bgColor = i % 2 === 0 ? 'white' : '#fafafa'; 
+        
+            // Status badge 
+            const statusColors = { 
+              open: { color: '#6b7280', bg: 'rgba(107,114,128,0.1)', border: 'rgba(107,114,128,0.3)' }, 
+              funded: { color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.3)' }, 
+              assigned: { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.3)' }, 
+              submitted: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.3)' }, 
+              pending_release: { color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.3)' }, 
+              completed: { color: '#28a745', bg: 'rgba(40,167,69,0.1)', border: 'rgba(40,167,69,0.3)' }, 
+              paid: { color: '#28a745', bg: 'rgba(40,167,69,0.1)', border: 'rgba(40,167,69,0.3)' }, 
+              cancelled: { color: '#dc3545', bg: 'rgba(220,53,69,0.1)', border: 'rgba(220,53,69,0.3)' } 
+            }; 
+            const sc = statusColors[status] || statusColors.open; 
+            const statusBadge = `<span style="font-size:10px; font-weight:700; color:${sc.color}; background:${sc.bg}; padding:4px 8px; border-radius:20px; border:1px solid ${sc.border}; white-space:nowrap;">${(t.status||'open').toUpperCase()}</span>`; 
+        
+            // Action buttons based on status 
+            let actions = ''; 
+            if (isCancelled) { 
+              actions = `<div style="background:rgba(220,53,69,0.08); border:1px solid rgba(220,53,69,0.2); border-radius:8px; padding:6px 10px; font-size:10px; font-weight:700; color:#dc3545;">CANCELLED · Refunded</div>`; 
+            } else if (isCompleted) { 
+              actions = `<div style="background:rgba(40,167,69,0.08); border:1px solid rgba(40,167,69,0.2); border-radius:8px; padding:6px 10px;"> 
+                <div style="font-size:10px; font-weight:700; color:#28a745;">COMPLETED</div> 
+                <div style="font-size:10px; color:#5a6a7a;">by ${workerName}</div> 
+              </div>`; 
+            } else if (isSubmitted && hasFinal) { 
+              if (!isWorkViewed) { 
+                actions = ` 
+                  <a href="${finalLink}" target="_blank" onclick="markWorkAsViewed('${tid}')" 
+                    style="font-size:10px; font-weight:600; color:white; background:#1E3A5F; padding:5px 9px; border-radius:6px; text-decoration:none; white-space:nowrap;"> 
+                    View Final Work 
+                  </a>`; 
+              } else { 
+                actions = ` 
+                  <div style="display:flex; gap:5px; flex-wrap:wrap;"> 
+                    <a href="${finalLink}" target="_blank" 
+                      style="font-size:10px; font-weight:600; color:#1E3A5F; background:white; padding:5px 9px; border-radius:6px; border:1.5px solid #1E3A5F; text-decoration:none; white-space:nowrap;"> 
+                      View Work 
+                    </a> 
+                    <button onclick="dashApproveTask('${tid}','${accId}')" 
+                      style="font-size:10px; font-weight:600; color:white; background:#28a745; padding:5px 9px; border-radius:6px; border:none; cursor:pointer;"> 
+                      Approve 
+                    </button> 
+                    <button onclick="dashRejectFinal('${tid}')" 
+                      style="font-size:10px; font-weight:600; color:white; background:#dc3545; padding:5px 9px; border-radius:6px; border:none; cursor:pointer;"> 
+                      Reject 
+                    </button> 
+                  </div>`; 
+              } 
+            } else if (hasAcc) { 
+              actions = ` 
+                <div style="display:flex; gap:5px; flex-wrap:wrap;"> 
+                  <button onclick="dashViewApps('${tid}')" 
+                    style="font-size:10px; font-weight:600; color:#1E3A5F; background:white; padding:5px 9px; border-radius:6px; border:1.5px solid #1E3A5F; cursor:pointer; white-space:nowrap;"> 
+                    View Apps 
+                  </button> 
+                  <button onclick="dashApproveTask('${tid}','${accId}')" 
+                    style="font-size:10px; font-weight:600; color:white; background:#28a745; padding:5px 9px; border-radius:6px; border:none; cursor:pointer;"> 
+                    Approve 
+                  </button> 
+                  <button onclick="dashDeclineTask('${tid}')" 
+                    style="font-size:10px; font-weight:600; color:white; background:#dc3545; padding:5px 9px; border-radius:6px; border:none; cursor:pointer;"> 
+                    Reject 
+                  </button> 
+                </div>`; 
+            } else { 
+              actions = ` 
+                <div style="display:flex; gap:5px; flex-wrap:wrap;"> 
+                  <button onclick="dashViewApps('${tid}')" 
+                    style="font-size:10px; font-weight:600; color:#1E3A5F; background:white; padding:5px 9px; border-radius:6px; border:1.5px solid #1E3A5F; cursor:pointer; white-space:nowrap;"> 
+                    View Apps ${appCount > 0 ? '('+appCount+')' : ''} 
+                  </button> 
+                  ${(status === 'open' || status === 'funded') ? ` 
+                  <button onclick="cancelTask('${tid}')" 
+                    style="font-size:10px; font-weight:600; color:white; background:#6c757d; padding:5px 9px; border-radius:6px; border:none; cursor:pointer; white-space:nowrap;"> 
+                    Cancel 
+                  </button>` : ''} 
+                </div>`; 
+            } 
+        
+            return ` 
+              <div style="display:grid; grid-template-columns:2.2fr 0.9fr 0.9fr 0.7fr 0.9fr 2fr; padding:13px 18px; border-bottom:0.5px solid #f5f5f5; align-items:center; gap:8px; background:${bgColor};"> 
+                <div> 
+                  <div style="font-size:13px; font-weight:600; color:#1E3A5F;">${t.title || 'Task'}</div> 
+                  <div style="font-size:10px; color:#aaa; margin-top:2px;">${t.createdAt ? new Date(t.createdAt).toLocaleDateString() : ''} · ${t.duration || 1} day</div> 
+                </div> 
+                <span style="font-size:11px; color:#5a6a7a;">${t.category || '—'}</span> 
+                <span style="font-size:11px; color:#5a6a7a;">${t.location || '—'}</span> 
+                <span style="font-size:12px; font-weight:600; color:#1E3A5F;">₹${t.amount || t.reward || '—'}</span> 
+                ${statusBadge} 
+                ${actions} 
+                <!-- Applications expand area --> 
+                <div id="dash-apps-${tid}" style="display:none; grid-column:1/-1; background:#FAF8F3; border-radius:10px; padding:14px; margin-top:4px; border:0.5px solid #e2e8f0;"></div> 
+              </div>`; 
+          }).join(''); 
+        
+          // Pagination 
+          renderDashPagination(); 
+        } 
+        
+        function renderDashPagination() { 
+          const totalPages = Math.ceil(dashFilteredTasks.length / dashPageSize); 
+          const paginationEl = document.getElementById('dashPagination'); 
+          if (!paginationEl || totalPages <= 1) { if(paginationEl) paginationEl.innerHTML = ''; return; } 
+          
+          let html = ''; 
+          if (dashCurrentPage > 1) html += `<div onclick="dashGoPage(${dashCurrentPage-1})" style="padding:4px 10px; border:0.5px solid #e2e8f0; border-radius:5px; font-size:11px; color:#5a6a7a; background:white; cursor:pointer;">Prev</div>`; 
+          for (let i = 1; i <= totalPages; i++) { 
+            html += `<div onclick="dashGoPage(${i})" style="padding:4px 10px; background:${i===dashCurrentPage?'#1E3A5F':'white'}; color:${i===dashCurrentPage?'white':'#5a6a7a'}; border:0.5px solid #e2e8f0; border-radius:5px; font-size:11px; cursor:pointer;">${i}</div>`; 
+          } 
+          if (dashCurrentPage < totalPages) html += `<div onclick="dashGoPage(${dashCurrentPage+1})" style="padding:4px 10px; border:0.5px solid #e2e8f0; border-radius:5px; font-size:11px; color:#5a6a7a; background:white; cursor:pointer;">Next</div>`; 
+          paginationEl.innerHTML = html; 
+        } 
+        
+        function dashGoPage(page) { 
+          dashCurrentPage = page; 
+          renderDashTable(); 
+          document.getElementById('provDashTab').scrollIntoView({ behavior:'smooth' }); 
+        } 
+        
+        function dashViewApps(taskId) { 
+          const appsEl = document.getElementById('dash-apps-' + taskId); 
+          if (!appsEl) return; 
+          if (appsEl.style.display === 'block') { appsEl.style.display = 'none'; return; } 
+          appsEl.style.display = 'block'; 
+          appsEl.innerHTML = '<div style="color:#5a6a7a; font-size:12px;">Loading applications...</div>'; 
+          
+          fetch(`${API_URL}/tasks/${taskId}/applications`) 
+            .then(r => r.json()) 
+            .then(d => { 
+              const arr = d.applications || []; 
+              if (!arr.length) { appsEl.innerHTML = '<p style="color:#666; font-size:12px;">No applications yet.</p>'; return; } 
+              appsEl.innerHTML = arr.map(a => { 
+                const uid = String(a.userId?._id || a.userId || ''); 
+                const nm = a.userId?.name || a.userId?.email || uid; 
+                const st = a.state || 'APPLIED'; 
+                const filePath = a.sampleFile?.path ? (API_URL + a.sampleFile.path) : null; 
+                return ` 
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border:0.5px solid #e2e8f0; border-radius:10px; background:white; margin-bottom:8px;"> 
+                    <div> 
+                      <div style="font-size:13px; font-weight:600; color:#1E3A5F;">${nm}</div> 
+                      <span style="font-size:10px; font-weight:600; color:#5a6a7a; background:#f8f9fa; padding:2px 8px; border-radius:10px;">${st}</span> 
+                      ${a.message ? `<div style="font-size:11px; color:#5a6a7a; margin-top:4px;">${a.message}</div>` : ''} 
+                    </div> 
+                    <div style="display:flex; gap:8px; align-items:center;"> 
+                      ${filePath ? `<a href="${filePath}" target="_blank" style="font-size:11px; color:#1E3A5F; border:1.5px solid #1E3A5F; padding:5px 10px; border-radius:6px; text-decoration:none; white-space:nowrap;">View Sample</a>` : ''} 
+                      ${st === 'APPLIED' ? ` 
+                        <button onclick="dashAcceptWorker('${taskId}','${uid}')" style="font-size:11px; font-weight:600; color:white; background:#C9A84C; padding:5px 12px; border-radius:6px; border:none; cursor:pointer;">Accept Worker</button> 
+                        <button onclick="dashRejectApp('${taskId}','${uid}')" style="font-size:11px; font-weight:600; color:white; background:#dc3545; padding:5px 10px; border-radius:6px; border:none; cursor:pointer;">Reject</button> 
+                      ` : ''} 
+                    </div> 
+                  </div>`; 
+              }).join(''); 
+            }) 
+            .catch(() => appsEl.innerHTML = '<p style="color:#dc3545; font-size:12px;">Failed to load</p>'); 
+        } 
+        
+        function dashAcceptWorker(taskId, userId) { 
+          const daysStr = prompt('Task duration (days)?', '3'); 
+          const days = Number(daysStr || 3); 
+          fetch(`${API_URL}/tasks/applications/accept`, { 
+            method: 'POST', 
+            headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify({ taskId: taskId, userId: userId, approvedBy: currentUser.userId, taskDurationDays: days }) 
+          }) 
+            .then(r => r.json()) 
+            .then(d => { alert(d.message || 'Worker accepted!'); loadDashboardTasks(); }) 
+            .catch(e => alert('Error: ' + e.message)); 
+        } 
+        
+        function dashRejectApp(taskId, userId) { 
+          fetch(`${API_URL}/tasks/applications/status`, { 
+            method: 'POST', headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify({ taskId: taskId, userId: userId, approvedBy: currentUser.userId, status: 'REJECTED' }) 
+          }).then(r => r.json()).then(d => { alert(d.message || 'Rejected'); loadDashboardTasks(); }) 
+            .catch(e => alert('Error: ' + e.message)); 
+        } 
+        
+        function dashApproveTask(taskId, workerId) { 
+          approveTask(taskId, null, workerId); 
+        } 
+        
+        function dashDeclineTask(taskId) { 
+          declineTask(taskId); 
+        } 
+        
+        function dashRejectFinal(taskId) { 
+          const remark = prompt('Optional remarks for rejection:'); 
+          fetch(`${API_URL}/tasks/reject-final`, { 
+            method: 'POST', headers: {'Content-Type':'application/json'}, 
+            body: JSON.stringify({ taskId, approvedBy: currentUser.userId, remark }) 
+          }).then(r => r.json()).then(x => { alert(x.message || 'Rejected'); loadDashboardTasks(); }) 
+            .catch(e => alert(e.message)); 
         }
 
         async function providerCreateTask() {
