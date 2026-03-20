@@ -2295,88 +2295,97 @@
                     </div>
                 </div>
 
-                <div id="userDashTab" class="tri-tab-content hidden"> 
-                  <div style="padding:1.5rem;"> 
-                
-                    <!-- Page header --> 
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:10px;"> 
-                      <div> 
-                        <div style="font-size:20px; font-weight:700; color:#1E3A5F;">Worker Dashboard</div> 
-                        <div style="font-size:12px; color:#5a6a7a; margin-top:3px;">Track your performance and ongoing tasks</div> 
-                      </div> 
-                      <input type="month" id="dashMonth" onchange="renderUserMetrics(); renderUserGraphs();" 
-                        style="padding:7px 12px; border-radius:8px; border:0.5px solid #e2e8f0; font-size:12px; color:#1E3A5F; background:white; outline:none;"/> 
-                    </div> 
-                
-                    <!-- KPI Cards — keep existing IDs --> 
-                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:1.2rem;"> 
-                      <div id="metricCompleted" style="background:white; border:0.5px solid #e2e8f0; border-top:3px solid #1E3A5F; border-radius:10px; padding:16px;"></div> 
-                      <div id="metricOngoing" style="background:white; border:0.5px solid #e2e8f0; border-top:3px solid #f59e0b; border-radius:10px; padding:16px;"></div> 
-                      <div id="metricPending" style="background:white; border:0.5px solid #e2e8f0; border-top:3px solid #8b5cf6; border-radius:10px; padding:16px;"></div> 
-                      <div id="metricEarnings" style="background:#1E3A5F; border-radius:10px; padding:16px;"></div> 
-                    </div> 
-                
-                    <!-- Graphs row — keep existing IDs --> 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:1.2rem;"> 
-                      <div style="background:white; border:0.5px solid #e2e8f0; border-radius:12px; padding:1.2rem;"> 
-                        <div style="font-size:13px; font-weight:700; color:#1E3A5F; margin-bottom:1rem;">Monthly Earnings</div> 
-                        <div id="earningsGraph" style="height:160px; display:flex; align-items:flex-end; gap:4px;"></div> 
-                      </div> 
-                      <div style="background:white; border:0.5px solid #e2e8f0; border-radius:12px; padding:1.2rem;"> 
-                        <div style="font-size:13px; font-weight:700; color:#1E3A5F; margin-bottom:1rem;">Task Completion Trend</div> 
-                        <div id="completionGraph" style="height:160px; display:flex; align-items:flex-end; gap:4px;"></div> 
-                      </div> 
-                    </div> 
-                
-                    <!-- Ongoing + Completed side by side tables --> 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:1.2rem;"> 
-                
-                      <!-- Ongoing Tasks Table --> 
-                      <div style="background:white; border-radius:12px; border:0.5px solid #e2e8f0; overflow:hidden;"> 
-                        <div style="background:#1E3A5F; padding:11px 16px; display:flex; justify-content:space-between; align-items:center;"> 
-                          <span style="font-size:13px; font-weight:700; color:white;">Ongoing Tasks</span> 
-                        </div> 
-                        <div style="display:grid; grid-template-columns:2fr 0.8fr 1fr 1fr; background:#f8f9fa; padding:9px 16px; border-bottom:0.5px solid #e2e8f0; gap:8px;"> 
-                          <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">TASK</span> 
-                          <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">AMOUNT</span> 
-                          <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">STATUS</span> 
-                          <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">ACTION</span> 
-                        </div> 
-                        <div id="userOngoingList"></div> 
-                      </div> 
-                
-                      <!-- Completed Tasks Table --> 
-                      <div style="background:white; border-radius:12px; border:0.5px solid #e2e8f0; overflow:hidden;"> 
-                        <div style="background:#28a745; padding:11px 16px; display:flex; justify-content:space-between; align-items:center;"> 
-                          <span style="font-size:13px; font-weight:700; color:white;">Completed Tasks</span> 
-                        </div> 
-                        <div style="display:grid; grid-template-columns:2fr 0.8fr 1fr; background:#f8f9fa; padding:9px 16px; border-bottom:0.5px solid #e2e8f0; gap:8px;"> 
-                          <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">TASK</span> 
-                          <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">AMOUNT</span> 
-                          <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">STATUS</span> 
-                        </div> 
-                        <div id="userCompletedList"></div> 
-                      </div> 
-                
-                    </div> 
-                
-                    <!-- Applied Tasks Table full width --> 
-                    <div style="background:white; border-radius:12px; border:0.5px solid #e2e8f0; overflow:hidden;"> 
-                      <div style="background:#C9A84C; padding:11px 16px;"> 
-                        <span style="font-size:13px; font-weight:700; color:white;">Applied Tasks & Status</span> 
-                      </div> 
-                      <div style="display:grid; grid-template-columns:2fr 0.8fr 0.8fr 1fr 0.8fr; background:#f8f9fa; padding:9px 16px; border-bottom:0.5px solid #e2e8f0; gap:8px;"> 
-                        <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">TASK</span> 
-                        <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">AMOUNT</span> 
-                        <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">APPLIED ON</span> 
-                        <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">STATUS</span> 
-                        <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">ACTION</span> 
-                      </div> 
-                      <div id="userAppliedList"></div> 
-                    </div> 
-                
-                  </div> 
-                </div>
+ <div id="userDashTab" class="tri-tab-content hidden"> 
+   <div style="padding:1.5rem;"> 
+ 
+     <!-- Header --> 
+     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:10px;"> 
+       <div> 
+         <div style="font-size:20px; font-weight:700; color:#1E3A5F;">Worker Dashboard</div> 
+         <div style="font-size:12px; color:#5a6a7a; margin-top:3px;">Track your performance and task activity</div> 
+       </div> 
+       <input type="month" id="dashMonth" onchange="renderUserMetrics(); renderUserGraphs();" 
+         style="padding:7px 12px; border-radius:8px; border:0.5px solid #e2e8f0; font-size:12px; color:#1E3A5F; background:white; outline:none;"/> 
+     </div> 
+ 
+     <!-- KPI Cards --> 
+     <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:1.2rem;"> 
+       <div id="metricCompleted" style="background:white; border:0.5px solid #e2e8f0; border-top:3px solid #1E3A5F; border-radius:10px; padding:16px;"></div> 
+       <div id="metricOngoing" style="background:white; border:0.5px solid #e2e8f0; border-top:3px solid #f59e0b; border-radius:10px; padding:16px;"></div> 
+       <div id="metricPending" style="background:white; border:0.5px solid #e2e8f0; border-top:3px solid #8b5cf6; border-radius:10px; padding:16px;"></div> 
+       <div id="metricEarnings" style="background:#1E3A5F; border-radius:10px; padding:16px;"></div> 
+     </div> 
+ 
+     <!-- Graphs row --> 
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:1.2rem;"> 
+       <div style="background:white; border:0.5px solid #e2e8f0; border-radius:12px; padding:1.2rem;"> 
+         <div style="font-size:13px; font-weight:700; color:#1E3A5F; margin-bottom:1rem;">Monthly Earnings</div> 
+         <div id="earningsGraph" style="height:160px; display:flex; align-items:flex-end; gap:4px;"></div> 
+       </div> 
+       <div style="background:white; border:0.5px solid #e2e8f0; border-radius:12px; padding:1.2rem;"> 
+         <div style="font-size:13px; font-weight:700; color:#1E3A5F; margin-bottom:1rem;">Task Completion Trend</div> 
+         <div id="completionGraph" style="height:160px; display:flex; align-items:flex-end; gap:4px;"></div> 
+       </div> 
+     </div> 
+ 
+     <!-- Single table with 3 tabs --> 
+     <div style="background:white; border-radius:12px; border:0.5px solid #e2e8f0; overflow:hidden;"> 
+ 
+       <!-- Tab buttons --> 
+       <div style="display:flex; border-bottom:0.5px solid #e2e8f0;"> 
+         <div id="dashTab_ongoing" onclick="switchDashTab('ongoing')" 
+           style="padding:12px 20px; font-size:12px; font-weight:700; color:white; background:#1E3A5F; cursor:pointer; border-right:0.5px solid #e2e8f0;"> 
+           Ongoing Tasks 
+         </div> 
+         <div id="dashTab_completed" onclick="switchDashTab('completed')" 
+           style="padding:12px 20px; font-size:12px; font-weight:600; color:#5a6a7a; background:white; cursor:pointer; border-right:0.5px solid #e2e8f0;"> 
+           Completed Tasks 
+         </div> 
+         <div id="dashTab_applied" onclick="switchDashTab('applied')" 
+           style="padding:12px 20px; font-size:12px; font-weight:600; color:#5a6a7a; background:white; cursor:pointer;"> 
+           Applied Tasks 
+         </div> 
+       </div> 
+ 
+       <!-- ONGOING TABLE --> 
+       <div id="dashContent_ongoing"> 
+         <div style="display:grid; grid-template-columns:2fr 0.8fr 0.8fr 1fr 1fr; background:#f8f9fa; padding:9px 18px; border-bottom:0.5px solid #e2e8f0; gap:8px;"> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">TASK NAME</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">AMOUNT</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">LOCATION</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">STATUS</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">ACTION</span> 
+         </div> 
+         <div id="userOngoingList"></div> 
+       </div> 
+ 
+       <!-- COMPLETED TABLE --> 
+       <div id="dashContent_completed" style="display:none;"> 
+         <div style="display:grid; grid-template-columns:2fr 0.8fr 0.8fr 1fr; background:#f8f9fa; padding:9px 18px; border-bottom:0.5px solid #e2e8f0; gap:8px;"> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">TASK NAME</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">AMOUNT</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">LOCATION</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">STATUS</span> 
+         </div> 
+         <div id="userCompletedList"></div> 
+       </div> 
+ 
+       <!-- APPLIED TABLE --> 
+       <div id="dashContent_applied" style="display:none;"> 
+         <div style="display:grid; grid-template-columns:2fr 0.8fr 0.8fr 1fr 0.8fr; background:#f8f9fa; padding:9px 18px; border-bottom:0.5px solid #e2e8f0; gap:8px;"> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">TASK NAME</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">AMOUNT</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">APPLIED ON</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">STATUS</span> 
+           <span style="font-size:10px; font-weight:700; color:#5a6a7a; letter-spacing:1px;">ACTION</span> 
+         </div> 
+         <div id="userAppliedList"></div> 
+       </div> 
+ 
+     </div> 
+ 
+   </div> 
+ </div> 
 
                 <!-- PROVIDER VIEWS -->
                 <div id="provCreateTab" class="tri-tab-content hidden">
@@ -4760,22 +4769,22 @@
         list.innerHTML = applied.map((x, i) => { 
           const t = x.task; 
           const st = String(x.app.state || x.app.status || 'APPLIED').toUpperCase(); 
-          const badge = st === 'ACCEPTED' ? 'APPROVED' : (st === 'REJECTED' ? 'REJECTED' : 'PENDING'); 
+          const badge = st === 'ACCEPTED' ? 'APPROVED' : st === 'REJECTED' ? 'REJECTED' : 'PENDING'; 
           const badgeColor = badge === 'APPROVED' ? '#3b82f6' : badge === 'REJECTED' ? '#dc3545' : '#8b5cf6'; 
           const badgeBg = badge === 'APPROVED' ? 'rgba(59,130,246,0.1)' : badge === 'REJECTED' ? 'rgba(220,53,69,0.1)' : 'rgba(139,92,246,0.1)'; 
           const badgeBorder = badge === 'APPROVED' ? 'rgba(59,130,246,0.3)' : badge === 'REJECTED' ? 'rgba(220,53,69,0.3)' : 'rgba(139,92,246,0.3)'; 
           const when = x.app.createdAt ? new Date(x.app.createdAt).toLocaleDateString() : '—'; 
           const bg = i % 2 === 0 ? 'white' : '#fafafa'; 
-          return `<div style="display:grid; grid-template-columns:2fr 0.8fr 0.8fr 1fr 0.8fr; padding:11px 16px; border-bottom:0.5px solid #f5f5f5; align-items:center; gap:8px; background:${bg};"> 
+          return `<div style="display:grid; grid-template-columns:2fr 0.8fr 0.8fr 1fr 0.8fr; padding:12px 18px; border-bottom:0.5px solid #f5f5f5; align-items:center; gap:8px; background:${bg};"> 
             <div> 
-              <div style="font-size:12px; font-weight:600; color:#1E3A5F;">${t.title || 'Task'}</div> 
-              <div style="font-size:10px; color:#aaa;">${t.location || ''}</div> 
+              <div style="font-size:13px; font-weight:600; color:#1E3A5F;">${t.title || 'Task'}</div> 
+              <div style="font-size:10px; color:#aaa; margin-top:2px;">${t.location || '—'}</div> 
             </div> 
             <span style="font-size:12px; font-weight:600; color:#1E3A5F;">₹${Number(t.amount||0)}</span> 
             <span style="font-size:11px; color:#5a6a7a;">${when}</span> 
-            <span style="font-size:9px; font-weight:700; color:${badgeColor}; background:${badgeBg}; padding:3px 7px; border-radius:20px; border:1px solid ${badgeBorder}; width:fit-content; display:inline-block;">${badge}</span> 
+            <span style="font-size:9px; font-weight:700; color:${badgeColor}; background:${badgeBg}; padding:3px 7px; border-radius:20px; border:1px solid ${badgeBorder}; display:inline-block; width:fit-content;">${badge}</span> 
             <button style="font-size:9px; font-weight:600; color:#1E3A5F; background:white; border:1px solid #1E3A5F; padding:4px 8px; border-radius:5px; cursor:pointer;" 
-              onclick="openTaskDetail(${JSON.stringify({ _id: t._id, title: t.title, description: t.description, amount: t.amount, duration: t.duration, location: t.location, workType: t.workType, skillset: t.skillset, applications: t.applications, acceptedBy: t.acceptedBy, approvedDate: t.approvedDate, submissionDeadline: t.submissionDeadline, finalFile: t.finalFile, finalStatus: t.finalStatus }).replace(/\"/g,'&quot;')})"> 
+              onclick="openTaskDetail(${JSON.stringify({_id:t._id,title:t.title,description:t.description,amount:t.amount,duration:t.duration,location:t.location,workType:t.workType,skillset:t.skillset,applications:t.applications,acceptedBy:t.acceptedBy,approvedDate:t.approvedDate,submissionDeadline:t.submissionDeadline,finalFile:t.finalFile,finalStatus:t.finalStatus}).replace(/\"/g,'&quot;')})"> 
               View 
             </button> 
           </div>`; 
@@ -5294,19 +5303,20 @@
                     const tid = String(t._id); 
                     const status = String(t.status).toUpperCase(); 
                     const bg = i % 2 === 0 ? 'white' : '#fafafa'; 
-                    return `<div style="display:grid; grid-template-columns:2fr 0.8fr 1fr 1fr; padding:11px 16px; border-bottom:0.5px solid #f5f5f5; align-items:center; gap:8px; background:${bg};"> 
+                    return `<div style="display:grid; grid-template-columns:2fr 0.8fr 0.8fr 1fr 1fr; padding:12px 18px; border-bottom:0.5px solid #f5f5f5; align-items:center; gap:8px; background:${bg};"> 
                       <div> 
-                        <div style="font-size:12px; font-weight:600; color:#1E3A5F;">${t.title || 'Task'}</div> 
-                        <div style="font-size:10px; color:#aaa;">${t.location || ''}</div> 
+                        <div style="font-size:13px; font-weight:600; color:#1E3A5F;">${t.title || 'Task'}</div> 
+                        <div style="font-size:10px; color:#aaa; margin-top:2px;">${t.duration || 1} day</div> 
                       </div> 
                       <span style="font-size:12px; font-weight:600; color:#1E3A5F;">₹${Number(t.amount||0)}</span> 
-                      <span style="font-size:9px; font-weight:700; color:#f59e0b; background:rgba(245,158,11,0.1); padding:3px 7px; border-radius:20px; border:1px solid rgba(245,158,11,0.3); width:fit-content; display:inline-block;">${status}</span> 
+                      <span style="font-size:11px; color:#5a6a7a;">${t.location || '—'}</span> 
+                      <span style="font-size:9px; font-weight:700; color:#f59e0b; background:rgba(245,158,11,0.1); padding:3px 7px; border-radius:20px; border:1px solid rgba(245,158,11,0.3); display:inline-block; width:fit-content;">${status}</span> 
                       <div style="display:flex; gap:4px;"> 
-                        <button class="btn-small" data-action="status" data-id="${tid}" style="font-size:9px; padding:4px 8px; background:#1E3A5F; color:white; border:none; border-radius:5px; cursor:pointer;">Update Status</button> 
-                        <button class="btn-small" data-action="detail" data-id="${tid}" style="font-size:9px; padding:4px 8px; background:white; color:#1E3A5F; border:1px solid #1E3A5F; border-radius:5px; cursor:pointer;">View</button> 
+                        <button data-action="status" data-id="${tid}" style="font-size:9px; font-weight:600; color:white; background:#1E3A5F; border:none; padding:4px 8px; border-radius:5px; cursor:pointer;">Update</button> 
+                        <button data-action="detail" data-id="${tid}" style="font-size:9px; font-weight:600; color:#1E3A5F; background:white; border:1px solid #1E3A5F; padding:4px 8px; border-radius:5px; cursor:pointer;">View</button> 
                       </div> 
                     </div>`; 
-                  }).join('') : '<div style="padding:20px 16px; color:#5a6a7a; font-size:13px; text-align:center;">No ongoing tasks for this period.</div>'; 
+                  }).join('') : '<div style="padding:24px; text-align:center; color:#5a6a7a; font-size:13px;">No ongoing tasks for this period.</div>'; 
                     
                     // Re-attach listeners for ongoingTasks
                     ongoingEl.querySelectorAll('button[data-action]').forEach(b => {
@@ -5329,18 +5339,18 @@
                 if (completedEl) { 
                   completedEl.innerHTML = completedTasks.length ? completedTasks.map((t, i) => { 
                     const st = String(t.status).toLowerCase(); 
-                    let badgeText = st === 'paid' ? 'PAID' : st === 'pending_release' || st === 'released' ? 'RELEASED' : 'COMPLETED'; 
-                    const badgeColor = '#28a745'; 
+                    const badgeText = st === 'paid' ? 'PAID' : st === 'pending_release' || st === 'released' ? 'RELEASED' : 'COMPLETED'; 
                     const bg = i % 2 === 0 ? 'white' : '#fafafa'; 
-                    return `<div style="display:grid; grid-template-columns:2fr 0.8fr 1fr; padding:11px 16px; border-bottom:0.5px solid #f5f5f5; align-items:center; gap:8px; background:${bg};"> 
+                    return `<div style="display:grid; grid-template-columns:2fr 0.8fr 0.8fr 1fr; padding:12px 18px; border-bottom:0.5px solid #f5f5f5; align-items:center; gap:8px; background:${bg};"> 
                       <div> 
-                        <div style="font-size:12px; font-weight:600; color:#1E3A5F;">${t.title || 'Task'}</div> 
-                        <div style="font-size:10px; color:#aaa;">${t.location || ''}</div> 
+                        <div style="font-size:13px; font-weight:600; color:#1E3A5F;">${t.title || 'Task'}</div> 
+                        <div style="font-size:10px; color:#aaa; margin-top:2px;">${t.duration || 1} day</div> 
                       </div> 
                       <span style="font-size:12px; font-weight:600; color:#1E3A5F;">₹${Number(t.amount||0)}</span> 
-                      <span style="font-size:9px; font-weight:700; color:${badgeColor}; background:rgba(40,167,69,0.1); padding:3px 7px; border-radius:20px; border:1px solid rgba(40,167,69,0.3); width:fit-content; display:inline-block;">${badgeText}</span> 
+                      <span style="font-size:11px; color:#5a6a7a;">${t.location || '—'}</span> 
+                      <span style="font-size:9px; font-weight:700; color:#28a745; background:rgba(40,167,69,0.1); padding:3px 7px; border-radius:20px; border:1px solid rgba(40,167,69,0.3); display:inline-block; width:fit-content;">${badgeText}</span> 
                     </div>`; 
-                  }).join('') : '<div style="padding:20px 16px; color:#5a6a7a; font-size:13px; text-align:center;">No completed tasks for this period.</div>'; 
+                  }).join('') : '<div style="padding:24px; text-align:center; color:#5a6a7a; font-size:13px;">No completed tasks for this period.</div>'; 
                 }
             } catch (_) {}
         }
@@ -6402,5 +6412,29 @@
             loadProviderTasks();
         }
     </script>
+<script>
+ function switchDashTab(tab) { 
+   // Hide all content 
+   ['ongoing','completed','applied'].forEach(t => { 
+     const content = document.getElementById('dashContent_' + t); 
+     const tabBtn = document.getElementById('dashTab_' + t); 
+     if (content) content.style.display = 'none'; 
+     if (tabBtn) { 
+       tabBtn.style.background = 'white'; 
+       tabBtn.style.color = '#5a6a7a'; 
+       tabBtn.style.fontWeight = '600'; 
+     } 
+   }); 
+   // Show selected 
+   const activeContent = document.getElementById('dashContent_' + tab); 
+   const activeBtn = document.getElementById('dashTab_' + tab); 
+   if (activeContent) activeContent.style.display = 'block'; 
+   if (activeBtn) { 
+     activeBtn.style.background = '#1E3A5F'; 
+     activeBtn.style.color = 'white'; 
+     activeBtn.style.fontWeight = '700'; 
+   } 
+ } 
+</script>
 </body>
 </html>
