@@ -3193,11 +3193,7 @@
                 const resendBtn = document.getElementById('resendOtpBtn');
                 if (resendBtn) resendBtn.disabled = true;
                 if (otpStatus) {
-                    if (data.devOtp) {
-                        otpStatus.textContent = `Enter the OTP sent to your email. Dev OTP: ${data.devOtp}`;
-                    } else {
-                        otpStatus.textContent = 'Enter the OTP sent to your email';
-                    }
+                    otpStatus.textContent = 'Enter the OTP sent to your email';
                 }
                 showMessage(messageDiv, 'Registration successful! Verify your email to continue.', 'success');
             } catch (error) {

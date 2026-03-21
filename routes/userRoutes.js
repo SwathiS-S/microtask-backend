@@ -7,6 +7,7 @@ const Wallet = require('../models/Wallet');
 const Withdrawal = require('../models/Withdrawal');   // ← ADD THIS 
 const WithdrawalRequest = require('../models/WithdrawalRequest');
 const { createPayoutForUser } = require('../services/razorpay');
+const { sendOTPEmail } = require('../utils/emailService');
 
 // Helper function to get wallet 
 async function getWalletByUserId(userId) { 
@@ -154,19 +155,19 @@ router.post('/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    if (!user.emailOtp || !user.emailOtpExpires) return res.status(400).json({ success: false, message: 'OTP not generated' });
-    if (Date.now() > new Date(user.emailOtpExpires).getTime()) {
-      user.emailOtp = undefined;
-      user.emailOtpExpires = undefined;
+    if (!user.otp || !user.otpExpiry) return res.status(400).json({ success: false, message: 'OTP not generated' });
+    if (Date.now() > new Date(user.otpExpiry).getTime()) {
+      user.otp = null;
+      user.otpExpiry = null;
       await user.save();
       return res.status(400).json({ success: false, message: 'OTP expired' });
     }
-    if (String(otp) !== String(user.emailOtp)) {
+    if (String(otp) !== String(user.otp)) {
       return res.status(400).json({ success: false, message: 'Invalid OTP' });
     }
     user.isEmailVerified = true;
-    user.emailOtp = undefined;
-    user.emailOtpExpires = undefined;
+    user.otp = null;
+    user.otpExpiry = null;
     await user.save();
     return res.json({ success: true, message: 'Email verified' });
   } catch (err) {
@@ -181,22 +182,23 @@ router.post('/register', async (req, res) => {
     const otp = String(Math.floor(100000 + Math.random() * 900000));
     const user = new User(Object.assign({}, body, {
       isEmailVerified: false,
-      emailOtp: otp,
-      emailOtpExpires: new Date(Date.now() + 5 * 60 * 1000)
+      otp: otp,
+      otpExpiry: new Date(Date.now() + 10 * 60 * 1000) // expires in 10 mins
     }));
     await user.save();
-    let isMock = false;
+    
     try {
-      const r = await sendEmail(user.email, 'TaskNest Email Verification OTP', `Your OTP is: ${otp}`);
-      isMock = !!(r && r.isMock);
-    } catch (_) {}
+      await sendOTPEmail(user.email, otp, user.name);
+    } catch (err) {
+      console.error('Failed to send OTP email:', err);
+    }
+
     res.json({
       success: true,
-      message: isMock ? 'Registration successful. (Mock Mode: Use Dev OTP)' : 'Registration successful. OTP sent to email.',
+      message: 'Registration successful. OTP sent to ' + user.email + '. Please check your inbox.',
       userId: user._id,
       email: user.email,
-      name: user.name,
-      devOtp: isMock ? otp : undefined
+      name: user.name
     });
   } catch (err) {
     res.status(400).json({ 
