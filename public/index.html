@@ -2447,10 +2447,16 @@
                         <span class="category-section-label">Popular Categories</span>
                         <div id="categoryChips" class="chips" style="flex-wrap:wrap; gap: 10px; margin-bottom: 24px;"></div>
                         
-                        <div class="search-wrapper-premium">
-                            <svg style="width:18px; height:18px; color:rgba(26,32,53,0.4);"><use href="#icon-search"/></svg>
-                            <input id="simpleSearchInput" placeholder="Search tasks by title, skill, or location..." oninput="syncAndSearch(this.value)"/>
-                            <button class="btn-premium" style="padding: 0 20px; height: 32px; border-radius: 6px;" onclick="renderFilterTasks()">Search</button>
+                        <!-- Search container — input and button joined together -->
+                        <div style="display:flex; background:white; border:1.5px solid #e2e8f0; border-radius:10px; overflow:hidden; margin-bottom:16px;">
+                            <input id="simpleSearchInput" type="text"
+                                placeholder="Search tasks by title, skill, or location..."
+                                oninput="syncAndSearch(this.value)"
+                                style="flex:1; padding:12px 16px; border:none; outline:none; font-size:13px; color:#333; background:transparent;">
+                            <button onclick="renderFilterTasks()"
+                                style="padding:12px 24px; background:#1E3A5F; color:white; border:none; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;">
+                                Search
+                            </button>
                         </div>
                     </div>
                     <div id="filterTasksList" class="task-grid-new" style="margin-top:32px;"></div>
@@ -2476,10 +2482,16 @@
                         </div>
                         <button class="btn-small" style="background:#f59e0b; border-radius:12px;" onclick="showCreateWalletModal()">Connect Bank</button>
                     </div>
-                    <!-- Withdrawal Button for User (Hidden if no wallet) -->
-                    <div id="userWithdrawalContainer" class="hidden" style="margin-top:24px; display: flex; flex-direction: column; gap: 12px;">
-                        <button class="btn-small" style="width:100%; padding:14px; background:#22c55e; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;" onclick="showWithdrawModal()">Withdraw to Bank</button>
-                        <button class="btn-small" style="width:100%; padding:14px; background:#3b82f6; color: #ffffff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);" onclick="showEditBankModal()">Change or Edit Bank Details</button>
+                    <!-- Withdrawal Buttons Section -->
+                    <div id="userWithdrawalContainer" class="hidden" style="margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                        <button onclick="showWithdrawModal()" 
+                            style="padding:12px 32px; background:#C9A84C; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; min-width:180px;">
+                            Withdraw to Bank
+                        </button>
+                        <button onclick="showEditBankModal()" 
+                            style="padding:12px 32px; background:#1E3A5F; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; min-width:180px;">
+                            Change Bank Details
+                        </button>
                     </div>
                     <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f3f4f6;">
                         <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Transaction History</h4>
