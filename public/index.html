@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>TaskNest - Microtask Platform</title>
     <style>
         :root {
@@ -1673,6 +1673,213 @@
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* ===== MOBILE RESPONSIVE ===== */ 
+        @media (max-width: 768px) { 
+        
+          /* Sidebar becomes top navbar on mobile */ 
+          .sidebar, #sidebar { 
+            width: 100% !important; 
+            height: auto !important; 
+            position: relative !important; 
+            display: flex !important; 
+            flex-direction: row !important; 
+            flex-wrap: wrap !important; 
+            padding: 8px !important; 
+            gap: 4px !important; 
+          } 
+        
+          /* Main content full width */ 
+          .main-content, #mainContent, .content-area { 
+            margin-left: 0 !important; 
+            width: 100% !important; 
+            padding: 10px !important; 
+          } 
+        
+          /* Dashboard layout — stack on mobile */ 
+          .dashboard-layout, #dashboardLayout { 
+            flex-direction: column !important; 
+          } 
+        
+          /* KPI cards — 2 per row on mobile */ 
+          #metricCompleted, #metricOngoing, #metricPending, #metricEarnings { 
+            min-width: calc(50% - 10px) !important; 
+          } 
+        
+          /* Graphs — full width on mobile */ 
+          #earningsGraph, #completionGraph { 
+            width: 100% !important; 
+          } 
+        
+          /* Table grids — scroll horizontally on mobile */ 
+          #dashTasksTableBody > div, 
+          #userOngoingList > div, 
+          #userCompletedList > div, 
+          #userAppliedList > div { 
+            display: flex !important; 
+            flex-direction: column !important; 
+            gap: 4px !important; 
+            padding: 12px !important; 
+          } 
+        
+          /* Table headers — hide on mobile, show as labels */ 
+          .table-header-row { 
+            display: none !important; 
+          } 
+        
+          /* Category pills — scroll horizontally */ 
+          .category-pills { 
+            overflow-x: auto !important; 
+            white-space: nowrap !important; 
+            -webkit-overflow-scrolling: touch !important; 
+          } 
+        
+          /* Login page — stack on mobile */ 
+          .login-split { 
+            grid-template-columns: 1fr !important; 
+          } 
+        
+          /* Hide right panel image on mobile */ 
+          .login-image-panel { 
+            display: none !important; 
+          } 
+        
+          /* Landing page hero buttons — stack on mobile */ 
+          .hero-buttons { 
+            flex-direction: column !important; 
+            align-items: center !important; 
+          } 
+        
+          /* Landing page features grid — 2 columns on mobile */ 
+          .features-grid { 
+            grid-template-columns: 1fr 1fr !important; 
+          } 
+        
+          /* How it works steps — single column */ 
+          .steps-grid { 
+            grid-template-columns: 1fr !important; 
+          } 
+        
+          /* Provider dashboard table — card view on mobile */ 
+          #dashTasksTableBody > div[style*='grid'] { 
+            display: block !important; 
+            border-left: 3px solid #C9A84C !important; 
+            margin-bottom: 8px !important; 
+            border-radius: 0 8px 8px 0 !important; 
+          } 
+        
+          /* Tab buttons — scrollable on mobile */ 
+          .dash-tabs { 
+            overflow-x: auto !important; 
+            white-space: nowrap !important; 
+          } 
+        
+          /* Wallet section — stack on mobile */ 
+          #userWalletTab .wallet-grid { 
+            grid-template-columns: 1fr !important; 
+          } 
+        
+          /* Modal — full screen on mobile */ 
+          .modal-content { 
+            width: 95% !important; 
+            max-width: 95% !important; 
+            margin: 10px auto !important; 
+            max-height: 90vh !important; 
+            overflow-y: auto !important; 
+          } 
+        
+          /* Buttons — full width on mobile forms */ 
+          .btn-full-mobile { 
+            width: 100% !important; 
+          } 
+        
+          /* Typography adjustments */ 
+          h1, .page-title { font-size: 20px !important; } 
+          h2 { font-size: 18px !important; } 
+          h3 { font-size: 15px !important; } 
+        
+          /* Hide non-essential elements on mobile */ 
+          .desktop-only { display: none !important; } 
+        
+          /* Show mobile-only elements */ 
+          .mobile-only { display: block !important; } 
+        
+          /* Task cards on mobile — full width */ 
+          .task-grid-new { 
+            grid-template-columns: 1fr !important; 
+          } 
+        
+          /* Navigation tabs on mobile */ 
+          .tri-tab-nav { 
+            overflow-x: auto !important; 
+            white-space: nowrap !important; 
+            -webkit-overflow-scrolling: touch !important; 
+          } 
+        
+          /* Filter bar — stack on mobile */ 
+          .filter-bar { 
+            flex-direction: column !important; 
+            gap: 8px !important; 
+          } 
+        
+          /* Search input full width on mobile */ 
+          #dashTaskSearch { 
+            width: 100% !important; 
+          } 
+        
+          /* Stat grids — 2 col on mobile */ 
+          [style*='grid-template-columns: repeat(4'] { 
+            grid-template-columns: repeat(2, 1fr) !important; 
+          } 
+        
+          /* Two col grids become single col */ 
+          [style*='grid-template-columns: 1fr 1fr'] { 
+            grid-template-columns: 1fr !important; 
+          } 
+        
+          /* Provider/user table rows — card style on mobile */ 
+          [style*='grid-template-columns: 2.2fr'] { 
+            display: flex !important; 
+            flex-direction: column !important; 
+            gap: 6px !important; 
+            padding: 12px 14px !important; 
+            border-left: 3px solid #C9A84C !important; 
+            margin-bottom: 6px !important; 
+          } 
+        
+          /* Action buttons row on mobile */ 
+          [style*='display:flex; gap:5px'] { 
+            flex-wrap: wrap !important; 
+          } 
+        
+          /* Landing page nav links — hide on mobile */ 
+          nav a { display: none !important; } 
+        
+          /* Padding adjustments */ 
+          [style*='padding:1.5rem'] { 
+            padding: 1rem !important; 
+          } 
+          [style*='padding: 2rem'] { 
+            padding: 1rem !important; 
+          } 
+        } 
+        
+        @media (max-width: 480px) { 
+          /* Extra small phones */ 
+          [style*='grid-template-columns: repeat(4'] { 
+            grid-template-columns: 1fr 1fr !important; 
+          } 
+        
+          .category-pills span { 
+            font-size: 10px !important; 
+            padding: 4px 10px !important; 
+          } 
+        
+          /* KPI cards single column on very small */ 
+          #metricCompleted, #metricOngoing, #metricPending, #metricEarnings { 
+            min-width: 100% !important; 
+          } 
+        } 
     </style>
 </head>
 <body>
