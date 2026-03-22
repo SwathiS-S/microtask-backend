@@ -14,6 +14,11 @@ dependencies:
   razorpay_flutter: ^1.4.1
   file_picker: ^8.0.0
   intl: ^0.19.0
+  url_launcher: ^6.2.5        # ← ADD for Legal & Policies links 
+  google_fonts: ^6.1.0        # ← ADD for premium typography 
+  cached_network_image: ^3.3.0 # ← ADD for profile images 
+  shimmer: ^3.0.0             # ← ADD for loading skeletons 
+  fluttertoast: ^8.2.4        # ← ADD for toast messages 
 
 dev_dependencies:
   flutter_test:

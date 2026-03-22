@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme/app_theme.dart';
 import 'screens/onboarding/role_selection_screen.dart';
 import 'screens/onboarding/landing_screen.dart';
 import 'screens/auth/login_screen.dart';
@@ -26,11 +27,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TaskNest',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: const Color(0xFF1E3A5F),
-        scaffoldBackgroundColor: const Color(0xFFF5F6FA),
-      ),
+      theme: AppTheme.theme,
       initialRoute: '/',
       routes: {
         '/': (context) => const RoleSelectionScreen(),

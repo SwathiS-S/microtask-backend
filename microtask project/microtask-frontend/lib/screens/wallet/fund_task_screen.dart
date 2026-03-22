@@ -91,7 +91,7 @@ class _FundTaskScreenState extends State<FundTaskScreen> {
 
       if (orderRes != null && orderRes['success']) {
           var options = {
-            'key': 'rzp_test_SNzqJbQGrxxv81', 
+            'key': 'rzp_live_STnxXSruVLrlO2', 
             'amount': (total * 100).toInt(),
             'name': 'TaskNest',
             'description': 'Funding Task: ${widget.task['title']}',
