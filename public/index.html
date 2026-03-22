@@ -2718,14 +2718,7 @@
 
                 <div id="provWalletTab" class="tri-tab-content hidden">
                     <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px;">Business Wallet</h2>
-                    <p style="color: #6b7280; margin-bottom: 30px;">Manage your funds and employee payments.</p>
-                    <div class="card-soft" style="padding:40px; display:flex; align-items:center; justify-content:space-between; background: #fff; border-radius: 24px;">
-                        <div>
-                            <div style="font-size:14px; color:#6b7280; font-weight: 600; margin-bottom: 8px;">Available Balance</div>
-                            <div style="font-size:48px; font-weight:800; color:#111827;">₹<span id="provWalletBalance">0</span></div>
-                        </div>
-                        <div><button class="add-task-btn" style="width: auto; padding: 14px 30px;" onclick="showProvAddMoney()">+ Add Funds</button></div>
-                    </div>
+                    <p style="color: #6b7280; margin-bottom: 30px;">Manage your employee payments and transaction history.</p>
                     <!-- Create Wallet Button for Provider -->
                     <div id="provCreateWalletContainer" class="card-soft hidden" style="padding:24px; margin-top:24px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 20px; display:flex; align-items:center; justify-content:space-between;">
                         <div>
@@ -2733,19 +2726,6 @@
                             <p style="margin:4px 0 0 0; font-size:13px; color:#856404;">Add bank details to receive commissions and manage payouts.</p>
                         </div>
                         <button class="btn-small" style="background:#f59e0b; border-radius:12px;" onclick="showCreateWalletModal()">Create Wallet</button>
-                    </div>
-                    <div id="provAddMoneySection" class="card-soft hidden" style="padding:32px; margin-top:24px; background: #f9fafb; border-radius: 24px;">
-                        <h4 style="margin:0 0 20px 0; font-size: 18px;">Add money to wallet</h4>
-                        <div class="form-group">
-                            <label>Amount (₹)</label>
-                            <input type="number" id="provAddMoneyAmount" placeholder="Enter amount" min="1" value="500" style="max-width: 300px;">
-                        </div>
-                        <p style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">Choose payment method:</p>
-                        <div style="display:flex; gap:12px; flex-wrap: wrap;">
-                            <button type="button" class="btn-small" onclick="payAndAddMoneyProv('upi')" style="background:#22c55e; padding: 12px 24px;">📱 GPay / UPI</button>
-                            <button type="button" class="btn-small" onclick="payAndAddMoneyProv('bank')" style="background:#3b82f6; padding: 12px 24px;">🏦 Bank Transfer</button>
-                            <button type="button" class="btn-small btn-secondary" onclick="hideProvAddMoney()" style="padding: 12px 24px;">Cancel</button>
-                        </div>
                     </div>
                     <div class="card-soft" style="padding:32px; margin-top:24px; background: #fff; border-radius: 24px;">
                         <h4 style="margin:0 0 24px 0; font-size: 20px; font-weight: 700;">Transaction History</h4>
