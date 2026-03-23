@@ -14,12 +14,20 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files (Prioritize these)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Debug middleware for file requests
+app.use('/api/uploads', (req, res, next) => {
+  console.log(`[File Request] ${req.method} ${req.url}`);
+  next();
+});
 
 // Import Routes
 const userRoutes = require('./routes/userRoutes');

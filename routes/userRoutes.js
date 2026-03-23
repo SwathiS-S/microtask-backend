@@ -244,6 +244,7 @@ router.post('/login', async (req, res) => {
       userId: user._id, 
       email: user.email, 
       name: user.name, 
+      phone: user.phone, // Include phone in login response
       role: user.role, 
       wallet: user.wallet 
     }); 

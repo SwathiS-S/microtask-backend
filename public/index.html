@@ -21,15 +21,13 @@
 
         /* Dashboard Layout */
         .dashboard-layout {
-            display: none; /* Hidden by default until login */
+            display: flex; /* Changed from none to flex */
             width: 100vw;
             height: 100vh;
             background: var(--bg-dark);
             overflow: hidden;
         }
-        .dashboard-layout.active {
-            display: flex;
-        }
+        /* No longer using .dashboard-layout.active, using .hidden class instead */
 
         .sidebar {
             width: 260px;
@@ -2313,7 +2311,7 @@
     <!-- END TASKNEST LANDING PAGE --> 
 
 
-    /* Auth Forms (Modern Option C: Navy left + Cream form right) */
+    <!-- Auth Forms (Modern Option C: Navy left + Cream form right) -->
     <div id="authSection" class="hidden">
         <div class="login-grid" style="display:grid; grid-template-columns:1fr 1fr; min-height:100vh; width:100%;"> 
  
@@ -2457,7 +2455,7 @@
     </div>
 
     <!-- Dashboard (Modern SaaS Layout) -->
-    <div id="dashboardSection" class="dashboard-layout">
+    <div id="dashboardSection" class="dashboard-layout hidden">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
@@ -2498,7 +2496,10 @@
                         <div class="avatar" id="userAvatar" style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #C9A84C, #E8C87A); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #1E3A5F;">TN</div>
                         <div style="display: flex; flex-direction: column; align-items: flex-start;">
                             <span id="displayUserName" style="font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.2;">User Name</span>
-                            <span id="displayUserRole" style="font-size: 10px; color: #C9A84C; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">User Role</span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span id="displayUserRole" style="font-size: 10px; color: #C9A84C; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;">User Role</span>
+                                <span id="displayUserPhone" style="font-size: 10px; color: #6b7280; font-weight: 500;">Phone</span>
+                            </div>
                         </div>
                     </div>
                     <button onclick="logout()" style="display: flex; align-items: center; gap: 6px; background: #dc3545; color: #ffffff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer;">
@@ -3174,10 +3175,12 @@
             // Update Top Bar
             const nameEl = document.getElementById('displayUserName');
             const roleEl = document.getElementById('displayUserRole');
+            const phoneEl = document.getElementById('displayUserPhone');
             const avatarEl = document.getElementById('userAvatar');
             
             if (nameEl) nameEl.textContent = currentUser.name || currentUser.email;
             if (roleEl) roleEl.textContent = isProvider ? 'Task Provider' : 'Worker / User';
+            if (phoneEl) phoneEl.textContent = currentUser.phone ? `• ${currentUser.phone}` : '';
             
             if (avatarEl) {
                 const initials = (currentUser.name || currentUser.email || 'TN').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
@@ -3195,6 +3198,9 @@
             
             if (pName) pName.textContent = currentUser.name || '-';
             if (pEmail) pEmail.textContent = currentUser.email || '-';
+            
+            const pPhone = document.getElementById('profilePhone');
+            if (pPhone) pPhone.textContent = currentUser.phone || 'Not provided';
             if (pRole) pRole.textContent = isProvider ? 'Task Provider' : 'User';
             
             // Wallet Balances
