@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         '/transactions': (context) => const TransactionsScreen(),
         '/add-money': (context) => const AddMoneyScreen(),
         '/wallet': (context) => const WalletScreen(),
-        '/profile': (context) => const ProfileScreen(),
+        '/profile': (context) => const DashboardScreen(),
         '/bank-setup': (context) => const BankSetupScreen(role: 'user'),
         '/admin/withdrawals': (context) => const AdminWithdrawalManagementScreen(),
       },

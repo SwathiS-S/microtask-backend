@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 import '../auth/login_screen.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -7,289 +8,140 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1E3A5F), Color(0xFF2C5282), Color(0xFF1976D2)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
+      backgroundColor: AppTheme.cream,
+      body: Stack(
+        children: [
+          // Background Branding Panel (Navy)
+          Container(
+            height: MediaQuery.of(context).size.height * 0.45,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: AppTheme.navy,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(40),
+                bottomRight: Radius.circular(40),
+              ),
+            ),
+            child: SafeArea(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 40),
-                  
-                  // Logo/Icon Section
+                  // Logo
                   Container(
-                    padding: const EdgeInsets.all(30),
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 3,
+                      color: AppTheme.gold,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.task_alt,
+                        color: Colors.white,
+                        size: 36,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.task_alt,
-                      size: 80,
-                      color: Colors.white,
-                    ),
                   ),
-                  
-                  const SizedBox(height: 40),
-                  
-                  // App Name
+                  const SizedBox(height: 16),
                   const Text(
                     'TaskNest',
                     style: TextStyle(
-                      fontSize: 42,
+                      fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      letterSpacing: 2,
                     ),
                   ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Tagline
-                  const Text(
-                    'Your Gateway to Micro-Task Success',
-                    textAlign: TextAlign.center,
+                  const SizedBox(height: 8),
+                  Text(
+                    'India\'s trusted freelance task platform',
                     style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w300,
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.7),
                     ),
                   ),
-                  
-                  const SizedBox(height: 60),
-                  
-                  // Features Section
-                  _FeatureCard(
-                    icon: Icons.work_outline,
-                    title: 'Find Tasks',
-                    description: 'Browse and accept tasks that match your skills',
+                ],
+              ),
+            ),
+          ),
+
+          // Content Area (Cream Form Panel style)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              decoration: const BoxDecoration(
+                color: AppTheme.cream,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Welcome to TaskNest',
+                    style: AppTheme.heading1,
                   ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  _FeatureCard(
-                    icon: Icons.account_balance_wallet,
-                    title: 'Earn Money',
-                    description: 'Complete tasks and get paid directly to your wallet',
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Secure escrow payments powered by Razorpay. Post tasks, find workers and get paid safely.',
+                    style: AppTheme.bodyMuted,
                   ),
+                  const SizedBox(height: 32),
                   
-                  const SizedBox(height: 20),
+                  // Feature List
+                  _buildFeature(Icons.security, 'Razorpay Escrow Protection'),
+                  const SizedBox(height: 16),
+                  _buildFeature(Icons.payments_outlined, 'Workers earn 80% per task'),
+                  const SizedBox(height: 16),
+                  _buildFeature(Icons.verified_outlined, 'Free to register, cancel anytime'),
                   
-                  // Focus this card on wallet/earnings instead of task creation
-                  _FeatureCard(
-                    icon: Icons.insights,
-                    title: 'Track Your Wallet',
-                    description: 'See your earnings grow with a clear, simple wallet view',
-                  ),
+                  const Spacer(),
                   
-                  const SizedBox(height: 50),
-                  
-                  // Get Started Button with gradient effect
-                  Container(
+                  // Get Started Button
+                  SizedBox(
                     width: double.infinity,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
+                    height: 56,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF1E3A5F),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
-                          ),
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
                         );
                       },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'Get Started',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Icon(
-                            Icons.arrow_forward,
-                            size: 24,
-                          ),
-                        ],
+                      style: AppTheme.goldButton,
+                      child: const Text(
+                        'Get Started',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Additional Info with icons
-                  Wrap(
-                    spacing: 20,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      _InfoItem(
-                        icon: Icons.verified_user,
-                        text: 'Secure',
-                      ),
-                      _InfoItem(
-                        icon: Icons.payment,
-                        text: 'Fast Payments',
-                      ),
-                      _InfoItem(
-                        icon: Icons.people,
-                        text: 'Trusted',
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                 ],
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FeatureCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-
-  const _FeatureCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.3),
-                  Colors.white.withOpacity(0.2),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
-                    height: 1.3,
-                  ),
-                ),
-              ],
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class _InfoItem extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _InfoItem({
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildFeature(IconData icon, String text) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          color: Colors.white.withOpacity(0.8),
-          size: 18,
-        ),
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.navy.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(8),
           ),
+          child: Icon(icon, color: AppTheme.navy, size: 20),
         ),
+        const SizedBox(width: 16),
+        Text(text, style: AppTheme.body),
       ],
     );
   }

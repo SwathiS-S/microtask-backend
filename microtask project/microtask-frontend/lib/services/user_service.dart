@@ -1,5 +1,14 @@
 enum UserRole { taskUser, taskProvider, admin }
 
+class User {
+  final String id;
+  final String name;
+  final String email;
+  final UserRole role;
+
+  User({required this.id, required this.name, required this.email, required this.role});
+}
+
 class UserService {
   static String? _userId;
   static String? _userName;
@@ -25,6 +34,16 @@ class UserService {
   static UserRole get userRole => _userRole;
   static bool get isTaskProvider => _userRole == UserRole.taskProvider;
   static bool get isAdmin => _userRole == UserRole.admin;
+
+  static User? getUser() {
+    if (_userId == null) return null;
+    return User(
+      id: _userId!,
+      name: _userName ?? '',
+      email: _userEmail ?? '',
+      role: _userRole,
+    );
+  }
 
   // Setters
   static void setUser({

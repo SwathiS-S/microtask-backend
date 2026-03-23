@@ -3,9 +3,9 @@ import '../../services/user_service.dart';
 import '../../services/api_service.dart';
 
 class WithdrawalScreen extends StatefulWidget {
-  final double balance;
-  final Map<String, dynamic> bankAccount;
-  const WithdrawalScreen({super.key, required this.balance, required this.bankAccount});
+  final double? balance;
+  final Map<String, dynamic>? bankAccount;
+  const WithdrawalScreen({super.key, this.balance, this.bankAccount});
 
   @override
   State<WithdrawalScreen> createState() => _WithdrawalScreenState();
@@ -57,11 +57,11 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         'userId': UserService.userId,
         'amount': amount,
         'bankDetails': {
-          'accountHolderName': widget.bankAccount['accountHolderName'],
-          'accountNumber': widget.bankAccount['accountNumber'],
-          'ifscCode': widget.bankAccount['ifscCode'],
-          'bankName': widget.bankAccount['bankName'],
-          'branchName': widget.bankAccount['branchName'],
+          'accountHolderName': widget.bankAccount?['accountHolderName'],
+          'accountNumber': widget.bankAccount?['accountNumber'],
+          'ifscCode': widget.bankAccount?['ifscCode'],
+          'bankName': widget.bankAccount?['bankName'],
+          'branchName': widget.bankAccount?['branchName'],
         }
       });
 
@@ -84,6 +84,11 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final String accountNumber = widget.bankAccount?['accountNumber']?.toString() ?? '';
+    final String maskedAccount = accountNumber.length > 4 
+        ? accountNumber.substring(accountNumber.length - 4)
+        : accountNumber;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Withdraw Funds')),
       body: Padding(
@@ -93,7 +98,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           children: [
             const Text('Available Balance', style: TextStyle(color: Colors.grey)),
             Text(
-              '₹${widget.balance.toStringAsFixed(2)}',
+              '₹${(widget.balance ?? 0.0).toStringAsFixed(2)}',
               style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
             ),
             const SizedBox(height: 8),
@@ -101,11 +106,11 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Minimum Withdrawal: ₹${widget.balance < 100 ? 1 : 10}',
+                  'Minimum Withdrawal: ₹${(widget.balance ?? 0.0) < 100 ? 1 : 10}',
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
                 Text(
-                  'Maximum Withdrawal: ₹${widget.balance.toStringAsFixed(2)}',
+                  'Maximum Withdrawal: ₹${(widget.balance ?? 0.0).toStringAsFixed(2)}',
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
@@ -133,9 +138,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                 children: [
                   const Text('Bank Account', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
-                  Text('Name: ${widget.bankAccount['accountHolderName']}'),
-                  Text('Bank: ${widget.bankAccount['bankName'] ?? 'N/A'}'),
-                  Text('A/C: ****${widget.bankAccount['accountNumber'].toString().substring(widget.bankAccount['accountNumber'].toString().length - 4)}'),
+                  Text('Name: ${widget.bankAccount?['accountHolderName'] ?? 'N/A'}'),
+                  Text('Bank: ${widget.bankAccount?['bankName'] ?? 'N/A'}'),
+                  Text('A/C: ****$maskedAccount'),
                 ],
               ),
             ),

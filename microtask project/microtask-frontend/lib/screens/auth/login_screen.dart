@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
 import '../../services/user_service.dart';
 import '../home/home_screen.dart';
@@ -7,7 +8,6 @@ import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final UserRole? selectedRole;
-  
   const LoginScreen({super.key, this.selectedRole});
 
   @override
@@ -18,86 +18,36 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   bool isLoading = false;
-  late UserRole selectedRole;
   String? errorMessage;
-  String? loadingMessage; // ← add this state variable 
-  
-  // Set to false for production use with real backend
-  static const bool _devMode = false;
+  late UserRole selectedRole;
 
   @override
   void initState() {
     super.initState();
-    // Use the role passed from RoleSelectionScreen, or default to taskUser
     selectedRole = widget.selectedRole ?? UserRole.taskUser;
   }
 
   Future<void> _handleLogin() async {
-    // Validate inputs
     if (email.text.isEmpty || password.text.isEmpty) {
-      setState(() {
-        errorMessage = "Please enter email and password";
-      });
-      return;
-    }
-    // Basic validation (prevent logging in with short password)
-    if (!email.text.contains('@')) {
-      setState(() {
-        errorMessage = "Please enter a valid email address";
-      });
-      return;
-    }
-    if (password.text.length < 6) {
-      setState(() {
-        errorMessage = "Password must be at least 6 characters";
-      });
+      setState(() => errorMessage = "Please enter email and password");
       return;
     }
 
     setState(() {
       isLoading = true;
       errorMessage = null;
-      loadingMessage = 'Connecting to server...'; // ← add this 
     });
 
-    // After 10 seconds, update message 
-    Future.delayed(const Duration(seconds: 10), () { 
-      if (mounted && isLoading) { 
-        setState(() { 
-          loadingMessage = 'Server is waking up, please wait...'; 
-        }); 
-      } 
-    }); 
-
     try {
-      final response = await ApiService.post("/users/login", { 
-        "email": email.text.trim(), 
-        "password": password.text, 
-        "role": selectedRole == UserRole.taskProvider ? "taskProvider" : "taskUser", 
-      }).timeout( 
-        const Duration(seconds: 60),  // ← increase to 60s for Render cold start 
-        onTimeout: () { 
-          setState(() { 
-            isLoading = false; 
-            errorMessage = 'Request timed out. Please check your connection.'; 
-          }); 
-          return {}; 
-        }, 
-      ); 
-      
-      // ← ADD null/empty check 
-      if (response == null || response.isEmpty) return; 
-
-      setState(() {
-        isLoading = false;
-        loadingMessage = null; // Clear loading message on success
+      final response = await ApiService.post("/users/login", {
+        "email": email.text.trim(),
+        "password": password.text,
+        "role": selectedRole == UserRole.taskProvider ? "taskProvider" : "taskUser",
       });
 
-      // Check if login was successful
-      if (response['success'] == true || response['token'] != null || response['message'] == 'Login successful') {
-        print('=== LOGIN DEBUG ===');
-        print('userId from response: ${response['userId']}');
-        // Store user data with role
+      setState(() => isLoading = false);
+
+      if (response != null && (response['success'] == true || response['token'] != null)) {
         UserService.setUser(
           userId: response['userId']?.toString() ?? 'USR-${DateTime.now().millisecondsSinceEpoch}',
           userName: response['name']?.toString() ?? email.text.split('@')[0],
@@ -105,8 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
           userPassword: password.text,
           userRole: selectedRole,
         );
-        
-        // Navigate to appropriate home screen based on role
+
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -118,291 +67,287 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } else {
-        // Show inline error message below fields
-        setState(() {
-          errorMessage = response['message'] ?? 'Login failed. Please try again.';
-        });
+        setState(() => errorMessage = response?['message'] ?? 'Login failed');
       }
     } catch (e) {
       setState(() {
         isLoading = false;
-        loadingMessage = null; // Clear on error
-        errorMessage = 'Something went wrong. Please try again.';
+        errorMessage = 'Connection error. Please try again.';
       });
-
-      // In development mode, allow navigation even if API fails (for testing)
-      if (_devMode) {
-        // Store user data for dev mode with role
-        UserService.setUser(
-          userId: 'USR-${DateTime.now().millisecondsSinceEpoch}',
-          userName: email.text.split('@')[0], // Use email prefix as name
-          userEmail: email.text.trim(),
-          userPassword: password.text,
-          userRole: selectedRole,
-        );
-        
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => selectedRole == UserRole.taskProvider
-                  ? const BusinessLeadScreen()
-                  : const HomeScreen(),
-            ),
-          );
-        }
-        return;
-      }
-
-      // Show error message in production
-      // Already set a generic errorMessage above
     }
   }
 
   @override
-  void dispose() {
-    email.dispose();
-    password.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    final bool isWide = MediaQuery.of(context).size.width > 800;
+
+    return Scaffold(
+      backgroundColor: AppTheme.cream,
+      body: isWide ? _buildWideLayout() : _buildMobileLayout(),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1E3A5F), // Dark blue background matching image
-      
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 500),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 40),
-                  
-                  // Logo/Title
-                  const Text(
-                    'TaskNest',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Login Container
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 20,
-                          offset: Offset(0, 10),
-                        )
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Email Input
-                          TextField(
-                            controller: email,
-                            enabled: !isLoading,
-                            decoration: InputDecoration(
-                              labelText: 'Email',
-                              labelStyle: const TextStyle(color: Colors.black54),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Colors.grey),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Colors.grey),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Color(0xFF1E3A5F), width: 2),
-                              ),
-                              prefixIcon: const Icon(Icons.email, color: Colors.black54),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Password Input
-                          TextField(
-                            controller: password,
-                            enabled: !isLoading,
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              labelText: 'Password',
-                              labelStyle: const TextStyle(color: Colors.black54),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Colors.grey),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Colors.grey),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(color: Color(0xFF1E3A5F), width: 2),
-                              ),
-                              prefixIcon: const Icon(Icons.lock, color: Colors.black54),
-                            ),
-                          ),
-                          if (errorMessage != null) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 32),
-
-                          // Two Login Buttons
-                          // User Login Button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1976D2), // Blue for user
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                elevation: 2,
-                              ),
-                              onPressed: isLoading ? null : () {
-                                setState(() => selectedRole = UserRole.taskUser);
-                                _handleLogin();
-                              },
-                              child: isLoading && selectedRole == UserRole.taskUser
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          loadingMessage ?? 'Please wait...',
-                                          style: const TextStyle(fontSize: 10, color: Colors.white),
-                                        ),
-                                      ],
-                                    )
-                                  : const Text(
-                                      'Login as User',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Task Provider Login Button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF7B1FA2), // Purple for task provider
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                elevation: 2,
-                              ),
-                              onPressed: isLoading ? null : () {
-                                setState(() => selectedRole = UserRole.taskProvider);
-                                _handleLogin();
-                              },
-                              child: isLoading && selectedRole == UserRole.taskProvider
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          loadingMessage ?? 'Please wait...',
-                                          style: const TextStyle(fontSize: 10, color: Colors.white),
-                                        ),
-                                      ],
-                                    )
-                                  : const Text(
-                                      'Login as Task Provider',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Sign Up Link
-                          Center(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const RegisterScreen(),
-                                  ),
-                                );
-                              },
-                              child: RichText(
-                                text: const TextSpan(
-                                  text: "Don't have an account? ",
-                                  style: TextStyle(color: Colors.black54),
-                                  children: [
-                                    TextSpan(
-                                      text: "Sign Up",
-                                      style: TextStyle(
-                                        color: Color(0xFF1E3A5F),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
+  Widget _buildWideLayout() {
+    return Row(
+      children: [
+        // Left Branding Panel
+        Expanded(
+          flex: 1,
+          child: Container(
+            color: AppTheme.navy,
+            padding: const EdgeInsets.all(60),
+            child: _buildBrandingContent(),
+          ),
+        ),
+        // Right Form Panel
+        Expanded(
+          flex: 1,
+          child: Container(
+            color: AppTheme.cream,
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 400),
+                padding: const EdgeInsets.all(40),
+                child: _buildLoginForm(),
               ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
+            decoration: const BoxDecoration(
+              color: AppTheme.navy,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
+            child: Column(
+              children: [
+                _buildLogo(),
+                const SizedBox(height: 24),
+                const Text(
+                  'Welcome Back',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Sign in to your TaskNest account',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: _buildLoginForm(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBrandingContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildLogo(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'India\'s trusted\nfreelance task\nplatform',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(width: 40, height: 3, color: AppTheme.gold),
+            const SizedBox(height: 24),
+            Text(
+              'Secure escrow payments powered by Razorpay. Post tasks, find workers and get paid safely.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.65),
+                height: 1.6,
+              ),
+            ),
+          ],
+        ),
+        Text(
+          '© 2026 TaskNest · teamtasknest@gmail.com',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white.withOpacity(0.3),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLogo() {
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppTheme.gold,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: const Center(
+            child: Icon(Icons.task_alt, color: Colors.white, size: 20),
+          ),
+        ),
+        const SizedBox(width: 12),
+        const Text(
+          'TaskNest',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Sign in', style: AppTheme.heading2),
+        const SizedBox(height: 8),
+        const Text('Enter your credentials to continue', style: AppTheme.bodyMuted),
+        const SizedBox(height: 32),
+        
+        if (errorMessage != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.error.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              errorMessage!,
+              style: const TextStyle(color: AppTheme.error, fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+
+        // Role Selector (Matching Web Style)
+        Row(
+          children: [
+            Expanded(
+              child: _buildRoleOption(UserRole.taskUser, 'I\'m a Worker'),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildRoleOption(UserRole.taskProvider, 'I\'m a Provider'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+
+        const Text('EMAIL', style: AppTheme.small),
+        const SizedBox(height: 8),
+        TextField(
+          controller: email,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(hintText: 'your@email.com'),
+        ),
+        const SizedBox(height: 20),
+        
+        const Text('PASSWORD', style: AppTheme.small),
+        const SizedBox(height: 8),
+        TextField(
+          controller: password,
+          obscureText: true,
+          decoration: const InputDecoration(hintText: 'Enter password'),
+        ),
+        const SizedBox(height: 32),
+
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: ElevatedButton(
+            onPressed: isLoading ? null : _handleLogin,
+            style: AppTheme.goldButton,
+            child: isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                  )
+                : const Text('Login', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          ),
+        ),
+        
+        const SizedBox(height: 24),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Don\'t have an account? ', style: AppTheme.bodyMuted),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                  );
+                },
+                child: const Text(
+                  'Register',
+                  style: TextStyle(color: AppTheme.gold, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRoleOption(UserRole role, String label) {
+    final bool isSelected = selectedRole == role;
+    return GestureDetector(
+      onTap: () => setState(() => selectedRole = role),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.navy : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isSelected ? AppTheme.navy : AppTheme.border),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : AppTheme.textMuted,
             ),
           ),
         ),

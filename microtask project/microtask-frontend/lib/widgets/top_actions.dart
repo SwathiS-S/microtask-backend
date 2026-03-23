@@ -29,7 +29,7 @@ List<Widget> topActions(BuildContext context) {
         if (value == 'profile') {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            MaterialPageRoute(builder: (_) => const DashboardScreen()),
           );
         } else if (value == 'logout') {
           // Show confirmation dialog

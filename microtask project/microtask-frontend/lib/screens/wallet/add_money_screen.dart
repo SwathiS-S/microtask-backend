@@ -94,7 +94,7 @@ class _AddMoneyScreenState extends State<AddMoneyScreen> {
           'key': 'rzp_live_STnxXSruVLrlO2',
           'amount': amount * 100,
           'name': 'TaskNest',
-          'order_id': orderId,
+          'order_id': orderRes['orderId'],
           'description': 'Add Money to Wallet',
           'prefill': {
             'contact': UserService.userPhone ?? '',
