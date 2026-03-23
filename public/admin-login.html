@@ -33,34 +33,33 @@
       <div class="brand">TaskNest Admin</div>
       <div class="subtitle">Sign in to your admin account</div>
     </div>
-    <form class="card-body" id="adminLoginForm">
+    <div class="card-body">
       <div id="errorBox" class="error"></div>
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" type="email" placeholder="admin@example.com" autocomplete="username" required>
+        <input id="email" type="email" placeholder="admin@example.com" autocomplete="username">
       </div>
       <div class="field">
         <label for="password">Password</label>
-        <input id="password" type="password" placeholder="Enter password" autocomplete="current-password" required>
+        <input id="password" type="password" placeholder="Enter password" autocomplete="current-password">
       </div>
-      <button class="btn" type="submit">Sign in</button>
+      <button class="btn" onclick="login()">Sign in</button>
       <div class="hint">Only accounts with role set to admin can sign in.</div>
-    </form>
+    </div>
   </div>
   <script>
-    const API_URL = 'https://microtask-backend-bc7z.onrender.com';
+    const API_URL = 'https://microtask-backend-bc7z.onrender.com/api';
     function showError(msg) {
       const box = document.getElementById('errorBox');
       box.textContent = msg || 'Login failed';
       box.style.display = 'block';
     }
-    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    async function login() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       if (!email || !password) { showError('Enter email and password'); return; }
       try {
-        const r = await fetch(`${API_URL}/auth/login`, {
+        const r = await fetch(`${API_URL}/users/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -73,7 +72,7 @@
       } catch (e) {
         showError(e.message);
       }
-    });
+    }
     (function bootstrap() {
       const raw = localStorage.getItem('adminUser');
       if (raw) {
