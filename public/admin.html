@@ -73,13 +73,14 @@
         <div>TaskNest Admin</div>
       </div>
       <div class="nav">
-        <button id="nav-overview" onclick="switchSection('overview')">Overview</button>
+        <button id="nav-overview" class="active" onclick="switchSection('overview')">Overview</button>
         <button id="nav-users" onclick="switchSection('users')">Users</button>
         <button id="nav-tasks" onclick="switchSection('tasks')">Tasks</button>
         <button id="nav-transactions" onclick="switchSection('transactions')">Transactions</button>
         <button id="nav-revenue" onclick="switchSection('revenue')">Revenue</button>
         <button id="nav-withdrawals" onclick="switchSection('withdrawals')">Withdrawals</button>
-        <button id="nav-escrow" class="active" onclick="switchSection('escrow')">Escrow Releases</button>
+        <button id="nav-escrow" onclick="switchSection('escrow')">Escrow Releases</button>
+        <button id="nav-wallet" onclick="switchSection('wallet')">My Wallet</button>
       </div>
       <div class="sidebar-footer">
         <div id="adminStatus">Not signed in</div>
@@ -95,7 +96,7 @@
 
       <!-- Sign-in panel removed in favor of a dedicated admin-login.html -->
 
-      <section id="section-overview" class="section">
+      <section id="section-overview" class="section active">
         <div class="metrics">
           <div class="metric">
             <div class="label">Total Users</div>
@@ -191,22 +192,35 @@
       </section>
 
       <section id="section-withdrawals" class="section">
+        <div class="metrics">
+          <div class="metric">
+            <div class="label">Pending Requests</div>
+            <div id="metricPending" class="value">–</div>
+          </div>
+          <div class="metric">
+            <div class="label">Today's Completed</div>
+            <div id="metricTodayCompleted" class="value">–</div>
+          </div>
+          <div class="metric">
+            <div class="label">Total Paid Out</div>
+            <div id="metricTotalPaid" class="value">–</div>
+          </div>
+        </div>
         <div class="panel" style="margin-top:16px;">
           <div class="panel-header">
-            <div>Withdrawal Approvals</div>
+            <div>Pending Withdrawals</div>
             <div class="actions"><button class="btn small" onclick="loadWithdrawals()">Reload</button></div>
           </div>
           <div class="panel-body">
             <table>
-              <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Requested At</th><th>Actions</th></tr></thead>
-              <tbody id="wdTable"></tbody>
+              <thead><tr><th>User</th><th>Amount</th><th>Bank Details</th><th>Action</th></tr></thead>
+              <tbody id="pendingWdTable"></tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- Fix 5: Admin dashboard show pending escrows -->
-      <section id="section-escrow" class="section active">
+      <section id="section-escrow" class="section">
         <div class="panel" style="margin-top:16px;">
           <div class="panel-header">
             <div>Pending Escrow Releases</div>
@@ -217,6 +231,61 @@
               <!-- Escrow cards will be injected here -->
               <p>Loading pending releases...</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-wallet" class="section">
+        <div class="metrics">
+          <div class="metric">
+            <div class="label">My Wallet Balance (Commissions)</div>
+            <div style="display:flex; align-items:baseline; gap:4px;">
+              <span style="font-size:14px; color:var(--muted);">₹</span>
+              <div id="adminWalletBalance" class="value">0.00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2" style="margin-top:20px;">
+          <!-- Withdrawal Form -->
+          <div class="panel">
+            <div class="panel-header">Withdraw Commissions</div>
+            <div class="panel-body">
+              <div id="adminWdMessage" class="hint" style="display:none; padding:10px; border-radius:8px; margin-bottom:12px;"></div>
+              <div style="display:grid; gap:12px;">
+                <div class="field">
+                  <label>Amount to Withdraw (₹)</label>
+                  <input type="number" id="adminWdAmount" placeholder="Min. ₹100">
+                </div>
+                <button class="btn" onclick="requestAdminWithdrawal()">Request Withdrawal</button>
+                <div class="hint">Funds will be sent to your connected bank account below.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bank Details Form -->
+          <div class="panel">
+            <div class="panel-header">Bank Account for Payouts</div>
+            <div class="panel-body">
+              <div id="adminBankMessage" class="hint" style="display:none; padding:10px; border-radius:8px; margin-bottom:12px;"></div>
+              <div style="display:grid; gap:12px;">
+                <input type="text" id="adminBankHolder" placeholder="Account Holder Name">
+                <input type="text" id="adminBankNumber" placeholder="Account Number">
+                <input type="text" id="adminBankIfsc" placeholder="IFSC Code">
+                <input type="text" id="adminBankName" placeholder="Bank Name">
+                <button class="btn alt" onclick="saveAdminBankDetails()">Save Bank Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:20px;">
+          <div class="panel-header">My Withdrawal History</div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody id="adminWdHistory"></tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -239,9 +308,6 @@
       }
     }
     function getAdminIdHeader() {
-      console.log('Admin header:', adminUser && adminUser.userId ? { 'x-admin-user-id': String(adminUser.userId) } : {}); 
-      console.log('Current admin:', adminUser); 
-      console.log('Admin ID:', adminUser?._id || adminUser?.id || adminUser?.userId); 
       return adminUser && adminUser.userId ? { 'x-admin-user-id': String(adminUser.userId) } : {};
     }
     function logoutAdmin() {
@@ -257,7 +323,7 @@
       }
     }
     function switchSection(name) {
-      const ids = ['overview','users','tasks','transactions','revenue','withdrawals','escrow'];
+      const ids = ['overview','users','tasks','transactions','revenue','withdrawals','escrow','wallet'];
       ids.forEach(id => {
         const el = document.getElementById('section-' + id);
         const nav = document.getElementById('nav-' + id);
@@ -265,6 +331,7 @@
         if (nav) nav.classList.toggle('active', id === name);
       });
       if (name === 'escrow') loadPendingEscrows();
+      if (name === 'wallet') loadAdminWallet();
     }
     async function refreshMetrics() {
       try {
@@ -277,15 +344,92 @@
         document.getElementById('metricUsers').textContent = (users.count ?? (users.users?.length ?? '–'));
         document.getElementById('metricTasks').textContent = (tasks.count ?? (tasks.tasks?.length ?? '–'));
         document.getElementById('metricWithdrawals').textContent = (wd.count ?? 0);
-        
-        // Update nav badge if it exists
+
         const escBtn = document.getElementById('nav-escrow');
         if (escBtn && esc.success) {
-          const count = (esc.tasks?.length || 0) + (esc.escrows?.length || 0);
+          const count = (esc.escrows?.length || 0);
           escBtn.innerHTML = `Escrow Releases ${count > 0 ? `<span class="badge" style="background:var(--danger); color:white; padding:2px 6px; font-size:10px;">${count}</span>` : ''}`;
         }
       } catch (_) {}
     }
+    async function loadPendingEscrows() {
+      const container = document.getElementById('pendingEscrows');
+      if (!container) return;
+      container.innerHTML = '<p>Loading pending releases...</p>';
+      try {
+        const res = await fetch(`${API_URL}/admin/escrow/pending`, { headers: getAdminIdHeader() });
+        const data = await res.json();
+        if (!data.success || !data.escrows?.length) {
+          container.innerHTML = '<p style="color:#666;">No pending escrow releases</p>';
+          return;
+        }
+        container.innerHTML = data.escrows.map(esc => {
+          const taskTitle = esc.taskId?.title || esc.title || 'Untitled Task';
+          const workerName = esc.userId?.name ||                    // direct userId 
+                             esc.taskId?.acceptedBy?.name ||         // from task acceptedBy 
+                             esc.taskId?.assignedTo?.name ||          // from task assignedTo 
+                             (esc.taskId?.acceptedBy ? 'User-' + (esc.taskId.acceptedBy._id || esc.taskId.acceptedBy) : null) || 
+                             'Not Assigned Yet';
+          const providerName = esc.providerId?.name || esc.providerId?.email || 'N/A';
+          const amount = esc.amount || esc.totalAmount || esc.escrowAmount || 0;
+          return `
+          <div class="card" style="padding:16px; border:1px solid #e5e7eb; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+              <div>
+                <div style="font-weight:600; font-size:16px;">${taskTitle}</div>
+                <div style="font-size:13px; color:#666; margin-top:4px;">
+                  User: ${workerName}<br>
+                  Provider: ${providerName}<br>
+                  Status: <span style="color:#d97706; font-weight:600;">${esc.status}</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:18px; font-weight:700; color:var(--primary);">₹${Number(amount).toFixed(2)}</div>
+                <button class="btn small" style="margin-top:8px;" onclick="releaseEscrow('${esc._id}')">Release to User</button>
+              </div>
+            </div>
+          </div>
+        `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<p style="color:var(--danger);">Error: ${e.message}</p>`;
+      }
+    }
+    async function releaseEscrow(id) {
+      if (!confirm('Are you sure you want to release this escrow to the user?')) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/escrow/release/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() }
+        });
+        
+        // Check if response is JSON before parsing
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await res.text();
+          console.error('Non-JSON response:', text);
+          alert('Server error (HTML returned). This usually means the URL is wrong (404). Check console.');
+          return;
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message || 'Released successfully');
+          loadPendingEscrows();
+          refreshMetrics();
+        } else {
+          if (data.message && data.message.includes('Worker not found')) {
+            alert('Cannot release: No worker assigned to this task yet. The task needs to be accepted by a worker first.');
+          } else {
+            alert('Error: ' + data.message);
+          }
+        }
+      } catch (e) {
+        console.error('Release failed:', e);
+        alert('Release failed: ' + e.message);
+      }
+    }
+
     async function loadUsers() {
       const tbody = document.getElementById('usersTable');
       tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
@@ -326,30 +470,26 @@
         loadUsers();
       } catch (e) { alert(e.message); }
     }
-    async function loadTasks() { 
-   const tbody = document.getElementById('tasksTable'); 
-   tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>'; 
-   try { 
-     const data = await fetch(`${API_URL}/admin/tasks`, { headers: getAdminIdHeader() }).then(r => r.json()); 
-     const items = data.tasks || []; 
-     tbody.innerHTML = items.map(t => { 
-       // ✅ amount can live on task directly or nested — check both 
-       const amount = Number(t.amount ?? t.taskAmount ?? 0); 
-       return ` 
-         <tr> 
-           <td>${t.title || '-'}</td> 
-           <td>₹ ${amount.toFixed(2)}</td> 
-           <td><span class="badge">${t.status}</span></td> 
-           <td>${t.postedBy ? (t.postedBy.email || t.postedBy.name || t.postedBy._id) : '-'}</td> 
-           <td>${t.acceptedBy ? (t.acceptedBy.email || t.acceptedBy.name || t.acceptedBy._id) : '-'}</td> 
-           <td><button class="btn small danger" onclick="removeTask('${t._id}')">Remove</button></td> 
-         </tr> 
-       `; 
-     }).join(''); 
-   } catch (e) { 
-     tbody.innerHTML = `<tr><td colspan="6">${e.message}</td></tr>`; 
-   } 
- } 
+    async function loadTasks() {
+      const tbody = document.getElementById('tasksTable');
+      tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+      try {
+        const data = await fetch(`${API_URL}/admin/tasks`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const items = data.tasks || [];
+        tbody.innerHTML = items.map(t => `
+          <tr>
+            <td>${t.title || '-'}</td>
+            <td>₹ ${Number(t.amount || 0).toFixed(2)}</td>
+            <td><span class="badge">${t.status}</span></td>
+            <td>${t.postedBy ? (t.postedBy.email || t.postedBy.name || t.postedBy._id) : '-'}</td>
+            <td>${t.acceptedBy ? (t.acceptedBy.email || t.acceptedBy.name || t.acceptedBy._id) : '-'}</td>
+            <td><button class="btn small danger" onclick="removeTask('${t._id}')">Remove</button></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6">${e.message}</td></tr>`;
+      }
+    }
     async function removeTask(id) {
       if (!confirm('Remove this task?')) return;
       try {
@@ -361,160 +501,322 @@
     }
     async function loadTransactions() {
       const tbody = document.getElementById('txTable');
+      if (!tbody) return;
       tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
       try {
-        const data = await fetch(`${API_URL}/admin/transactions`, { headers: getAdminIdHeader() }).then(r => r.json());
+        const res = await fetch(`${API_URL}/admin/wallet-transactions`, { headers: getAdminIdHeader() });
+        const data = await res.json();
+        if (!data.success) {
+          tbody.innerHTML = `<tr><td colspan="5">${data.message || 'Failed to load'}</td></tr>`;
+          return;
+        }
+        
         const items = data.transactions || [];
-        tbody.innerHTML = items.map(x => `
+        if (items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5">No transactions found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = items.map(x => {
+          const type = (x.transactionType || x.type || 'N/A').toUpperCase();
+          const dateStr = x.date || x.created_at;
+          const date = dateStr ? new Date(dateStr).toLocaleString() : 'N/A';
+          const amount = Number(x.amount || 0).toFixed(2);
+          const status = (x.status || 'N/A').toUpperCase();
+          const user = x.userName || 'Unknown';
+          
+          const typeColor = type === 'CREDIT' ? '#28a745' : 
+                           type === 'COMMISSION' ? '#fd7e14' : 
+                           type === 'WITHDRAWAL' ? '#dc3545' : '#6c757d';
+          
+          return `
           <tr>
-            <td>${x.user_id ? (x.user_id.name || x.user_id.email || x.user_id) : '-'}</td>
-            <td><span class="badge" style="background:${(x.transactionType || x.type)==='COMMISSION'?'#fef3c7':(x.transactionType || x.type)==='CREDIT'?'#dcfce7':'#fee2e2'};color:${(x.transactionType || x.type)==='COMMISSION'?'#92400e':(x.transactionType || x.type)==='CREDIT'?'#166534':'#991b1b'}">${(x.transactionType || x.type)}</span></td>
-            <td>₹ ${Number(x.amount || 0).toFixed(2)}</td>
-            <td>${x.status}</td>
-            <td>${new Date(x.created_at).toLocaleString()}</td>
+            <td>${user}</td>
+            <td><span style="background:${typeColor}20; color:${typeColor}; padding:2px 8px; border-radius:4px; font-weight:600;">${type}</span></td>
+            <td>₹ ${amount}</td>
+            <td>${status}</td>
+            <td>${date}</td>
           </tr>
-        `).join('');
+        `;
+        }).join('');
       } catch (e) {
         tbody.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`;
       }
     }
     async function loadRevenue() {
       try {
-        const data = await fetch(`${API_URL}/admin/analytics/revenue`, { headers: getAdminIdHeader() }).then(r => r.json());
-        const inflow = data.revenue?.inflow?.total ?? 0;
-        const outflow = data.revenue?.outflow?.total ?? 0;
-        const commission = data.revenue?.commission?.total ?? 0;
-        document.getElementById('inflowTotal').textContent = `₹ ${Number(inflow).toFixed(2)}`;
-        document.getElementById('outflowTotal').textContent = `₹ ${Number(outflow).toFixed(2)}`;
-        document.getElementById('commissionTotal').textContent = `₹ ${Number(commission).toFixed(2)}`;
-      } catch (_) {}
-    }
-    async function loadWithdrawals() {
-      const tbody = document.getElementById('wdTable');
-      tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
-      try {
-        const data = await fetch(`${API_URL}/admin/withdrawals?status=PENDING`, { headers: getAdminIdHeader() }).then(r => r.json());
-        const items = data.withdrawals || [];
-        tbody.innerHTML = items.map(w => `
-          <tr>
-            <td>${w.user_id ? (w.user_id.email || w.user_id.name || w.user_id._id) : '-'}</td>
-            <td>₹ ${Number(w.amount || 0).toFixed(2)}</td>
-            <td><span class="badge">${w.status}</span></td>
-            <td>${new Date(w.created_at).toLocaleString()}</td>
-            <td>
-              <button class="btn small success" onclick="approveWithdrawal('${w._id}')">Approve</button>
-              <button class="btn small danger" onclick="rejectWithdrawal('${w._id}')">Reject</button>
-            </td>
-          </tr>
-        `).join('');
+        const res = await fetch(`${API_URL}/admin/revenue`, { headers: getAdminIdHeader() });
+        const data = await res.json();
+        if (!data.success) return;
+        
+        const setEl = (id, val) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = `₹ ${val}`;
+        };
+        
+        setEl('inflowTotal', data.totalInflow);
+        setEl('outflowTotal', data.totalOutflow);
+        setEl('commissionTotal', data.netCommission);
+        // If these elements exist in your HTML, they will be updated too
+        setEl('pendingWithdrawals', data.pendingWithdrawals);
+        setEl('netRevenue', data.netRevenue);
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`;
+        console.error('loadRevenue error:', e);
       }
     }
-    async function approveWithdrawal(id) {
+    async function loadWithdrawals() {
+      const tbody = document.getElementById('pendingWdTable');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
       try {
-        const r = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, { method: 'POST', headers: getAdminIdHeader() });
-        const d = await r.json();
-        alert(d.message || (r.ok ? 'Withdrawal approved' : 'Failed'));
-        loadWithdrawals(); refreshMetrics();
-      } catch (e) { alert(e.message); }
-    }
-    async function rejectWithdrawal(id) {
-      try {
-        const r = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, { method: 'POST', headers: getAdminIdHeader() });
-        const d = await r.json();
-        alert(d.message || (r.ok ? 'Withdrawal rejected' : 'Failed'));
-        loadWithdrawals();
-      } catch (e) { alert(e.message); }
+        const res = await fetch(`${API_URL}/admin/withdrawals`, { headers: getAdminIdHeader() });
+        const data = await res.json();
+        if (!data.success) {
+          tbody.innerHTML = `<tr><td colspan="4">${data.message || 'Failed to load'}</td></tr>`;
+          return;
+        }
+        
+        const container = document.getElementById('withdrawalsList'); // For mobile/card view if exists
+        const items = data.withdrawals || [];
+        
+        if (items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4">No withdrawal requests</td></tr>';
+          if (container) container.innerHTML = '<p>No withdrawal requests</p>';
+          return;
+        }
+        
+        // Update table view
+        tbody.innerHTML = items.map(w => {
+          const name = w.userId?.name || w.userName || 'Unknown';
+          const email = w.userId?.email || '';
+          const amount = Number(w.amount || 0).toFixed(2);
+          const date = new Date(w.requestedAt).toLocaleString();
+          const statusColor = w.status === 'completed' ? '#28a745' : 
+                             w.status === 'rejected' ? '#dc3545' : '#fd7e14';
+          
+          return `
+            <tr>
+              <td>
+                <strong>${name}</strong><br>
+                <small style="color:#666;">${email}</small>
+              </td>
+              <td>₹ ${amount}</td>
+              <td>
+                <div style="font-size:12px;">
+                  ${w.bankDetails?.bankName || 'Bank'} - ${w.bankDetails?.accountNumber || 'N/A'}<br>
+                  <small>${w.bankDetails?.ifscCode || ''}</small>
+                </div>
+                ${w.status === 'pending' ? ` 
+                <div style="background:#f8f9fa; border-radius:8px; padding:10px; margin-top:8px; font-size:11px; border:1px solid #eee;"> 
+                    <div style="font-weight:600; color:#1E3A5F; margin-bottom:4px;">💳 Bank Details for Transfer:</div> 
+                    <div>Account Holder: <strong>${w.bankDetails?.accountHolderName || 'N/A'}</strong></div> 
+                    <div>Account Number: <strong>${w.bankDetails?.accountNumber || 'N/A'}</strong></div> 
+                    <div>IFSC Code: <strong>${w.bankDetails?.ifscCode || 'N/A'}</strong></div> 
+                    <div>Bank: <strong>${w.bankDetails?.bankName || 'N/A'}</strong></div> 
+                    ${w.bankDetails?.branchName ? `<div>Branch: <strong>${w.bankDetails.branchName}</strong></div>` : ''} 
+                </div> 
+                ` : ''}
+              </td>
+              <td>
+                ${w.status === 'pending' ? `
+                  <button class="btn small success" onclick="approveWithdrawal('${w._id}')">Approve</button>
+                  <button class="btn small danger" onclick="rejectWithdrawal('${w._id}')">Reject</button>
+                ` : `<span style="color:${statusColor}; font-weight:600;">${w.status.toUpperCase()}</span>`}
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        // Update card view if container exists
+        if (container) {
+          container.innerHTML = items.map(w => {
+            const name = w.userId?.name || w.userName || 'Unknown';
+            const email = w.userId?.email || '';
+            const amount = Number(w.amount).toFixed(2);
+            const date = new Date(w.requestedAt).toLocaleString();
+            const statusColor = w.status === 'completed' ? '#28a745' : 
+                               w.status === 'rejected' ? '#dc3545' : '#fd7e14';
+            
+            return `<div style="background:white; border-radius:10px; padding:16px; margin-bottom:12px; border:1px solid #e2e8f0;"> 
+                <div style="display:flex; justify-content:space-between; align-items:center;"> 
+                    <div> 
+                        <strong>${name}</strong> (${email})<br> 
+                        <span style="color:#666; font-size:13px;">${date}</span><br> 
+                        <span style="color:${statusColor}; font-weight:600;">${w.status.toUpperCase()}</span> 
+                        ${w.status === 'pending' ? ` 
+                        <div style="background:#f8f9fa; border-radius:8px; padding:10px; margin-top:8px; font-size:11px; border:1px solid #eee;"> 
+                            <div style="font-weight:600; color:#1E3A5F; margin-bottom:4px;">💳 Bank Details for Transfer:</div> 
+                            <div>Account Holder: <strong>${w.bankDetails?.accountHolderName || 'N/A'}</strong></div> 
+                            <div>Account Number: <strong>${w.bankDetails?.accountNumber || 'N/A'}</strong></div> 
+                            <div>IFSC Code: <strong>${w.bankDetails?.ifscCode || 'N/A'}</strong></div> 
+                            <div>Bank: <strong>${w.bankDetails?.bankName || 'N/A'}</strong></div> 
+                            ${w.bankDetails?.branchName ? `<div>Branch: <strong>${w.bankDetails.branchName}</strong></div>` : ''} 
+                        </div> 
+                        ` : (w.bankDetails ? `<br><small>Bank: ${w.bankDetails.bankName || ''} | AC: ${w.bankDetails.accountNumber || ''}</small>` : '')} 
+                    </div> 
+                    <div style="text-align:right;"> 
+                        <strong style="font-size:20px;">₹${amount}</strong> 
+                        ${w.status === 'pending' ? ` 
+                        <br> 
+                        <button onclick="approveWithdrawal('${w._id}')" 
+                            style="margin-top:8px; padding:5px 12px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; margin-right:6px;"> 
+                            Approve 
+                        </button> 
+                        <button onclick="rejectWithdrawal('${w._id}')" 
+                            style="padding:5px 12px; background:#dc3545; color:white; border:none; border-radius:5px; cursor:pointer;"> 
+                            Reject 
+                        </button>` : ''} 
+                    </div> 
+                </div> 
+            </div>`;
+          }).join('');
+        }
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4">${e.message}</td></tr>`;
+      }
     }
 
-    // Fix 5: Admin dashboard show pending escrows
-    async function loadPendingEscrows() { 
-      const container = document.getElementById('pendingEscrows'); 
-      container.innerHTML = '<p>Loading pending releases...</p>'; 
- 
-      try { 
-        const response = await fetch(`${API_URL}/admin/escrow/pending`, { 
-          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() } 
-        }); 
-        const data = await response.json(); 
-        const items = data.escrows || data.tasks || []; 
- 
-        if (!items.length) { 
-          container.innerHTML = '<p>No pending escrow releases.</p>'; 
-          return; 
-        } 
- 
-        container.innerHTML = items.map(item => { 
-          // ✅ FIX 1: use numbers, never fallback to string 'N/A' 
-          const rawAmount  = Number(item.amount || item.totalAmount || 0); 
-          const workerAmt  = Number(item.workerAmount || Math.round(rawAmount * 0.8) || 0); 
-          const taskId     = item.taskId?._id || item.taskId || item._id; 
-          const title      = item.title || item.taskId?.title || 'Untitled Task'; 
-          const provider   = item.providerId?.name || item.providerId?.email || 'Unknown'; 
- 
-          return ` 
-            <div style="background:#1e293b; padding:16px; border-radius:8px; margin:8px 0;"> 
-              <p><b>Task:</b> ${title}</p> 
-              <p><b>Worker receives:</b> ₹${workerAmt.toFixed(2)}</p> 
-              <p><b>Total held:</b> ₹${rawAmount.toFixed(2)}</p> 
-              <p style="font-size:12px; color:#94a3b8">Provider: ${provider}</p> 
-              <button 
-                id="btn-${taskId}" 
-                onclick="releaseEscrow('${taskId}', this)" 
-                style="background:green; color:white; padding:8px 16px; border:none; border-radius:4px; cursor:pointer;"> 
-                ✅ Release ₹${workerAmt.toFixed(2)} to Worker 
-              </button> 
-            </div> 
-          `; 
-        }).join(''); 
- 
-      } catch (error) { 
-        container.innerHTML = `<p style="color:red">Error: ${error.message}</p>`; 
-      } 
-    } 
- 
-    // ✅ FIX 2: btn is now passed and used, auth header added 
-    async function releaseEscrow(taskId, btn) { 
-      if (!confirm('Release payment to worker?')) return; 
- 
-      if (btn) { 
-        btn.disabled = true; 
-        btn.textContent = 'Releasing...'; 
-      } 
- 
-      try { 
-        const response = await fetch(`${API_URL}/admin/escrow/release/${taskId}`, { 
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() } 
-        }); 
-        const data = await response.json(); 
- 
-        if (data.success) { 
-          if (btn) { 
-            btn.textContent = '✅ Released!'; 
-            btn.style.background = '#1e3a5f'; 
-          } 
-          setTimeout(() => loadPendingEscrows(), 1200); 
-        } else { 
-          alert('❌ ' + (data.message || 'Release failed')); 
-          if (btn) { 
-            btn.disabled = false; 
-            btn.textContent = '⚠️ Retry Release'; 
-          } 
-        } 
-      } catch (e) { 
-        alert('Network error: ' + e.message); 
-        if (btn) { 
-          btn.disabled = false; 
-          btn.textContent = '⚠️ Retry Release'; 
-        } 
-      } 
-    } 
- 
-    // Load on page load 
+    async function approveWithdrawal(id) {
+      if (!confirm('Approve this withdrawal?')) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, { 
+          method: 'POST',
+          headers: getAdminIdHeader()
+        });
+        const data = await res.json();
+        alert(data.message || 'Done');
+        loadWithdrawals();
+        loadRevenue();
+        refreshMetrics();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function rejectWithdrawal(id) {
+      const reason = prompt('Enter rejection reason (shown to user):');
+      if (!reason) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify({ reason })
+        });
+        const data = await res.json();
+        alert(data.message || 'Done');
+        loadWithdrawals();
+        loadRevenue();
+        refreshMetrics();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    // --- ADMIN WALLET LOGIC ---
+    async function loadAdminWallet() {
+      try {
+        const res = await fetch(`${API_URL}/admin/wallet`, { headers: getAdminIdHeader() });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('adminWalletBalance').textContent = Number(data.wallet || 0).toFixed(2);
+          
+          if (data.bankDetails) {
+            document.getElementById('adminBankHolder').value = data.bankDetails.accountHolderName || '';
+            document.getElementById('adminBankNumber').value = data.bankDetails.accountNumber || '';
+            document.getElementById('adminBankIfsc').value = data.bankDetails.ifscCode || '';
+            document.getElementById('adminBankName').value = data.bankDetails.bankName || '';
+          }
+
+          const historyTbody = document.getElementById('adminWdHistory');
+          if (data.withdrawals?.length) {
+            historyTbody.innerHTML = data.withdrawals.map(w => `
+              <tr>
+                <td>${new Date(w.requestedAt).toLocaleDateString()}</td>
+                <td>₹${w.amount}</td>
+                <td><span class="status ${w.status.toUpperCase()}">${w.status.toUpperCase()}</span></td>
+              </tr>
+            `).join('');
+          } else {
+            historyTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#666;">No withdrawal history</td></tr>';
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load admin wallet:', e);
+      }
+    }
+
+    async function saveAdminBankDetails() {
+      const payload = {
+        bankDetails: {
+          accountHolderName: document.getElementById('adminBankHolder').value.trim(),
+          accountNumber: document.getElementById('adminBankNumber').value.trim(),
+          ifscCode: document.getElementById('adminBankIfsc').value.trim(),
+          bankName: document.getElementById('adminBankName').value.trim()
+        }
+      };
+      
+      const msg = document.getElementById('adminBankMessage');
+      msg.style.display = 'none';
+
+      try {
+        const res = await fetch(`${API_URL}/admin/bank-details`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          msg.textContent = 'Bank details saved successfully';
+          msg.style.background = '#dcfce7';
+          msg.style.color = '#166534';
+          msg.style.display = 'block';
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.style.background = '#fee2e2';
+        msg.style.color = '#991b1b';
+        msg.style.display = 'block';
+      }
+    }
+
+    async function requestAdminWithdrawal() {
+      const amount = parseFloat(document.getElementById('adminWdAmount').value);
+      if (isNaN(amount) || amount < 100) {
+        alert('Please enter a valid amount (Min. ₹100)');
+        return;
+      }
+
+      const msg = document.getElementById('adminWdMessage');
+      msg.style.display = 'none';
+
+      try {
+        const res = await fetch(`${API_URL}/admin/withdraw`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+        if (data.success) {
+          msg.textContent = 'Withdrawal request submitted';
+          msg.style.background = '#dcfce7';
+          msg.style.color = '#166534';
+          msg.style.display = 'block';
+          document.getElementById('adminWdAmount').value = '';
+          loadAdminWallet();
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.style.background = '#fee2e2';
+        msg.style.color = '#991b1b';
+        msg.style.display = 'block';
+      }
+    }
+
     loadPersisted();
-    loadPendingEscrows();
   </script>
 </body>
 </html>

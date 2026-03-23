@@ -251,4 +251,84 @@ router.get('/dashboard-summary', async (req, res) => {
   }
 });
 
+// --- ADMIN SELF-WALLET MANAGEMENT ---
+
+router.get('/wallet', async (req, res) => {
+  try {
+    const adminId = req.admin._id;
+    const wallet = await Wallet.findOne({ userId: adminId });
+    const admin = await User.findById(adminId).select('bankDetails');
+    const withdrawals = await Withdrawal.find({ userId: adminId }).sort({ requestedAt: -1 });
+
+    res.json({
+      success: true,
+      wallet: wallet ? wallet.balance : 0,
+      bankDetails: admin.bankDetails || null,
+      withdrawals: withdrawals || []
+    });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+router.post('/bank-details', async (req, res) => {
+  try {
+    const adminId = req.admin._id;
+    const { bankDetails } = req.body;
+    
+    if (!bankDetails || !bankDetails.accountNumber) {
+      return res.status(400).json({ success: false, message: 'Invalid bank details' });
+    }
+
+    await User.findByIdAndUpdate(adminId, { bankDetails });
+    res.json({ success: true, message: 'Bank details updated' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+router.post('/withdraw', async (req, res) => {
+  try {
+    const adminId = req.admin._id;
+    const { amount } = req.body;
+    
+    const wallet = await Wallet.findOne({ userId: adminId });
+    if (!wallet || wallet.balance < amount) {
+      return res.status(400).json({ success: false, message: 'Insufficient commission balance' });
+    }
+
+    const admin = await User.findById(adminId);
+    if (!admin.bankDetails || !admin.bankDetails.accountNumber) {
+      return res.status(400).json({ success: false, message: 'Please add bank details first' });
+    }
+
+    // Create withdrawal request
+    const withdrawal = await Withdrawal.create({
+      userId: adminId,
+      amount,
+      bankDetails: admin.bankDetails,
+      status: 'pending',
+      requestedAt: new Date()
+    });
+
+    // Deduct from wallet
+    wallet.balance -= amount;
+    wallet.transactions.push({
+      amount,
+      transactionType: 'withdrawal',
+      description: `Commission withdrawal request #${withdrawal._id.toString().substring(0, 8)}`,
+      date: new Date()
+    });
+    await wallet.save();
+
+    // Update User model wallet for backward compatibility
+    admin.wallet = wallet.balance;
+    await admin.save();
+
+    res.json({ success: true, message: 'Withdrawal request submitted successfully', withdrawal });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;
