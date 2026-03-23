@@ -3369,10 +3369,14 @@
                         userId: data.userId,
                         email: data.email,
                         name: data.name,
+                        phone: data.phone || '',
                         role: data.role,
                         wallet: data.wallet != null ? data.wallet : 0,
                         bankDetails: data.bankDetails || null
                     };
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                    document.getElementById('landingPage').classList.add('hidden');
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('dashboardSection').classList.remove('hidden');
                     
