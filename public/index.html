@@ -2536,13 +2536,13 @@
                         <div id="categoryChips" class="chips" style="flex-wrap:wrap; gap: 10px; margin-bottom: 24px;"></div>
                         
                         <!-- Search container — input and button joined together -->
-                        <div style="display:flex; background:white; border:1.5px solid #e2e8f0; border-radius:10px; overflow:hidden; margin-bottom:16px;">
+                        <div style="display:flex; max-width:500px; background:white; border:1.5px solid #e2e8f0; border-radius:12px; overflow:hidden; margin-bottom:16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                             <input id="simpleSearchInput" type="text"
-                                placeholder="Search tasks by title, skill, or location..."
+                                placeholder="Search tasks..."
                                 oninput="syncAndSearch(this.value)"
-                                style="flex:1; padding:12px 16px; border:none; outline:none; font-size:13px; color:#333; background:transparent;">
+                                style="flex:1; padding:10px 16px; border:none; outline:none; font-size:13px; color:#333; background:transparent;">
                             <button onclick="renderFilterTasks()"
-                                style="padding:12px 24px; background:#1E3A5F; color:white; border:none; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;">
+                                style="padding:8px 24px; background:#1E3A5F; color:white; border:none; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; flex-shrink:0; margin-top:0; border-radius:0; width:auto; box-shadow:none;">
                                 Search
                             </button>
                         </div>
