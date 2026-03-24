@@ -48,7 +48,7 @@
     </div>
   </div>
   <script>
-    const API_URL = 'https://microtask-backend-bc7z.onrender.com';
+    const API_URL = 'http://localhost:5000/api';
     function showError(msg) {
       const box = document.getElementById('errorBox');
       box.textContent = msg || 'Login failed';
@@ -59,7 +59,7 @@
       const password = document.getElementById('password').value;
       if (!email || !password) { showError('Enter email and password'); return; }
       try {
-        const r = await fetch(`${API_URL}/auth/login`, {
+        const r = await fetch(`${API_URL}/users/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })

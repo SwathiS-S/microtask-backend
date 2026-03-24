@@ -80,6 +80,7 @@
         <button id="nav-revenue" onclick="switchSection('revenue')">Revenue</button>
         <button id="nav-withdrawals" onclick="switchSection('withdrawals')">Withdrawals</button>
         <button id="nav-escrow" onclick="switchSection('escrow')">Escrow Releases</button>
+        <button id="nav-wallet" onclick="switchSection('wallet')">My Wallet</button>
       </div>
       <div class="sidebar-footer">
         <div id="adminStatus">Not signed in</div>
@@ -233,11 +234,66 @@
           </div>
         </div>
       </section>
+
+      <section id="section-wallet" class="section">
+        <div class="metrics">
+          <div class="metric">
+            <div class="label">My Wallet Balance (Commissions)</div>
+            <div style="display:flex; align-items:baseline; gap:4px;">
+              <span style="font-size:14px; color:var(--muted);">₹</span>
+              <div id="adminWalletBalance" class="value">0.00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2" style="margin-top:20px;">
+          <!-- Withdrawal Form -->
+          <div class="panel">
+            <div class="panel-header">Withdraw Commissions</div>
+            <div class="panel-body">
+              <div id="adminWdMessage" class="hint" style="display:none; padding:10px; border-radius:8px; margin-bottom:12px;"></div>
+              <div style="display:grid; gap:12px;">
+                <div class="field">
+                  <label>Amount to Withdraw (₹)</label>
+                  <input type="number" id="adminWdAmount" placeholder="Min. ₹100">
+                </div>
+                <button class="btn" onclick="requestAdminWithdrawal()">Request Withdrawal</button>
+                <div class="hint">Funds will be sent to your connected bank account below.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bank Details Form -->
+          <div class="panel">
+            <div class="panel-header">Bank Account for Payouts</div>
+            <div class="panel-body">
+              <div id="adminBankMessage" class="hint" style="display:none; padding:10px; border-radius:8px; margin-bottom:12px;"></div>
+              <div style="display:grid; gap:12px;">
+                <input type="text" id="adminBankHolder" placeholder="Account Holder Name">
+                <input type="text" id="adminBankNumber" placeholder="Account Number">
+                <input type="text" id="adminBankIfsc" placeholder="IFSC Code">
+                <input type="text" id="adminBankName" placeholder="Bank Name">
+                <button class="btn alt" onclick="saveAdminBankDetails()">Save Bank Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:20px;">
+          <div class="panel-header">My Withdrawal History</div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody id="adminWdHistory"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
   <script>
-    const API_URL = 'https://microtask-backend-bc7z.onrender.com/api';
+    const API_URL = 'http://localhost:5000/api';
     let adminUser = null;
     function setAdmin(u) {
       adminUser = u;
@@ -267,7 +323,7 @@
       }
     }
     function switchSection(name) {
-      const ids = ['overview','users','tasks','transactions','revenue','withdrawals','escrow'];
+      const ids = ['overview','users','tasks','transactions','revenue','withdrawals','escrow','wallet'];
       ids.forEach(id => {
         const el = document.getElementById('section-' + id);
         const nav = document.getElementById('nav-' + id);
@@ -275,6 +331,7 @@
         if (nav) nav.classList.toggle('active', id === name);
       });
       if (name === 'escrow') loadPendingEscrows();
+      if (name === 'wallet') loadAdminWallet();
     }
     async function refreshMetrics() {
       try {
@@ -307,13 +364,26 @@
           return;
         }
         container.innerHTML = data.escrows.map(esc => {
-          const taskTitle = esc.taskId?.title || esc.title || 'Untitled Task';
-          const workerName = esc.userId?.name ||                    // direct userId 
-                             esc.taskId?.acceptedBy?.name ||         // from task acceptedBy 
-                             esc.taskId?.assignedTo?.name ||          // from task assignedTo 
-                             (esc.taskId?.acceptedBy ? 'User-' + (esc.taskId.acceptedBy._id || esc.taskId.acceptedBy) : null) || 
-                             'Not Assigned Yet';
-          const providerName = esc.providerId?.name || esc.providerId?.email || 'N/A';
+          // Robust title resolution
+          const taskTitle = (esc.taskId && esc.taskId.title) || 
+                           esc.taskTitle || 
+                           esc.title || 
+                           'Untitled Task';
+
+          // Robust worker resolution
+          const workerObj = esc.userId || (esc.taskId && esc.taskId.acceptedBy) || (esc.taskId && esc.taskId.assignedTo);
+          const hasWorker = !!workerObj;
+          
+          let workerName = 'Not Assigned Yet';
+          if (workerObj) {
+            if (typeof workerObj === 'object') {
+              workerName = workerObj.name || workerObj.email || (workerObj._id ? 'User-' + workerObj._id : 'Unknown User');
+            } else {
+              workerName = 'User-' + workerObj; // ID string but not populated
+            }
+          }
+
+          const providerName = (esc.providerId && (esc.providerId.name || esc.providerId.email)) || 'N/A';
           const amount = esc.amount || esc.totalAmount || esc.escrowAmount || 0;
           return `
           <div class="card" style="padding:16px; border:1px solid #e5e7eb; border-radius:8px;">
@@ -328,7 +398,11 @@
               </div>
               <div style="text-align:right;">
                 <div style="font-size:18px; font-weight:700; color:var(--primary);">₹${Number(amount).toFixed(2)}</div>
-                <button class="btn small" style="margin-top:8px;" onclick="releaseEscrow('${esc._id}')">Release to User</button>
+                ${hasWorker ? `
+                  <button class="btn small" style="margin-top:8px;" onclick="releaseEscrow('${esc._id}')">Release to User</button>
+                ` : `
+                  <button class="btn small danger" style="margin-top:8px;" onclick="cancelAndRefundEscrow('${esc.taskId?._id || esc.taskId}')">Cancel & Refund</button>
+                `}
               </div>
             </div>
           </div>
@@ -370,6 +444,26 @@
       } catch (e) {
         console.error('Release failed:', e);
         alert('Release failed: ' + e.message);
+      }
+    }
+
+    async function cancelAndRefundEscrow(taskId) {
+      if (!confirm('This task has no assigned worker. Do you want to cancel the task and refund the funds to the provider?')) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/escrow/cancel/${taskId}`, {
+          method: 'POST',
+          headers: getAdminIdHeader()
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message || 'Refunded successfully');
+          loadPendingEscrows();
+          refreshMetrics();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (e) {
+        alert('Refund failed: ' + e.message);
       }
     }
 
@@ -442,6 +536,14 @@
         loadTasks();
       } catch (e) { alert(e.message); }
     }
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+
     async function loadTransactions() {
       const tbody = document.getElementById('txTable');
       if (!tbody) return;
@@ -550,13 +652,17 @@
                   <small>${w.bankDetails?.ifscCode || ''}</small>
                 </div>
                 ${w.status === 'pending' ? ` 
-                <div style="background:#f8f9fa; border-radius:8px; padding:10px; margin-top:8px; font-size:11px; border:1px solid #eee;"> 
+                <div style="background:#f8f9fa; border-radius:8px; padding:10px; margin-top:8px; font-size:11px; border:1px solid #eee; position:relative;"> 
                     <div style="font-weight:600; color:#1E3A5F; margin-bottom:4px;">💳 Bank Details for Transfer:</div> 
                     <div>Account Holder: <strong>${w.bankDetails?.accountHolderName || 'N/A'}</strong></div> 
                     <div>Account Number: <strong>${w.bankDetails?.accountNumber || 'N/A'}</strong></div> 
                     <div>IFSC Code: <strong>${w.bankDetails?.ifscCode || 'N/A'}</strong></div> 
                     <div>Bank: <strong>${w.bankDetails?.bankName || 'N/A'}</strong></div> 
                     ${w.bankDetails?.branchName ? `<div>Branch: <strong>${w.bankDetails.branchName}</strong></div>` : ''} 
+                    <button class="btn small" style="margin-top:8px; width:100%; background:#1E3A5F; color:white;" 
+                      onclick="copyToClipboard('Holder: ${w.bankDetails?.accountHolderName}\\nAC: ${w.bankDetails?.accountNumber}\\nIFSC: ${w.bankDetails?.ifscCode}\\nBank: ${w.bankDetails?.bankName}')">
+                      Copy Bank Details
+                    </button>
                 </div> 
                 ` : ''}
               </td>
@@ -564,7 +670,10 @@
                 ${w.status === 'pending' ? `
                   <button class="btn small success" onclick="approveWithdrawal('${w._id}')">Approve</button>
                   <button class="btn small danger" onclick="rejectWithdrawal('${w._id}')">Reject</button>
-                ` : `<span style="color:${statusColor}; font-weight:600;">${w.status.toUpperCase()}</span>`}
+                ` : `
+                  <span style="color:${statusColor}; font-weight:600;">${w.status.toUpperCase()}</span>
+                  ${w.transactionReference ? `<br><small style="color:#666;">Ref: ${w.transactionReference}</small>` : ''}
+                `}
               </td>
             </tr>
           `;
@@ -620,11 +729,14 @@
     }
 
     async function approveWithdrawal(id) {
-      if (!confirm('Approve this withdrawal?')) return;
+      const ref = prompt('Enter Transaction Reference ID (after manual transfer):');
+      if (ref === null) return; // Cancelled
+      
       try {
         const res = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, { 
           method: 'POST',
-          headers: getAdminIdHeader()
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify({ transactionReference: ref || 'Manual Transfer' })
         });
         const data = await res.json();
         alert(data.message || 'Done');
@@ -652,6 +764,110 @@
         refreshMetrics();
       } catch (e) {
         alert(e.message);
+      }
+    }
+
+    // --- ADMIN WALLET LOGIC ---
+    async function loadAdminWallet() {
+      try {
+        const res = await fetch(`${API_URL}/admin/wallet`, { headers: getAdminIdHeader() });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('adminWalletBalance').textContent = Number(data.wallet || 0).toFixed(2);
+          
+          if (data.bankDetails) {
+            document.getElementById('adminBankHolder').value = data.bankDetails.accountHolderName || '';
+            document.getElementById('adminBankNumber').value = data.bankDetails.accountNumber || '';
+            document.getElementById('adminBankIfsc').value = data.bankDetails.ifscCode || '';
+            document.getElementById('adminBankName').value = data.bankDetails.bankName || '';
+          }
+
+          const historyTbody = document.getElementById('adminWdHistory');
+          if (data.withdrawals?.length) {
+            historyTbody.innerHTML = data.withdrawals.map(w => `
+              <tr>
+                <td>${new Date(w.requestedAt).toLocaleDateString()}</td>
+                <td>₹${w.amount}</td>
+                <td><span class="status ${w.status.toUpperCase()}">${w.status.toUpperCase()}</span></td>
+              </tr>
+            `).join('');
+          } else {
+            historyTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#666;">No withdrawal history</td></tr>';
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load admin wallet:', e);
+      }
+    }
+
+    async function saveAdminBankDetails() {
+      const payload = {
+        bankDetails: {
+          accountHolderName: document.getElementById('adminBankHolder').value.trim(),
+          accountNumber: document.getElementById('adminBankNumber').value.trim(),
+          ifscCode: document.getElementById('adminBankIfsc').value.trim(),
+          bankName: document.getElementById('adminBankName').value.trim()
+        }
+      };
+      
+      const msg = document.getElementById('adminBankMessage');
+      msg.style.display = 'none';
+
+      try {
+        const res = await fetch(`${API_URL}/admin/bank-details`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          msg.textContent = 'Bank details saved successfully';
+          msg.style.background = '#dcfce7';
+          msg.style.color = '#166534';
+          msg.style.display = 'block';
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.style.background = '#fee2e2';
+        msg.style.color = '#991b1b';
+        msg.style.display = 'block';
+      }
+    }
+
+    async function requestAdminWithdrawal() {
+      const amount = parseFloat(document.getElementById('adminWdAmount').value);
+      if (isNaN(amount) || amount < 100) {
+        alert('Please enter a valid amount (Min. ₹100)');
+        return;
+      }
+
+      const msg = document.getElementById('adminWdMessage');
+      msg.style.display = 'none';
+
+      try {
+        const res = await fetch(`${API_URL}/admin/withdraw`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAdminIdHeader() },
+          body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+        if (data.success) {
+          msg.textContent = 'Withdrawal request submitted';
+          msg.style.background = '#dcfce7';
+          msg.style.color = '#166534';
+          msg.style.display = 'block';
+          document.getElementById('adminWdAmount').value = '';
+          loadAdminWallet();
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.style.background = '#fee2e2';
+        msg.style.color = '#991b1b';
+        msg.style.display = 'block';
       }
     }
 
