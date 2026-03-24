@@ -1508,64 +1508,76 @@
         }
         .auth-card {
             width: 100%;
-            background: transparent;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
             padding: 0;
             border: none;
             box-shadow: none;
         }
         .auth-card .logo h1 {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 800;
             color: #1E3A5F;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 12px;
+            letter-spacing: -0.02em;
         }
         .auth-card .logo p {
             color: #64748b;
-            font-size: 16px;
-            margin-bottom: 40px;
+            font-size: 15px;
+            margin-bottom: 32px;
+            font-weight: 500;
         }
         .auth-card label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #64748b;
-            margin-bottom: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
         .auth-card input {
             width: 100%;
-            padding: 16px;
-            background: #FAF8F3;
-            border: 1px solid #e2e8f0;
+            padding: 14px 16px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
             border-radius: 12px;
-            color: #1a1a2e;
-            font-size: 16px;
-            margin-bottom: 24px;
-            transition: all 0.3s ease;
+            color: #1e293b;
+            font-size: 15px;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
         }
         .auth-card input:focus {
-            border-color: #C9A84C;
+            border-color: #1E3A5F;
             background: #ffffff;
             outline: none;
-            box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.1);
+            box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.08);
         }
         .auth-card button {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #C9A84C, #E8C87A);
+            padding: 14px;
+            background: #1E3A5F;
             color: #fff;
             border: none;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            box-shadow: 0 10px 15px -3px rgba(201, 168, 76, 0.2);
+            transition: all 0.2s ease;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.15);
+        }
+        .auth-card button:hover {
+            background: #2a4a75;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(30, 58, 95, 0.2);
+        }
+        .auth-card button:active {
+            transform: translateY(0);
         }
         .auth-card button:hover {
             transform: translateY(-2px);
