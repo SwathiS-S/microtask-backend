@@ -97,9 +97,15 @@ router.get('/withdrawals', async (req, res) => {
  
  router.post('/withdrawals/:id/approve', async (req, res) => { 
    try { 
+     const { transactionReference } = req.body || {};
      const withdrawal = await Withdrawal.findByIdAndUpdate( 
        req.params.id, 
-       { status: 'completed', processedAt: new Date(), processedBy: req.admin._id }, 
+       { 
+         status: 'completed', 
+         processedAt: new Date(), 
+         processedBy: req.admin._id,
+         transactionReference: transactionReference || 'Manual Transfer'
+       }, 
        { new: true } 
      ); 
      if (!withdrawal) return res.status(404).json({ success: false, message: 'Withdrawal not found' });
@@ -114,7 +120,7 @@ router.get('/withdrawals', async (req, res) => {
      await Notification.create({
        recipient: withdrawal.userId,
        title: '✅ Withdrawal Approved',
-       message: `Your withdrawal of ₹${withdrawal.amount} has been approved and processed.`,
+       message: `Your withdrawal of ₹${withdrawal.amount} has been approved and processed. ${transactionReference ? `Ref: ${transactionReference}` : ''}`,
        type: 'WITHDRAWAL_APPROVED'
      });
 

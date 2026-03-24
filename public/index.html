@@ -1474,29 +1474,37 @@
         }
 
         #authSection {
-            background-color: #FAF8F3;
+            background: #1E3A5F;
+            background-image: linear-gradient(rgba(30, 58, 95, 0.85), rgba(30, 58, 95, 0.85)), url('assets/login_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             min-height: 100vh;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         .auth-split {
             width: 100%;
-            min-height: 100vh;
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
+            max-width: 480px;
             background: #ffffff;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             margin: 0;
+            display: block;
         }
         .auth-left {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 60px;
+            padding: 40px;
             background: #ffffff;
+        }
+        .auth-right {
+            display: none;
         }
         .auth-card {
             width: 100%;
@@ -2563,13 +2571,13 @@
                         <button class="btn-small" style="background:#f59e0b; border-radius:12px;" onclick="showCreateWalletModal()">Connect Bank</button>
                     </div>
                     <!-- Withdrawal Buttons Section -->
-                    <div id="userWithdrawalContainer" class="hidden" style="margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                    <div id="userWithdrawalContainer" class="hidden" style="margin-top:24px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
                         <button onclick="showWithdrawModal()" 
-                            style="padding:12px 32px; background:#C9A84C; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; min-width:180px;">
+                            style="width:auto; padding:10px 24px; background:#C9A84C; color:white; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; margin-top:0; box-shadow:0 4px 12px rgba(201, 168, 76, 0.2);">
                             Withdraw to Bank
                         </button>
                         <button onclick="showEditBankModal()" 
-                            style="padding:12px 32px; background:#1E3A5F; color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; min-width:180px;">
+                            style="width:auto; padding:10px 24px; background:#1E3A5F; color:white; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; margin-top:0; box-shadow:0 4px 12px rgba(30, 58, 95, 0.2);">
                             Change Bank Details
                         </button>
                     </div>
@@ -3037,7 +3045,7 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         // REPLACE THIS WITH YOUR PUBLIC NGROK URL (e.g. 'https://a1b2-c3d4.ngrok-free.app')
-        const API_URL = 'https://microtask-backend-bc7z.onrender.com/api'; 
+        const API_URL = '/api'; 
         const OTP_ENABLED = true;
         async function readJson(response) {
             try {

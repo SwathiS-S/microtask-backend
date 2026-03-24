@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const escrowSchema = new mongoose.Schema({
   taskId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task', required: true },
+  taskTitle: { type: String }, // redundant title
   providerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
    amount: { type: Number, required: true }, 

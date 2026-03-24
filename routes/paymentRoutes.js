@@ -99,27 +99,27 @@ router.post('/razorpay/verify-escrow-payment', async (req, res) => {
     console.log('Admin wallet updated:', adminWallet.balance); 
     console.log('Admin commission:', adminWallet.totalCommission); 
     
-    // Fix 1: After escrow payment verified save to DB correctly
-    // Save or Update Escrow record using findOneAndUpdate with upsert
-    // ✅ FIXED - use correct field names matching Escrow schema 
-     const escrow = await Escrow.findOneAndUpdate( 
-       { taskId: taskId }, 
-       { 
-         $set: { 
-           taskId: taskId, 
-           providerId: providerId, 
-           amount: totalAmount,          // ✅ 'amount' not 'totalAmount' 
-           workerAmount: workerAmount, 
-           platformFee: adminCommission, // ✅ 'platformFee' not 'adminCommission' 
-           totalPaid: totalAmount,       // ✅ required field 
-           razorpayPaymentId: razorpay_payment_id, 
-           razorpayOrderId: razorpay_order_id, 
-           status: 'held', 
-           heldAt: new Date() 
-         } 
-       }, 
-       { upsert: true, new: true } 
-     ); 
+     // Save or Update Escrow record using findOneAndUpdate with upsert
+     // ✅ FIXED - use correct field names matching Escrow schema 
+      const escrow = await Escrow.findOneAndUpdate( 
+        { taskId: taskId }, 
+        { 
+          $set: { 
+            taskId: taskId, 
+            taskTitle: task.title, // ✅ Added title redundancy
+            providerId: providerId, 
+            amount: totalAmount,          // ✅ 'amount' not 'totalAmount' 
+            workerAmount: workerAmount, 
+            platformFee: adminCommission, // ✅ 'platformFee' not 'adminCommission' 
+            totalPaid: totalAmount,       // ✅ required field 
+            razorpayPaymentId: razorpay_payment_id, 
+            razorpayOrderId: razorpay_order_id, 
+            status: 'held', 
+            heldAt: new Date() 
+          } 
+        }, 
+        { upsert: true, new: true } 
+      ); 
 
     // Update task 
     await Task.findByIdAndUpdate(taskId, { 

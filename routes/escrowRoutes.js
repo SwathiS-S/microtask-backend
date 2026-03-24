@@ -15,6 +15,7 @@ router.get('/pending', async (req, res) => {
       .populate('userId', 'name email')
       .populate({
         path: 'taskId',
+        model: 'Task', // Explicitly specify the model name as part of the trick
         select: 'title amount acceptedBy assignedTo applications',
         populate: {
           path: 'acceptedBy',
@@ -23,7 +24,17 @@ router.get('/pending', async (req, res) => {
         }
       });
 
-    res.json({ success: true, escrows });
+    // Ensure we handle case where taskId might not be populated or deleted
+    const sanitizedEscrows = escrows.map(esc => {
+      const e = esc.toObject();
+      if (!e.taskId) {
+        // Task was deleted, use redundant title
+        e.taskTitle = e.taskTitle || 'Untitled Task (Deleted)';
+      }
+      return e;
+    });
+
+    res.json({ success: true, escrows: sanitizedEscrows });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -60,7 +71,13 @@ router.post('/release/:id', async (req, res) => {
     const adminCommission = totalAmount * 0.2; 
 
     // Get worker ID from escrow or task
-    const workerId = escrow.userId || escrow.workerId || task?.acceptedBy || task?.assignedTo;
+    let workerId = escrow.userId || escrow.workerId || task?.acceptedBy || task?.assignedTo;
+    
+    // If workerId is a populated object, extract the ID
+    if (workerId && typeof workerId === 'object' && workerId._id) {
+      workerId = workerId._id;
+    }
+
     if (!workerId) return res.status(400).json({ success: false, message: 'Worker not found for this escrow' });
 
     // Save workerId back to escrow for future reference 
