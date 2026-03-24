@@ -2319,147 +2319,79 @@
     <!-- END TASKNEST LANDING PAGE --> 
 
 
-    <!-- Auth Forms (Modern Option C: Navy left + Cream form right) -->
+    <!-- Auth Forms (Modern Centered Card) -->
     <div id="authSection" class="hidden">
-        <div class="login-grid" style="display:grid; grid-template-columns:1fr 1fr; min-height:100vh; width:100%;"> 
- 
-            <!-- LEFT: Navy branding panel --> 
-            <div class="login-left-panel" style="background:#1E3A5F; padding:3rem 2.5rem; display:flex; flex-direction:column; justify-content:space-between; position:relative;"> 
-              
-              <!-- Back button to Landing (Absolute positioned) -->
-              <button onclick="logout()" style="position:absolute; top:20px; left:20px; display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:white; font-size:14px; font-weight:600; cursor:pointer; padding:8px 0; width:auto; z-index:10;">
-                ← Back
-              </button>
-
-              <!-- Logo top --> 
-              <div style="display:flex; align-items:center; gap:10px;"> 
-                <div style="width:36px; height:36px; background:#C9A84C; border-radius:9px; display:flex; align-items:center; justify-content:center;"> 
-                  <div style="width:16px; height:16px; border:2.5px solid white; border-radius:4px;"></div> 
-                </div> 
-                <span style="font-size:20px; font-weight:700; color:white;">Task<span style="color:#C9A84C;">Nest</span></span> 
-              </div> 
-          
-              <!-- Center content --> 
-              <div> 
-                <div style="font-size:32px; font-weight:700; color:white; margin-bottom:8px; line-height:1.2;"> 
-                  India's trusted<br>freelance task<br>platform 
-                </div> 
-                <div style="width:40px; height:3px; background:#C9A84C; margin:16px 0;"></div> 
-                <div style="font-size:14px; color:rgba(255,255,255,0.65); line-height:1.7; margin-bottom:2rem;"> 
-                  Secure escrow payments powered by Razorpay. Post tasks, find workers and get paid safely. 
-                </div> 
-                <!-- Feature list --> 
-                <div style="background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.3); border-radius:10px; padding:16px;"> 
-                  <div style="font-size:11px; color:#E8C87A; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Platform highlights</div> 
-                  <div style="font-size:13px; color:rgba(255,255,255,0.75); line-height:2.2;"> 
-                    ✓ &nbsp;Razorpay escrow protection<br> 
-                    ✓ &nbsp;Workers earn 80% per task<br> 
-                    ✓ &nbsp;Free to register<br> 
-                    ✓ &nbsp;Cancel anytime with refund 
-                  </div> 
-                </div> 
-              </div> 
-          
-              <!-- Bottom text --> 
-              <div style="font-size:11px; color:rgba(255,255,255,0.3);"> 
-                © 2026 TaskNest · teamtasknest@gmail.com 
-              </div> 
-          
-            </div> 
- 
-            <!-- RIGHT: Cream form panel --> 
-            <div style="background:#FAF8F3; padding:3rem 2.5rem; display:flex; flex-direction:column; justify-content:center; position:relative;"> 
-              
-              <!-- Back button for mobile (only visible when left panel is hidden) -->
-              <button class="mobile-back-btn" onclick="logout()" style="display:none; position:absolute; top:20px; left:20px; align-items:center; gap:6px; background:none; border:none; color:#1E3A5F; font-size:14px; font-weight:600; cursor:pointer;">
-                ← Back
-              </button>
-
-              <div style="max-width:380px; width:100%; margin:0 auto;"> 
-          
-                <!-- LOGIN FORM -->
-                <div id="loginForm">
-                  <div style="margin-bottom:2rem;"> 
-                    <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:6px;">Sign in</div> 
-                    <div style="font-size:13px; color:#5a6a7a;">Enter your credentials to continue</div> 
-                  </div> 
-                  
-                  <div id="loginMessage"></div>
-                  
-                  <div style="margin-bottom:14px;"> 
-                    <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Email</label> 
-                    <input type="email" id="loginEmail" placeholder="your@email.com" style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; background:white; box-sizing:border-box;" onfocus="this.style.borderColor='#1E3A5F'" onblur="this.style.borderColor='#e2e8f0'"> 
-                  </div> 
-            
-                  <div style="margin-bottom:20px;"> 
-                    <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Password</label> 
-                    <input type="password" id="loginPassword" placeholder="Enter password" style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; background:white; box-sizing:border-box;" onfocus="this.style.borderColor='#1E3A5F'" onblur="this.style.borderColor='#e2e8f0'"> 
-                  </div> 
-            
-                  <button onclick="login()" style="width:100%; padding:13px; background:#C9A84C; color:white; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; margin-top:8px;">Login</button>
-            
-                  <div style="margin-top:16px; font-size:13px; color:#5a6a7a; text-align:center;"> 
-                    Don't have an account? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:600; cursor:pointer;">Register</a> 
-                  </div> 
-                </div>
-
-                <!-- REGISTER FORM -->
-                <div id="registerForm" class="hidden">
-                  <div style="margin-bottom:2rem;"> 
-                    <div style="font-size:24px; font-weight:700; color:#1E3A5F; margin-bottom:6px;">Create account</div> 
-                    <div style="font-size:13px; color:#5a6a7a;">Join our platform and start earning</div> 
-                  </div> 
-                  
-                  <div id="registerMessage"></div>
-                  
-                  <div style="margin-bottom:14px;"> 
-                    <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Full Name</label> 
-                    <input type="text" id="registerName" placeholder="Your name" style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; background:white; box-sizing:border-box;" onfocus="this.style.borderColor='#1E3A5F'" onblur="this.style.borderColor='#e2e8f0'"> 
-                  </div>
-
-                  <div style="margin-bottom:14px;"> 
-                    <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Email</label> 
-                    <input type="email" id="registerEmail" placeholder="your@email.com" style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; background:white; box-sizing:border-box;" onfocus="this.style.borderColor='#1E3A5F'" onblur="this.style.borderColor='#e2e8f0'"> 
-                  </div>
-
-                  <div style="margin-bottom:14px;"> 
-                    <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Phone Number</label> 
-                    <input type="tel" id="registerPhone" placeholder="Enter phone number" style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; background:white; box-sizing:border-box;" onfocus="this.style.borderColor='#1E3A5F'" onblur="this.style.borderColor='#e2e8f0'"> 
-                  </div>
-
-                  <div id="otpBlock" class="hidden" style="margin-bottom:14px;">
-                    <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">One-Time Password</label>
-                    <input type="text" id="registerOtp" placeholder="Enter OTP" style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; background:white; box-sizing:border-box;" onfocus="this.style.borderColor='#1E3A5F'" onblur="this.style.borderColor='#e2e8f0'">
-                    <div id="otpStatus" style="font-size:11px; color:#5a6a7a; margin-top:6px;">Resend in 60s</div>
-                    <div style="display:flex; gap:8px; margin-top:8px;">
-                      <button id="verifyOtpBtn" onclick="verifyEmail()" style="flex:1; background:#1E3A5F; color:white; padding:10px; border:none; border-radius:6px; font-size:13px; cursor:pointer; font-weight:600;">Verify Email</button>
-                      <button id="resendOtpBtn" onclick="resendOtp()" disabled style="flex:1; background:#f3f4f6; color:#5a6a7a; padding:10px; border:none; border-radius:6px; font-size:13px; cursor:pointer; font-weight:600;">Resend OTP</button>
+        <div class="auth-split">
+            <div class="auth-left">
+                <div class="auth-card">
+                    <div class="logo">
+                        <div style="width:48px; height:48px; background:#C9A84C; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:24px;">
+                            <div style="width:22px; height:22px; border:3px solid white; border-radius:6px;"></div>
+                        </div>
+                        <h1>TaskNest</h1>
+                        <p id="authSubtitle">Sign in to your account</p>
                     </div>
-                  </div>
 
-                  <div style="margin-bottom:14px;"> 
-                    <label style="font-size:11px; font-weight:600; color:#5a6a7a; letter-spacing:1px; text-transform:uppercase; display:block; margin-bottom:7px;">Password</label> 
-                    <input type="password" id="registerPassword" placeholder="Create password" style="width:100%; padding:11px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; background:white; box-sizing:border-box;" onfocus="this.style.borderColor='#1E3A5F'" onblur="this.style.borderColor='#e2e8f0'"> 
-                  </div>
+                    <!-- LOGIN FORM -->
+                    <div id="loginForm">
+                        <div id="loginMessage"></div>
+                        <label>Email Address</label>
+                        <input type="email" id="loginEmail" placeholder="your@email.com">
+                        
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••">
+                        
+                        <button onclick="login()">Sign In</button>
+                        
+                        <div style="text-align:center; margin-top:24px; color:#64748b; font-size:14px;">
+                            New to TaskNest? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:700; cursor:pointer;">Create account</a>
+                        </div>
+                    </div>
 
-                  <div style="display:none;">
-                    <select id="registerRole">
-                      <option value="taskUser">User</option>
-                      <option value="taskProvider">Task Provider</option>
-                    </select>
-                  </div>
+                    <!-- REGISTER FORM -->
+                    <div id="registerForm" class="hidden">
+                        <div id="registerMessage"></div>
+                        
+                        <label>Full Name</label>
+                        <input type="text" id="registerName" placeholder="John Doe">
+                        
+                        <label>Email Address</label>
+                        <input type="email" id="registerEmail" placeholder="your@email.com">
 
-                  <button onclick="register()" style="width:100%; padding:13px; background:#C9A84C; color:white; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; margin-top:8px;">Register</button>
-            
-                  <div style="margin-top:16px; font-size:13px; color:#5a6a7a; text-align:center;"> 
-                    Already have an account? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:600; cursor:pointer;">Login</a> 
-                  </div>
+                        <label>Phone Number</label>
+                        <input type="tel" id="registerPhone" placeholder="Enter phone number">
+
+                        <!-- OTP Section -->
+                        <div id="otpBlock" class="hidden" style="margin-bottom:24px;">
+                            <label>One-Time Password</label>
+                            <input type="text" id="registerOtp" placeholder="Enter OTP" style="margin-bottom:8px;">
+                            <div id="otpStatus" style="font-size:11px; color:#64748b; margin-bottom:12px;">Resend in 60s</div>
+                            <div style="display:flex; gap:12px;">
+                                <button id="verifyOtpBtn" onclick="verifyEmail()" style="flex:1; padding:12px; font-size:13px; background:#1E3A5F; margin-top:0;">Verify Email</button>
+                                <button id="resendOtpBtn" onclick="resendOtp()" disabled style="flex:1; padding:12px; font-size:13px; background:#f1f5f9; color:#64748b; margin-top:0;">Resend</button>
+                            </div>
+                        </div>
+
+                        <label>Password</label>
+                        <input type="password" id="registerPassword" placeholder="••••••••">
+
+                        <div style="display:none;">
+                            <select id="registerRole"><option value="taskUser">User</option></select>
+                        </div>
+
+                        <button onclick="register()">Create Account</button>
+                        
+                        <div style="text-align:center; margin-top:24px; color:#64748b; font-size:14px;">
+                            Already have an account? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:700; cursor:pointer;">Sign in</a>
+                        </div>
+                    </div>
+                    
+                    <button onclick="logout()" style="background:none; border:none; color:#64748b; font-size:14px; font-weight:600; cursor:pointer; margin-top:32px; padding:0; box-shadow:none; text-align:center; display:block; margin-left:auto; margin-right:auto; width:auto;">
+                        ← Back to Home
+                    </button>
                 </div>
-
-              </div> 
-            </div> 
- 
-        </div> 
+            </div>
+        </div>
     </div>
 
     <!-- Dashboard (Modern SaaS Layout) -->
