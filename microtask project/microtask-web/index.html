@@ -1477,6 +1477,8 @@
             padding: 20px;
             box-sizing: border-box;
             overflow-y: auto;
+            position: relative;
+            z-index: 1000;
         }
         .auth-split {
             width: 100%;
@@ -1554,17 +1556,22 @@
         }
         .auth-card button {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: #1E3A5F;
-            color: #fff;
+            color: #fff !important;
             border: none;
             border-radius: 12px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            margin-top: 8px;
+            margin-top: 12px;
             box-shadow: 0 4px 12px rgba(30, 58, 95, 0.15);
+            display: block;
+            text-align: center;
+            line-height: 1;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .auth-card button:hover {
             background: #2a4a75;
@@ -1573,11 +1580,7 @@
         }
         .auth-card button:active {
             transform: translateY(0);
-        }
-        .auth-card button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(201, 168, 76, 0.3);
-            background: linear-gradient(135deg, #E8C87A, #C9A84C);
+            background: #162a45;
         }
         .auth-toggle {
             margin-top: 32px;
@@ -2321,7 +2324,7 @@
                         <label>Password</label>
                         <input type="password" id="loginPassword" placeholder="••••••••">
                         
-                        <button onclick="login()">Sign In</button>
+                        <button type="button" id="loginBtn" onclick="login()">Sign In</button>
                         
                         <div style="text-align:center; margin-top:24px; color:#64748b; font-size:14px;">
                             New to TaskNest? <a onclick="toggleForms()" style="color:#C9A84C; font-weight:700; cursor:pointer;">Create account</a>
@@ -2959,7 +2962,7 @@
         // REPLACE THIS WITH YOUR PUBLIC NGROK URL (e.g. 'https://a1b2-c3d4.ngrok-free.app')
         const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:5000/api'
-            : window.location.origin + '/api'; 
+            : (window.location.origin.endsWith('.onrender.com') ? window.location.origin + '/api' : window.location.origin + '/api'); 
         const OTP_ENABLED = true;
         async function readJson(response) {
             try {
