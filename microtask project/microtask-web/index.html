@@ -437,6 +437,7 @@
             }
             #landingPage #how-it-works-grid,
             #landingPage #worker-how-grid,
+            /* Responsive Landing features */
             #landingPage #features-grid {
                 grid-template-columns: 1fr 1fr !important;
                 gap: 10px !important;
@@ -447,17 +448,6 @@
             #landingPage #contact div:last-child {
                 flex-direction: column !important;
                 gap: 10px !important;
-            }
-
-            /* Responsive Auth Split Screen */
-            #authSection > div {
-                grid-template-columns: 1fr !important;
-            }
-            #authSection > div > div:last-child {
-                display: none !important; /* Hide navy panel on mobile */
-            }
-            #authSection > div > div:first-child {
-                padding: 2rem 1.5rem !important;
             }
         }
 
@@ -1498,6 +1488,7 @@
             margin: auto;
             display: block;
             box-sizing: border-box;
+            animation: fadeUp 0.5s ease-out;
         }
         .auth-left {
             display: flex;
@@ -1508,7 +1499,7 @@
             box-sizing: border-box;
         }
         .auth-right {
-            display: none;
+            display: none !important;
         }
         .auth-card {
             width: 100%;
@@ -1650,28 +1641,11 @@
             color: #3b82f6;
         }
 
-        @media (max-width: 1024px) {
-            .auth-split {
-                grid-template-columns: 1fr;
-                max-width: 100%;
-                border-radius: 0;
-            }
-            .auth-right {
-                order: -1;
-                min-height: 300px;
-            }
-            .auth-left {
-                padding: 40px;
-            }
-            .illustration-text {
-                font-size: 24px;
-            }
-        }
         @media (max-width: 480px) {
             .auth-split {
                 margin: 10px;
                 border-radius: 20px;
-                min-height: auto;
+                width: calc(100% - 20px);
             }
             .auth-left {
                 padding: 30px 20px;
@@ -1931,18 +1905,8 @@
           /* Landing page nav links — hide on mobile — only target landing page nav */ 
           #landingPage nav a { display: none !important; } 
 
-          /* Option C Login Responsive */
+          /* Mobile Adjustments */
           @media (max-width: 768px) {
-            .login-grid {
-              grid-template-columns: 1fr !important;
-            }
-            .login-left-panel {
-              display: none !important;
-            }
-            .mobile-back-btn {
-              display: inline-flex !important;
-            }
-          }
         
           /* Padding adjustments */ 
           [style*='padding:1.5rem'] { 
