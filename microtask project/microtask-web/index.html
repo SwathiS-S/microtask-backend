@@ -1477,12 +1477,8 @@
             padding: 20px;
             box-sizing: border-box;
             overflow-y: auto;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 9999;
+            position: relative;
+            z-index: 1000;
         }
         .auth-split {
             width: 100%;
@@ -5798,10 +5794,14 @@
                                       method:'POST',
                                       headers:{'Content-Type':'application/json'},
                                       body: JSON.stringify({ taskId: tid, userId: uid, approvedBy: currentUser.userId, taskDurationDays: days })
-                                    }).then(r=>r.json()).then(x=>{
+                                    }).then(async r => {
+                                      const data = await r.json();
+                                      if (!r.ok) throw new Error(data.message || data.error || 'Failed to accept worker');
+                                      return data;
+                                    }).then(x => {
                                       alert(x.message || 'Approved');
                                       loadProviderTasks();
-                                    }).catch(e=> alert(e.message));
+                                    }).catch(e => alert('Error: ' + e.message));
                                   };
                                 });
                                 appsEl.querySelectorAll('button[data-action="status-app"]').forEach(btn=>{
@@ -5813,10 +5813,14 @@
                                       method:'POST',
                                       headers:{'Content-Type':'application/json'},
                                       body: JSON.stringify({ taskId: tid, userId: uid, approvedBy: currentUser.userId, status: st })
-                                    }).then(r=>r.json()).then(x=>{
+                                    }).then(async r => {
+                                      const data = await r.json();
+                                      if (!r.ok) throw new Error(data.message || data.error || 'Failed to update status');
+                                      return data;
+                                    }).then(x => {
                                       alert(x.message || 'Status updated');
                                       loadProviderTasks();
-                                    }).catch(e=> alert(e.message));
+                                    }).catch(e => alert('Error: ' + e.message));
                                   };
                                 });
                             }).catch(_=> appsEl.innerHTML = '<p style="color:#dc3545;">Failed to load applications</p>');
@@ -6149,7 +6153,11 @@
             headers: {'Content-Type':'application/json'}, 
             body: JSON.stringify({ taskId: taskId, userId: userId, approvedBy: currentUser.userId, taskDurationDays: days }) 
           }) 
-            .then(r => r.json()) 
+            .then(async r => {
+              const data = await r.json();
+              if (!r.ok) throw new Error(data.message || data.error || 'Failed to accept worker');
+              return data;
+            }) 
             .then(d => { alert(d.message || 'Worker accepted!'); loadDashboardTasks(); }) 
             .catch(e => alert('Error: ' + e.message)); 
         } 
@@ -6158,7 +6166,11 @@
           fetch(`${API_URL}/tasks/applications/status`, { 
             method: 'POST', headers: {'Content-Type':'application/json'}, 
             body: JSON.stringify({ taskId: taskId, userId: userId, approvedBy: currentUser.userId, status: 'REJECTED' }) 
-          }).then(r => r.json()).then(d => { alert(d.message || 'Rejected'); loadDashboardTasks(); }) 
+          }).then(async r => {
+            const data = await r.json();
+            if (!r.ok) throw new Error(data.message || data.error || 'Failed to reject');
+            return data;
+          }).then(d => { alert(d.message || 'Rejected'); loadDashboardTasks(); }) 
             .catch(e => alert('Error: ' + e.message)); 
         } 
         
@@ -6634,7 +6646,8 @@
                 window.viewedWork = {};
             }
             window.viewedWork[taskId] = true;
-            loadProviderTasks();
+            if (typeof loadProviderTasks === 'function') loadProviderTasks();
+            if (typeof loadDashboardTasks === 'function') loadDashboardTasks();
         }
     </script>
 <script>
