@@ -79,278 +79,203 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isWide = MediaQuery.of(context).size.width > 800;
-
     return Scaffold(
-      backgroundColor: AppTheme.cream,
-      body: isWide ? _buildWideLayout() : _buildMobileLayout(),
-    );
-  }
-
-  Widget _buildWideLayout() {
-    return Row(
-      children: [
-        // Left Branding Panel
-        Expanded(
-          flex: 1,
-          child: Container(
-            color: AppTheme.navy,
-            padding: const EdgeInsets.all(60),
-            child: _buildBrandingContent(),
-          ),
-        ),
-        // Right Form Panel
-        Expanded(
-          flex: 1,
-          child: Container(
-            color: AppTheme.cream,
-            child: Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 400),
-                padding: const EdgeInsets.all(40),
-                child: _buildLoginForm(),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMobileLayout() {
-    return SingleChildScrollView(
-      child: Column(
+      body: Stack(
         children: [
+          // Background with Dark Blue Gradient and Image Overlay
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
-            decoration: const BoxDecoration(
+            height: double.infinity,
+            decoration: BoxDecoration(
               color: AppTheme.navy,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+              image: const DecorationImage(
+                image: NetworkImage(
+                  'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=2070',
+                ),
+                fit: BoxFit.cover,
+                opacity: 0.08, // 92% dark blue overlay
               ),
             ),
-            child: Column(
-              children: [
-                _buildLogo(),
-                const SizedBox(height: 24),
-                const Text(
-                  'Welcome Back',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Sign in to your TaskNest account',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                ),
-              ],
-            ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: _buildLoginForm(),
+          
+          // Centered Login Card
+          Center(child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Card(
+                  elevation: 20,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  color: Colors.white.withOpacity(0.98),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Logo and Title
+                        _buildLogo(),
+                        const SizedBox(height: 32),
+                        
+                        // Error Message
+                        if (errorMessage != null)
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            margin: const EdgeInsets.only(bottom: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              errorMessage!,
+                              style: const TextStyle(color: Colors.red, fontSize: 13),
+                            ),
+                          ),
+                          
+                        // Email Field
+                        _buildLabel("Email Address"),
+                        _buildInputField(email, "your@email.com", false),
+                        const SizedBox(height: 20),
+                        
+                        // Password Field
+                        _buildLabel("Password"),
+                        _buildInputField(password, "••••••••", true),
+                        const SizedBox(height: 12),
+                        
+                        // Sign In Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: isLoading ? null : _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.navy,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 4,
+                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  )
+                                : const Text("Sign In", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          ),
+                        ),
+                        
+                        // Footer Toggle
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("New to TaskNest?", style: TextStyle(color: Color(0xFF64748b), fontSize: 14)),
+                            TextButton(
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                              child: const Text("Create account", style: TextStyle(color: Color(0xFFC9A84C), fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                        
+                        // Back Button
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("← Back to Home", style: TextStyle(color: Color(0xFF64748b), fontWeight: FontWeight.w600)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBrandingContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildLogo(),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'India\'s trusted\nfreelance task\nplatform',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(width: 40, height: 3, color: AppTheme.gold),
-            const SizedBox(height: 24),
-            Text(
-              'Secure escrow payments powered by Razorpay. Post tasks, find workers and get paid safely.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white.withOpacity(0.65),
-                height: 1.6,
-              ),
-            ),
-          ],
-        ),
-        Text(
-          '© 2026 TaskNest · teamtasknest@gmail.com',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.white.withOpacity(0.3),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildLogo() {
-    return Row(
+    return Column(
       children: [
         Container(
-          width: 36,
-          height: 36,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
-            color: AppTheme.gold,
-            borderRadius: BorderRadius.circular(9),
+            color: const Color(0xFFC9A84C),
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: const Center(
-            child: Icon(Icons.task_alt, color: Colors.white, size: 20),
-          ),
-        ),
-        const SizedBox(width: 12),
-        const Text(
-          'TaskNest',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoginForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Sign in', style: AppTheme.heading2),
-        const SizedBox(height: 8),
-        const Text('Enter your credentials to continue', style: AppTheme.bodyMuted),
-        const SizedBox(height: 32),
-        
-        if (errorMessage != null) ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppTheme.error.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              errorMessage!,
-              style: const TextStyle(color: AppTheme.error, fontSize: 13),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-
-        // Role Selector (Matching Web Style)
-        Row(
-          children: [
-            Expanded(
-              child: _buildRoleOption(UserRole.taskUser, 'I\'m a Worker'),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildRoleOption(UserRole.taskProvider, 'I\'m a Provider'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-
-        const Text('EMAIL', style: AppTheme.small),
-        const SizedBox(height: 8),
-        TextField(
-          controller: email,
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(hintText: 'your@email.com'),
-        ),
-        const SizedBox(height: 20),
-        
-        const Text('PASSWORD', style: AppTheme.small),
-        const SizedBox(height: 8),
-        TextField(
-          controller: password,
-          obscureText: true,
-          decoration: const InputDecoration(hintText: 'Enter password'),
-        ),
-        const SizedBox(height: 32),
-
-        SizedBox(
-          width: double.infinity,
-          height: 54,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : _handleLogin,
-            style: AppTheme.goldButton,
-            child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                  )
-                : const Text('Login', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          ),
-        ),
-        
-        const SizedBox(height: 24),
-        Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Don\'t have an account? ', style: AppTheme.bodyMuted),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                  );
-                },
-                child: const Text(
-                  'Register',
-                  style: TextStyle(color: AppTheme.gold, fontWeight: FontWeight.bold),
-                ),
+          child: Center(
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white, width: 3),
+                borderRadius: BorderRadius.circular(6),
               ),
-            ],
+            ),
           ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          "TaskNest",
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF1E3A5F),
+            letterSpacing: -0.02,
+          ),
+        ),
+        const Text(
+          "Sign in to your account",
+          style: TextStyle(color: Color(0xFF64748b), fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ],
     );
   }
 
-  Widget _buildRoleOption(UserRole role, String label) {
-    final bool isSelected = selectedRole == role;
-    return GestureDetector(
-      onTap: () => setState(() => selectedRole = role),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.navy : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isSelected ? AppTheme.navy : AppTheme.border),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : AppTheme.textMuted,
-            ),
+  Widget _buildLabel(String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Text(
+          text.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF475569),
+            letterSpacing: 0.05,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInputField(TextEditingController controller, String hint, bool isPassword) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: const Color(0xFFf8fafc),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFe2e8f0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFe2e8f0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1E3A5F), width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

@@ -151,303 +151,269 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isWide = MediaQuery.of(context).size.width > 800;
-
     return Scaffold(
-      backgroundColor: AppTheme.cream,
-      body: isWide ? _buildWideLayout() : _buildMobileLayout(),
-    );
-  }
-
-  Widget _buildWideLayout() {
-    return Row(
-      children: [
-        Expanded(
-          flex: 1,
-          child: Container(
-            color: AppTheme.navy,
-            padding: const EdgeInsets.all(60),
-            child: _buildBrandingContent(),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Container(
-            color: AppTheme.cream,
-            child: Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 400),
-                padding: const EdgeInsets.all(40),
-                child: _buildRegisterForm(),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMobileLayout() {
-    return SingleChildScrollView(
-      child: Column(
+      body: Stack(
         children: [
+          // Background with Dark Blue Gradient and Image Overlay
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
-            decoration: const BoxDecoration(
+            height: double.infinity,
+            decoration: BoxDecoration(
               color: AppTheme.navy,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+              image: const DecorationImage(
+                image: NetworkImage(
+                  'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=2070',
+                ),
+                fit: BoxFit.cover,
+                opacity: 0.08, // 92% dark blue overlay
               ),
             ),
-            child: Column(
-              children: [
-                _buildLogo(),
-                const SizedBox(height: 24),
-                const Text(
-                  'Create Account',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Join our platform and start earning',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                ),
-              ],
-            ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: _buildRegisterForm(),
+          
+          // Centered Register Card
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Card(
+                  elevation: 20,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  color: Colors.white.withOpacity(0.98),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Logo and Title
+                        _buildLogoContent(),
+                        const SizedBox(height: 32),
+                        
+                        // Error Message
+                        if (errorMessage != null)
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            margin: const EdgeInsets.only(bottom: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              errorMessage!,
+                              style: const TextStyle(color: Colors.red, fontSize: 13),
+                            ),
+                          ),
+                          
+                        // Role Selection
+                        _buildLabel("I WANT TO"),
+                        Row(
+                          children: [
+                            Expanded(child: _buildRoleOption(UserRole.taskUser, "Find Tasks")),
+                            const SizedBox(width: 12),
+                            Expanded(child: _buildRoleOption(UserRole.taskProvider, "Post Tasks")),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Form Fields
+                        _buildLabel("Full Name"),
+                        _buildInputField(name, "John Doe", false),
+                        const SizedBox(height: 16),
+                        
+                        _buildLabel("Email Address"),
+                        _buildInputField(email, "your@email.com", false, enabled: !isVerified),
+                        const SizedBox(height: 16),
+
+                        _buildLabel("Phone Number"),
+                        _buildInputField(phone, "Enter phone number", false),
+                        const SizedBox(height: 16),
+
+                        // OTP Section
+                        if (isOtpSent && !isVerified)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel("One-Time Password"),
+                              Row(
+                                children: [
+                                  Expanded(child: _buildInputField(otp, "Enter OTP", false)),
+                                  const SizedBox(width: 12),
+                                  ElevatedButton(
+                                    onPressed: isLoading ? null : _verifyEmail,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF1E3A5F),
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                    child: const Text("Verify", style: TextStyle(fontSize: 13, color: Colors.white)),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                resendTimer > 0 ? "Resend in ${resendTimer}s" : "You can resend now",
+                                style: const TextStyle(fontSize: 11, color: Color(0xFF64748b)),
+                              ),
+                              if (resendTimer <= 0)
+                                TextButton(
+                                  onPressed: isLoading ? null : _sendOtp,
+                                  child: const Text("Resend OTP", style: TextStyle(fontSize: 12, color: Color(0xFFC9A84C))),
+                                ),
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+
+                        if (isVerified)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 16),
+                            child: Row(
+                              children: [
+                                Icon(Icons.verified, color: Colors.green, size: 16),
+                                SizedBox(width: 8),
+                                Text('Email Verified', style: TextStyle(color: Colors.green, fontSize: 13, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+
+                        _buildLabel("Password"),
+                        _buildInputField(password, "••••••••", true),
+                        const SizedBox(height: 24),
+                        
+                        // Register Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: isLoading ? null : (isVerified ? _handleRegister : _sendOtp),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.navy,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 4,
+                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  )
+                                : Text(isVerified ? "Create Account" : (isOtpSent ? "Send OTP Again" : "Send Verification Code"), 
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          ),
+                        ),
+                        
+                        // Footer Toggle
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Already have an account?", style: TextStyle(color: Color(0xFF64748b), fontSize: 14)),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("Sign in", style: TextStyle(color: Color(0xFFC9A84C), fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBrandingContent() {
+  Widget _buildLogoContent() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildLogo(),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Join India\'s\nlargest micro-task\nnetwork',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(width: 40, height: 3, color: AppTheme.gold),
-            const SizedBox(height: 24),
-            Text(
-              'Start your journey today. Join thousands of workers earning safely with Razorpay protection.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white.withOpacity(0.65),
-                height: 1.6,
-              ),
-            ),
-          ],
-        ),
-        Text(
-          '© 2026 TaskNest · teamtasknest@gmail.com',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.white.withOpacity(0.3),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLogo() {
-    return Row(
       children: [
         Container(
-          width: 36,
-          height: 36,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
-            color: AppTheme.gold,
-            borderRadius: BorderRadius.circular(9),
+            color: const Color(0xFFC9A84C),
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: const Center(
-            child: Icon(Icons.task_alt, color: Colors.white, size: 20),
+          child: Center(
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white, width: 3),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(height: 16),
         const Text(
-          'TaskNest',
+          "TaskNest",
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF1E3A5F),
+            letterSpacing: -0.02,
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildRegisterForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: AppTheme.navy),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            ),
-            const SizedBox(width: 12),
-            const Text('Register', style: AppTheme.heading2),
-          ],
-        ),
-        const SizedBox(height: 8),
-        const Text('Join our community today', style: AppTheme.bodyMuted),
-        const SizedBox(height: 32),
-        
-        if (errorMessage != null) ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppTheme.error.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              errorMessage!,
-              style: const TextStyle(color: AppTheme.error, fontSize: 13),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-
-        Row(
-          children: [
-            Expanded(child: _buildRoleOption(UserRole.taskUser, 'Worker')),
-            const SizedBox(width: 12),
-            Expanded(child: _buildRoleOption(UserRole.taskProvider, 'Provider')),
-          ],
-        ),
-        const SizedBox(height: 24),
-
-        _buildLabel('FULL NAME'),
-        TextField(controller: name, decoration: const InputDecoration(hintText: 'Your name')),
-        const SizedBox(height: 16),
-        
-        _buildLabel('EMAIL'),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: email,
-                enabled: !isVerified,
-                decoration: const InputDecoration(hintText: 'your@email.com'),
-              ),
-            ),
-            if (!isVerified) ...[
-              const SizedBox(width: 8),
-              SizedBox(
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : _sendOtp,
-                  style: AppTheme.primaryButton.copyWith(
-                    padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 16)),
-                  ),
-                  child: Text(isOtpSent ? 'Resend' : 'Send OTP', style: const TextStyle(fontSize: 12)),
-                ),
-              ),
-            ],
-          ],
-        ),
-        
-        if (isOtpSent && !isVerified) ...[
-          const SizedBox(height: 16),
-          _buildLabel('ENTER OTP'),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: otp,
-                  decoration: const InputDecoration(hintText: '6-digit code'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : _verifyEmail,
-                  style: AppTheme.goldButton.copyWith(
-                    padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 16)),
-                  ),
-                  child: const Text('Verify', style: TextStyle(fontSize: 12)),
-                ),
-              ),
-            ],
-          ),
-          if (resendTimer > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text('Resend in ${resendTimer}s', style: AppTheme.small),
-            ),
-        ],
-
-        if (isVerified)
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Row(
-              children: [
-                Icon(Icons.verified, color: AppTheme.success, size: 16),
-                SizedBox(width: 8),
-                Text('Email Verified', style: TextStyle(color: AppTheme.success, fontSize: 13, fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-
-        const SizedBox(height: 16),
-        _buildLabel('PHONE'),
-        TextField(controller: phone, decoration: const InputDecoration(hintText: 'Enter phone number')),
-        const SizedBox(height: 16),
-        
-        _buildLabel('PASSWORD'),
-        TextField(controller: password, obscureText: true, decoration: const InputDecoration(hintText: 'Create password')),
-        const SizedBox(height: 32),
-
-        SizedBox(
-          width: double.infinity,
-          height: 54,
-          child: ElevatedButton(
-            onPressed: (isLoading || !isVerified) ? null : _handleRegister,
-            style: AppTheme.goldButton,
-            child: isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
-                : const Text('Register Now', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          ),
+        const Text(
+          "Create your account",
+          style: TextStyle(color: Color(0xFF64748b), fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ],
     );
   }
 
   Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: AppTheme.small),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Text(
+          text.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF475569),
+            letterSpacing: 0.05,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField(TextEditingController controller, String hint, bool isPassword, {bool enabled = true}) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      enabled: enabled,
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: enabled ? const Color(0xFFf8fafc) : const Color(0xFFf1f5f9),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFe2e8f0), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFe2e8f0), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1E3A5F), width: 1.5),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFe2e8f0), width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
     );
   }
 
@@ -459,16 +425,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.navy : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isSelected ? AppTheme.navy : AppTheme.border),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? AppTheme.navy : const Color(0xFFe2e8f0), width: 1.5),
         ),
         child: Center(
           child: Text(
             label,
             style: TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : AppTheme.textMuted,
+              fontWeight: FontWeight.bold,
+              color: isSelected ? Colors.white : const Color(0xFF64748b),
             ),
           ),
         ),
