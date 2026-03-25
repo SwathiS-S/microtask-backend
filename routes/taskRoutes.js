@@ -31,6 +31,7 @@ const finalStorage = multer.diskStorage({
 const uploadFinal = multer({ storage: finalStorage });
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const Escrow = require('../models/Escrow');
 
 // CREATE TASK
 router.post('/create', async (req, res) => {
@@ -130,13 +131,15 @@ router.post('/applications/accept', async (req, res) => {
     if (String(task.postedBy) !== String(approvedBy))
       return res.status(403).json({ message: 'Only the task provider can accept applications' });
     
-    // Step 6: Sample work disappears forever
-    task.applications = (task.applications || []).map(a => {
-      if (String(a.userId) === String(userId)) {
-        return { ...a.toObject(), state: 'ACCEPTED', sampleFile: undefined };
-      }
-      return { ...a.toObject(), sampleFile: undefined }; // Remove samples for others too
-    });
+    // Step 6: Update application states and remove sample work snapshots
+    if (task.applications && task.applications.length > 0) {
+      task.applications.forEach(a => {
+        if (String(a.userId) === String(userId)) {
+          a.state = 'ACCEPTED';
+        }
+        a.sampleFile = undefined;
+      });
+    }
 
     task.acceptedBy = userId;
     task.status = 'assigned';
@@ -288,10 +291,22 @@ router.post('/reject-final', async (req, res) => {
     if (!task) return res.status(404).json({ message: 'Task not found' });
     if (String(task.postedBy) !== String(approvedBy))
       return res.status(403).json({ message: 'Only the task provider can reject final work' });
+    
     task.finalStatus = 'REJECTED';
     task.status = 'rejected';
     task.reviewRemark = remark || '';
     await task.save();
+
+    // Notify Worker
+    await Notification.create({
+      recipient: task.acceptedBy,
+      sender: approvedBy,
+      title: 'Work Rejected ❌',
+      message: `Your final work for "${task.title}" was rejected by the provider. Remark: ${remark || 'No remark provided.'}`,
+      type: 'WORK_REJECTED',
+      taskId: task._id
+    });
+
     res.json({ success: true, message: 'Final work rejected' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -578,6 +593,16 @@ router.post('/approve-work/:taskId', async (req, res) => {
     task.providerApprovedAt = new Date();
     await task.save();
 
+    // Notify Worker
+    await Notification.create({
+      recipient: task.acceptedBy,
+      sender: approvedBy,
+      title: 'Work Approved! ✔️',
+      message: `Your work for "${task.title}" has been approved by the provider. The Admin will release your payment shortly.`,
+      type: 'WORK_APPROVED',
+      taskId: task._id
+    });
+
     // Notify Admin
     const admin = await User.findOne({ role: 'admin' });
     if (admin) {
@@ -601,20 +626,36 @@ router.post('/approve', async (req, res) => {
    try { 
      const { taskId, approvedBy } = req.body; 
  
-     console.log('Approve route hit!'); 
-     console.log('taskId:', taskId); 
- 
-     const task = await Task.findByIdAndUpdate( 
-       taskId, 
-       { 
-         status: 'pending_release', 
-         finalStatus: 'APPROVED', 
-         providerApprovedAt: new Date() 
-       }, 
-       { new: true } 
-     ); 
- 
-     console.log('Task status:', task.status); 
+     const task = await Task.findById(taskId);
+     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+     task.status = 'pending_release'; 
+     task.finalStatus = 'APPROVED'; 
+     task.providerApprovedAt = new Date(); 
+     await task.save(); 
+
+     // Notify Worker
+     await Notification.create({
+       recipient: task.acceptedBy,
+       sender: approvedBy,
+       title: 'Work Approved! ✔️',
+       message: `Your work for "${task.title}" has been approved by the provider. The Admin will release your payment shortly.`,
+       type: 'WORK_APPROVED',
+       taskId: task._id
+     });
+
+     // Notify Admin
+     const admin = await User.findOne({ role: 'admin' });
+     if (admin) {
+       await Notification.create({
+         recipient: admin._id,
+         sender: approvedBy,
+         title: 'Escrow Release Request',
+         message: `Provider approved work for "${task.title}". Please release the payment of ₹${task.amount}.`,
+         type: 'ESCROW_RELEASE_REQUEST',
+         taskId: task._id
+       });
+     }
  
      return res.json({ 
        success: true, 
