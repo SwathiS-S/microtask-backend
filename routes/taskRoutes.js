@@ -140,6 +140,13 @@ router.post('/applications/accept', async (req, res) => {
 
     task.acceptedBy = userId;
     task.status = 'assigned';
+
+    // Link the worker to the existing escrow record
+    await Escrow.findOneAndUpdate(
+      { taskId: taskId, status: 'held' },
+      { userId: userId }
+    );
+
     // deadlines
     task.approvedDate = new Date();
     const dur = Number(req.body.taskDurationDays || 3);
