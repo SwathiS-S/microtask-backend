@@ -32,6 +32,7 @@ const uploadFinal = multer({ storage: finalStorage });
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const Escrow = require('../models/Escrow');
+const Message = require('../models/Message');
 
 // CREATE TASK
 router.post('/create', async (req, res) => {
@@ -43,7 +44,6 @@ router.post('/create', async (req, res) => {
       description: req.body.description,
       amount: req.body.amount,
       postedBy: req.body.postedBy,
-      // map optional fields for new model
       skillset: req.body.skillset,
       workType: req.body.workType || req.body.workMode || 'ALL',
       location: req.body.location,
@@ -102,7 +102,7 @@ router.post('/apply', async (req, res) => {
     if (!task) return res.status(404).json({ message: 'Task not found' });
     task.applications = task.applications || [];
     const exists = task.applications.find(a => String(a.userId) === String(userId));
-    if (exists) return res.json({ message: 'Application already exists' });
+    if (exists) return res.json({ success: true, message: 'Application already exists' });
     task.applications.push({ userId, state: 'APPLIED' });
     await task.save();
 
@@ -116,9 +116,10 @@ router.post('/apply', async (req, res) => {
       taskId: task._id
     });
 
-    res.json({ message: 'Applied successfully' });
+    // ✅ FIXED: added success: true
+    res.json({ success: true, message: 'Applied successfully' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -131,7 +132,6 @@ router.post('/applications/accept', async (req, res) => {
     if (String(task.postedBy) !== String(approvedBy))
       return res.status(403).json({ message: 'Only the task provider can accept applications' });
     
-    // Step 6: Update application states and remove sample work snapshots
     if (task.applications && task.applications.length > 0) {
       task.applications.forEach(a => {
         if (String(a.userId) === String(userId)) {
@@ -144,25 +144,39 @@ router.post('/applications/accept', async (req, res) => {
     task.acceptedBy = userId;
     task.status = 'assigned';
 
-    // Link the worker to the existing escrow record
     await Escrow.findOneAndUpdate(
       { taskId: taskId, status: 'held' },
       { userId: userId }
     );
 
-    // deadlines
     task.approvedDate = new Date();
     const dur = Number(req.body.taskDurationDays || 3);
     task.taskDurationDays = dur;
     task.submissionDeadline = new Date(task.approvedDate.getTime() + dur * 24 * 60 * 60 * 1000);
     
-    // Notify User
     await Notification.create({
       recipient: userId,
       sender: approvedBy,
       title: 'Application Approved! 🎉',
       message: `Your application for "${task.title}" has been approved. You can now start the task.`,
       type: 'APPLICATION_APPROVED',
+      taskId: task._id
+    });
+
+    const defaultMessage = new Message({
+      taskId: task._id,
+      sender: approvedBy,
+      receiver: userId,
+      text: `Hi! I've accepted your application for the task "${task.title}". Let's discuss the details here.`
+    });
+    await defaultMessage.save();
+
+    await Notification.create({
+      recipient: userId,
+      sender: approvedBy,
+      title: 'New Chat Message 💬',
+      message: defaultMessage.text.substring(0, 50),
+      type: 'CHAT_MESSAGE',
       taskId: task._id
     });
 
@@ -211,7 +225,6 @@ router.post('/applications/status', async (req, res) => {
     if (!app) return res.status(404).json({ message: 'Application not found' });
     if (status === 'APPROVED') {
       app.state = 'ACCEPTED';
-      // Notify User
       await Notification.create({
         recipient: userId,
         sender: approvedBy,
@@ -220,9 +233,25 @@ router.post('/applications/status', async (req, res) => {
         type: 'APPLICATION_APPROVED',
         taskId: task._id
       });
+
+      const defaultMessage = new Message({
+        taskId: task._id,
+        sender: approvedBy,
+        receiver: userId,
+        text: `Hi! I've approved your application for the task "${task.title}". Let's discuss the details here.`
+      });
+      await defaultMessage.save();
+
+      await Notification.create({
+        recipient: userId,
+        sender: approvedBy,
+        title: 'New Chat Message 💬',
+        message: defaultMessage.text.substring(0, 50),
+        type: 'CHAT_MESSAGE',
+        taskId: task._id
+      });
     } else if (status === 'REJECTED') {
       app.state = 'REJECTED';
-      // Notify User
       await Notification.create({
         recipient: userId,
         sender: approvedBy,
@@ -231,11 +260,49 @@ router.post('/applications/status', async (req, res) => {
         type: 'APPLICATION_REJECTED',
         taskId: task._id
       });
-    } else app.state = 'APPLIED'; // KEEP WAITING
+    } else app.state = 'APPLIED';
     await task.save();
     res.json({ success: true, message: 'Application status updated', state: app.state });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// APPLY WITH FIREBASE SAMPLE URL
+router.post('/:id/apply-with-firebase-sample', async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const { userId, url, filename, mime, size } = req.body;
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+    
+    task.applications = task.applications || [];
+    const exists = task.applications.find(a => String(a.userId && a.userId._id || a.userId || '') === String(userId));
+    if (exists) return res.status(400).json({ success: false, message: 'Already applied' });
+    
+    const sampleFile = {
+      filename: filename || 'firebase-upload',
+      url: url,
+      mime: mime || 'image/jpeg',
+      size: size || 0,
+      uploadedAt: new Date()
+    };
+    
+    task.applications.push({ userId, state: 'APPLIED', sampleFile });
+    await task.save();
+    
+    await Notification.create({
+      recipient: task.postedBy,
+      sender: userId,
+      title: 'New Applicant with Sample',
+      message: `A user has applied for your task: ${task.title} and provided a sample work.`,
+      type: 'APPLICATION_RECEIVED',
+      taskId: task._id
+    });
+    
+    res.json({ success: true, message: 'Application submitted with Firebase sample', sampleFile });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -267,7 +334,6 @@ router.post('/:id/submit-final', uploadFinal.single('final'), async (req, res) =
     task.status = 'submitted';
     await task.save();
 
-    // Notify Provider
     await Notification.create({
       recipient: task.postedBy,
       sender: userId,
@@ -283,7 +349,7 @@ router.post('/:id/submit-final', uploadFinal.single('final'), async (req, res) =
   }
 });
 
-// PROVIDER REJECTS FINAL WORK (optional remarks)
+// PROVIDER REJECTS FINAL WORK
 router.post('/reject-final', async (req, res) => {
   try {
     const { taskId, approvedBy, remark } = req.body;
@@ -297,7 +363,6 @@ router.post('/reject-final', async (req, res) => {
     task.reviewRemark = remark || '';
     await task.save();
 
-    // Notify Worker
     await Notification.create({
       recipient: task.acceptedBy,
       sender: approvedBy,
@@ -313,7 +378,7 @@ router.post('/reject-final', async (req, res) => {
   }
 });
 
-// PROVIDER APPROVES FINAL WORK (Step 9 & 10)
+// PROVIDER APPROVES FINAL WORK
 router.post('/approve-final', async (req, res) => {
   const { taskId, providerId } = req.body;
   try {
@@ -326,11 +391,9 @@ router.post('/approve-final', async (req, res) => {
     const Wallet = require('../models/Wallet');
     const Transaction = require('../models/Transaction');
 
-    // 1. Find Escrow Record
     const escrow = await Escrow.findOne({ taskId: task._id, status: 'held' });
     if (!escrow) return res.status(404).json({ success: false, message: 'No funds held in escrow' });
 
-    // 2. Transfer to Worker Wallet
     const worker = await User.findById(task.acceptedBy);
     if (!worker) return res.status(404).json({ success: false, message: 'Worker not found' });
 
@@ -349,12 +412,10 @@ router.post('/approve-final', async (req, res) => {
     });
     await workerWallet.save();
 
-    // 3. Update Escrow Status
     escrow.status = 'released';
     escrow.releasedAt = new Date();
     await escrow.save();
 
-    // 4. Update Provider's Escrow Balance
     const providerWallet = await Wallet.findOne({ userId: task.postedBy });
     if (providerWallet) {
       providerWallet.escrowBalance = Math.max(0, (providerWallet.escrowBalance || 0) - escrow.amount);
@@ -370,12 +431,10 @@ router.post('/approve-final', async (req, res) => {
       await providerWallet.save();
     }
 
-    // 5. Update Task Status (Step 11)
     task.status = 'completed';
     task.finalStatus = 'APPROVED';
     await task.save();
 
-    // 6. Notify Worker
     await Notification.create({
       recipient: worker._id,
       sender: providerId,
@@ -402,7 +461,7 @@ router.get('/:id/applications', async (req, res) => {
   }
 });
 
-// USER SUBMITS WORK (set submitted)
+// USER SUBMITS WORK
 router.post('/submit', async (req, res) => {
   const { taskId, submittedBy } = req.body;
   try {
@@ -419,7 +478,7 @@ router.post('/submit', async (req, res) => {
   }
 });
 
-// USER STARTS TASK (moves to in_progress)
+// USER STARTS TASK
 router.post('/:id/start', async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -435,7 +494,44 @@ router.post('/:id/start', async (req, res) => {
   }
 });
 
-// PROVIDER REVIEWS WORK (moves to reviewed)
+// SUBMIT FINAL WORK WITH FIREBASE URL
+router.post('/:id/submit-firebase-final', async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const { userId, url, filename, mime, size, reviewRemark } = req.body;
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    if (String(task.acceptedBy) !== String(userId))
+      return res.status(403).json({ success: false, message: 'Only the assigned worker can submit' });
+    
+    task.finalFile = {
+      filename: filename || 'final-work',
+      url: url,
+      mime: mime || 'application/octet-stream',
+      size: size || 0,
+      uploadedAt: new Date()
+    };
+    task.finalStatus = 'SUBMITTED';
+    task.status = 'submitted';
+    task.reviewRemark = reviewRemark;
+    await task.save();
+    
+    await Notification.create({
+      recipient: task.postedBy,
+      sender: userId,
+      title: 'Final Work Submitted 📂',
+      message: `The worker has submitted the final work for "${task.title}". Please review it.`,
+      type: 'WORK_SUBMITTED',
+      taskId: task._id
+    });
+    
+    res.json({ success: true, message: 'Final work submitted via Firebase', task });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PROVIDER REVIEWS FINAL WORK
 router.post('/:id/review', async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -451,7 +547,7 @@ router.post('/:id/review', async (req, res) => {
   }
 });
 
-// STATUS UPDATE (daily progress note)
+// STATUS UPDATE
 router.post('/:id/status-update', async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -464,7 +560,6 @@ router.post('/:id/status-update', async (req, res) => {
     task.updates.unshift({ userId, text });
     await task.save();
 
-    // Notify Provider
     await Notification.create({
       recipient: task.postedBy,
       sender: userId,
@@ -491,53 +586,34 @@ router.get('/:id/updates', async (req, res) => {
   }
 });
 
-// COMPLETE TASK & TRANSFER PAYMENT (worker marks done – optional flow)
+// COMPLETE TASK & TRANSFER PAYMENT
 router.post('/complete', async (req, res) => {
   const { taskId, completedBy } = req.body;
-
   try {
     const task = await Task.findById(taskId);
-
-    if (!task)
-      return res.status(404).json({ message: 'Task not found' });
-
-    if (!task.acceptedBy)
-      return res.status(400).json({ message: 'Task not accepted yet' });
-
-    if (task.acceptedBy.toString() !== completedBy)
-      return res.status(400).json({ message: 'Only assigned user can complete' });
-
-    if (!['accepted', 'underReview'].includes(task.status))
-      return res.status(400).json({ message: 'Task not in accepted state' });
-
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+    if (!task.acceptedBy) return res.status(400).json({ message: 'Task not accepted yet' });
+    if (task.acceptedBy.toString() !== completedBy) return res.status(400).json({ message: 'Only assigned user can complete' });
+    if (!['accepted', 'underReview'].includes(task.status)) return res.status(400).json({ message: 'Task not in accepted state' });
     task.status = 'completed';
     await task.save();
 
     const poster = await User.findById(task.postedBy);
     const worker = await User.findById(completedBy);
-
-    // Calculate Commission (20%)
     const adminCommission = Math.round(task.amount * 0.20);
     const userEarnings = task.amount - adminCommission;
 
-    if (poster.wallet < task.amount)
-      return res.status(400).json({ message: 'Insufficient balance' });
+    if (poster.wallet < task.amount) return res.status(400).json({ message: 'Insufficient balance' });
 
-    // Deduct from poster
     poster.wallet -= task.amount;
-    // Credit to worker
     worker.wallet += userEarnings;
-
     await poster.save();
     await worker.save();
 
-    // Credit to Admin
     const admin = await User.findOne({ role: 'admin' });
     if (admin) {
       admin.wallet = (admin.wallet || 0) + adminCommission;
       await admin.save();
-      
-      // Admin Commission Transaction
       const Transaction = require('../models/Transaction');
       await Transaction.create({
         user_id: admin._id,
@@ -548,30 +624,11 @@ router.post('/complete', async (req, res) => {
       });
     }
 
-    // Transactions for poster and worker
     const Transaction = require('../models/Transaction');
-    await Transaction.create({
-      user_id: poster._id,
-      task_id: task._id,
-      amount: task.amount,
-      type: 'DEBIT',
-      status: 'SUCCESS'
-    });
+    await Transaction.create({ user_id: poster._id, task_id: task._id, amount: task.amount, type: 'DEBIT', status: 'SUCCESS' });
+    await Transaction.create({ user_id: worker._id, task_id: task._id, amount: userEarnings, type: 'CREDIT', status: 'SUCCESS' });
 
-    await Transaction.create({
-      user_id: worker._id,
-      task_id: task._id,
-      amount: userEarnings,
-      type: 'CREDIT',
-      status: 'SUCCESS'
-    });
-
-    res.json({ 
-      message: 'Task completed and payment transferred successfully',
-      earnings: userEarnings,
-      commission: adminCommission
-    });
-
+    res.json({ message: 'Task completed and payment transferred successfully', earnings: userEarnings, commission: adminCommission });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -580,20 +637,14 @@ router.post('/complete', async (req, res) => {
 router.post('/approve-work/:taskId', async (req, res) => {
   const { taskId } = req.params;
   const { approvedBy } = req.body;
-
   try {
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ message: 'Task not found' });
-
-    if (String(task.postedBy) !== String(approvedBy)) {
-      return res.status(403).json({ message: 'Only the task provider can approve this work' });
-    }
-
+    if (String(task.postedBy) !== String(approvedBy)) return res.status(403).json({ message: 'Only the task provider can approve this work' });
     task.status = 'pending_release';
     task.providerApprovedAt = new Date();
     await task.save();
 
-    // Notify Worker
     await Notification.create({
       recipient: task.acceptedBy,
       sender: approvedBy,
@@ -603,7 +654,6 @@ router.post('/approve-work/:taskId', async (req, res) => {
       taskId: task._id
     });
 
-    // Notify Admin
     const admin = await User.findOne({ role: 'admin' });
     if (admin) {
       await Notification.create({
@@ -622,74 +672,53 @@ router.post('/approve-work/:taskId', async (req, res) => {
   }
 });
 
-router.post('/approve', async (req, res) => { 
-   try { 
-     const { taskId, approvedBy } = req.body; 
- 
-     const task = await Task.findById(taskId);
-     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
-
-     task.status = 'pending_release'; 
-     task.finalStatus = 'APPROVED'; 
-     task.providerApprovedAt = new Date(); 
-     await task.save(); 
-
-     // Notify Worker
-     await Notification.create({
-       recipient: task.acceptedBy,
-       sender: approvedBy,
-       title: 'Work Approved! ✔️',
-       message: `Your work for "${task.title}" has been approved by the provider. The Admin will release your payment shortly.`,
-       type: 'WORK_APPROVED',
-       taskId: task._id
-     });
-
-     // Notify Admin
-     const admin = await User.findOne({ role: 'admin' });
-     if (admin) {
-       await Notification.create({
-         recipient: admin._id,
-         sender: approvedBy,
-         title: 'Escrow Release Request',
-         message: `Provider approved work for "${task.title}". Please release the payment of ₹${task.amount}.`,
-         type: 'ESCROW_RELEASE_REQUEST',
-         taskId: task._id
-       });
-     }
- 
-     return res.json({ 
-       success: true, 
-       message: 'Work approved! Admin will release payment shortly.' 
-     }); 
- 
-   } catch (error) { 
-     return res.status(500).json({ 
-       success: false, 
-       message: error.message 
-     }); 
-   } 
- }); 
-
-
-// DECLINE TASK (task provider declines → user can continue work)
-router.post('/decline', async (req, res) => {
-  const { taskId, declinedBy } = req.body;
-
+router.post('/approve', async (req, res) => {
   try {
+    const { taskId, approvedBy } = req.body;
     const task = await Task.findById(taskId);
-
-    if (!task)
-      return res.status(404).json({ message: 'Task not found' });
-
-    if (!['accepted','submitted','inProgress','underReview'].includes(task.status))
-      return res.status(400).json({ message: 'Task is not in reviewable state' });
-
-    if (task.postedBy.toString() !== declinedBy)
-      return res.status(403).json({ message: 'Only the task provider can decline this task' });
-
-    task.status = 'inProgress';
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    task.status = 'pending_release';
+    task.finalStatus = 'APPROVED';
+    task.providerApprovedAt = new Date();
     await task.save();
 
+    await Notification.create({
+      recipient: task.acceptedBy,
+      sender: approvedBy,
+      title: 'Work Approved! ✔️',
+      message: `Your work for "${task.title}" has been approved by the provider. The Admin will release your payment shortly.`,
+      type: 'WORK_APPROVED',
+      taskId: task._id
+    });
+
+    const admin = await User.findOne({ role: 'admin' });
+    if (admin) {
+      await Notification.create({
+        recipient: admin._id,
+        sender: approvedBy,
+        title: 'Escrow Release Request',
+        message: `Provider approved work for "${task.title}". Please release the payment of ₹${task.amount}.`,
+        type: 'ESCROW_RELEASE_REQUEST',
+        taskId: task._id
+      });
+    }
+
+    return res.json({ success: true, message: 'Work approved! Admin will release payment shortly.' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// DECLINE TASK
+router.post('/decline', async (req, res) => {
+  const { taskId, declinedBy } = req.body;
+  try {
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: 'Task not found' });
+    if (!['accepted','submitted','inProgress','underReview'].includes(task.status)) return res.status(400).json({ message: 'Task is not in reviewable state' });
+    if (task.postedBy.toString() !== declinedBy) return res.status(403).json({ message: 'Only the task provider can decline this task' });
+    task.status = 'inProgress';
+    await task.save();
     res.json({ message: 'Task rejected, please continue working' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -707,7 +736,6 @@ router.post('/cancel', async (req, res) => {
       task.status = 'cancelled';
     } else if (['accepted','inProgress','submitted','underReview'].includes(task.status)) {
       task.status = 'cancelled';
-      // leave acceptedBy as is for audit
     } else {
       return res.status(400).json({ message: 'Task cannot be cancelled in current state' });
     }
